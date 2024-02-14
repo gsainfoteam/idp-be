@@ -130,10 +130,18 @@ export class UserService {
   }
 
   async deleteUser({ email, password }: DeleteUserDto): Promise<void> {
+    await this.validateUserPassword({ email, password });
+    await this.userRepository.deleteUser(email);
+  }
+
+  async validateUserPassword({
+    email,
+    password,
+  }: Pick<User, 'email' | 'password'>): Promise<User> {
     const user: User = await this.userRepository.findUserByEmail(email);
     if (!(await bcrypt.compare(password, user.password))) {
       throw new ForbiddenException('비밀번호가 일치하지 않습니다.');
     }
-    await this.userRepository.deleteUser(email);
+    return user;
   }
 }
