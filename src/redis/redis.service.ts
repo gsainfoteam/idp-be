@@ -1,11 +1,12 @@
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 import { Cache } from 'cache-manager';
 import { RedisConfig } from './types/redisConfig.type';
 import { RedisNotFoundException } from './exceptions/redisNotFound.exception';
 
 @Injectable()
 export class RedisService {
+  private readonly logger = new Logger(RedisService.name);
   constructor(@Inject(CACHE_MANAGER) private readonly cache: Cache) {}
 
   async set<T>(
@@ -13,6 +14,7 @@ export class RedisService {
     value: T,
     { prefix = 'default', ttl }: RedisConfig,
   ): Promise<void> {
+    this.logger.debug(`set redis key: ${prefix}_${key}`);
     return this.cache.set(`${prefix}_${key}`, value, ttl * 1000);
   }
 
@@ -20,6 +22,7 @@ export class RedisService {
     key: string,
     { prefix = 'default' }: Pick<RedisConfig, 'prefix'>,
   ): Promise<T | undefined> {
+    this.logger.debug(`get redis key: ${prefix}_${key}`);
     return this.cache.get<T>(`${prefix}_${key}`);
   }
 
@@ -29,6 +32,7 @@ export class RedisService {
   ): Promise<T> {
     const result = await this.get<T>(key, { prefix });
     if (!result) {
+      this.logger.debug(`Redis key not found: ${prefix}_${key}`);
       throw new RedisNotFoundException(`${prefix}_${key}`);
     }
     return result;
@@ -38,6 +42,7 @@ export class RedisService {
     key: string,
     { prefix = 'default' }: Pick<RedisConfig, 'prefix'>,
   ): Promise<void> {
+    this.logger.debug(`del redis key: ${prefix}_${key}`);
     return this.cache.del(`${prefix}_${key}`);
   }
 }
