@@ -7,10 +7,4 @@ export class LoginResDto {
     description: '액세스 토큰',
   })
   accessToken: string;
-
-  @ApiProperty({
-    example: 'afasiesase',
-    description: '리프레시 토큰',
-  })
-  refreshToken: string;
 }
