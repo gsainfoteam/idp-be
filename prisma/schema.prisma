@@ -32,7 +32,7 @@ model User {
   accessLevel AccessLevel @default(USER)
 
   clients Client[]  @relation("ClientToUser")
-  Consent Consent[]
+  consent Consent[]
 
   @@map("user_tb")
 }
@@ -47,8 +47,8 @@ model Client {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  User    User[]    @relation("ClientToUser")
-  Consent Consent[]
+  member  User[]    @relation("ClientToUser")
+  consent Consent[]
 
   @@map("client_tb")
 }
@@ -71,9 +71,9 @@ model Consent {
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 
-  Client       Client         @relation(fields: [clientUuid], references: [uuid])
-  User         User           @relation(fields: [userUuid], references: [uuid])
-  RefreshToken RefreshToken[]
+  client       Client         @relation(fields: [clientUuid], references: [uuid])
+  user         User           @relation(fields: [userUuid], references: [uuid])
+  refreshToken RefreshToken[]
 
   @@id([clientUuid, userUuid])
   @@map("consent_tb")
