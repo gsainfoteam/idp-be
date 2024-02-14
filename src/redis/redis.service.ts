@@ -14,7 +14,7 @@ export class RedisService {
     value: T,
     { prefix = 'default', ttl }: RedisConfig,
   ): Promise<void> {
-    this.logger.debug(`set redis key: ${prefix}_${key}`);
+    this.logger.log(`set redis key: ${prefix}_${key}`);
     return this.cache.set(`${prefix}_${key}`, value, ttl * 1000);
   }
 
@@ -22,7 +22,7 @@ export class RedisService {
     key: string,
     { prefix = 'default' }: Pick<RedisConfig, 'prefix'>,
   ): Promise<T | undefined> {
-    this.logger.debug(`get redis key: ${prefix}_${key}`);
+    this.logger.log(`get redis key: ${prefix}_${key}`);
     return this.cache.get<T>(`${prefix}_${key}`);
   }
 
@@ -42,7 +42,7 @@ export class RedisService {
     key: string,
     { prefix = 'default' }: Pick<RedisConfig, 'prefix'>,
   ): Promise<void> {
-    this.logger.debug(`del redis key: ${prefix}_${key}`);
+    this.logger.log(`del redis key: ${prefix}_${key}`);
     return this.cache.del(`${prefix}_${key}`);
   }
 }
