@@ -1,0 +1,75 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+enum AccessLevel {
+  USER
+  ADMIN
+}
+
+enum Role {
+  DISALLOW
+  ALLOW
+}
+
+model User {
+  uuid        String      @id @default(uuid())
+  name        String
+  email       String      @unique
+  password    String
+  studentId   String      @unique @map("student_id")
+  phoneNumber String      @unique @map("phone_number") @db.VarChar(11)
+  accessLevel AccessLevel @default(USER)
+
+  clients Client[]  @relation("ClientToUser")
+  Consent Consent[]
+
+  @@map("user_tb")
+}
+
+model Client {
+  uuid     String    @id @default(uuid())
+  id       Int       @unique
+  password String
+  name     String
+  urls     Json      @default("[]")
+  role     Role      @default(DISALLOW)
+  User     User[]    @relation("ClientToUser")
+  Consent  Consent[]
+
+  @@map("client_tb")
+}
+
+model RefreshToken {
+  token     String   @id
+  scopes    Json     @default("[]")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  clientUuid String
+  userUuid   String
+  consent    Consent @relation(fields: [clientUuid, userUuid], references: [clientUuid, userUuid])
+}
+
+model Consent {
+  clientUuid String
+  userUuid   String
+  scopes     Json     @default("[]")
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  Client       Client         @relation(fields: [clientUuid], references: [uuid])
+  User         User           @relation(fields: [userUuid], references: [uuid])
+  RefreshToken RefreshToken[]
+
+  @@id([clientUuid, userUuid])
+  @@map("consent_tb")
+}
