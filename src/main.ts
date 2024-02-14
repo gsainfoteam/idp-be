@@ -9,7 +9,7 @@ async function bootstrap() {
   // Swagger 보안 설정
   const configService = app.get(ConfigService);
   app.use(
-    ['/api#/default'],
+    ['/api'],
     expressBasicAuth({
       challenge: true,
       users: {
