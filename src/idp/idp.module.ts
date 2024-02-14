@@ -1,7 +1,6 @@
 import { Module } from '@nestjs/common';
 import { IdpController } from './idp.controller';
 import { IdpService } from './idp.service';
-import { IdpRepository } from './idp.repository';
 import { RedisModule } from 'src/redis/redis.module';
 import { UserModule } from 'src/user/user.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
@@ -29,7 +28,7 @@ import { IdpGuard } from './guard/idp.guard';
     }),
   ],
   controllers: [IdpController],
-  providers: [IdpService, IdpRepository, IdpStrategy, IdpGuard],
+  providers: [IdpService, IdpStrategy, IdpGuard],
   exports: [IdpGuard],
 })
 export class IdpModule {}
