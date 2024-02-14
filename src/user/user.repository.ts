@@ -35,13 +35,47 @@ export class UserRepository {
       });
   }
 
+  async findUserByUuid(uuid: string): Promise<Omit<User, 'password'>> {
+    this.logger.log(`find user by uuid: ${uuid}`);
+    return this.prismaService.user
+      .findUniqueOrThrow({
+        where: {
+          uuid,
+        },
+        select: {
+          uuid: true,
+          email: true,
+          name: true,
+          studentId: true,
+          phoneNumber: true,
+          accessLevel: true,
+          createdAt: true,
+          updatedAt: true,
+        },
+      })
+      .catch((error) => {
+        if (
+          error instanceof PrismaClientKnownRequestError &&
+          error.code === 'P2022'
+        ) {
+          this.logger.debug(`user not found: ${uuid}`);
+          throw new ForbiddenException('존재하지 않는 유저입니다.');
+        }
+        this.logger.error(`find user by uuid error: ${error}`);
+        throw new InternalServerErrorException();
+      });
+  }
+
   async createUser({
     email,
     password,
     name,
     studentId,
     phoneNumber,
-  }: Omit<User, 'accessLevel' | 'uuid'>): Promise<void> {
+  }: Omit<
+    User,
+    'accessLevel' | 'uuid' | 'createdAt' | 'updatedAt'
+  >): Promise<void> {
     this.logger.log(`create user: ${email}`);
     await this.prismaService.user
       .create({

@@ -6,6 +6,8 @@ import { RedisModule } from 'src/redis/redis.module';
 import { UserModule } from 'src/user/user.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
+import { IdpStrategy } from './guard/idp.strategy';
+import { IdpGuard } from './guard/idp.guard';
 
 @Module({
   imports: [
@@ -27,6 +29,7 @@ import { JwtModule } from '@nestjs/jwt';
     }),
   ],
   controllers: [IdpController],
-  providers: [IdpService, IdpRepository],
+  providers: [IdpService, IdpRepository, IdpStrategy, IdpGuard],
+  exports: [IdpGuard],
 })
 export class IdpModule {}

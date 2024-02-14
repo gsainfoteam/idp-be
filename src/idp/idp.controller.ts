@@ -3,9 +3,11 @@ import {
   Controller,
   Delete,
   Post,
+  Get,
   Req,
   Res,
   UsePipes,
+  UseGuards,
   ValidationPipe,
 } from '@nestjs/common';
 import { IdpService } from './idp.service';
@@ -19,6 +21,10 @@ import {
 import { LoginDto } from './dto/req/login.dto';
 import { LoginResDto } from './dto/res/loginRes.dto';
 import { Request, Response } from 'express';
+import { IdpGuard } from './guard/idp.guard';
+import { GetUser } from './decorator/getUser.decorator';
+import { User } from '@prisma/client';
+import { UserResDto } from './dto/res/userRes.dto';
 
 @ApiTags('idp')
 @Controller('idp')
@@ -79,5 +85,13 @@ export class IdpController {
       expires: new Date(Date.now() + 1000 * 60 * 60 * 24 * 30 * 6),
     });
     return rest;
+  }
+
+  @Get('user')
+  @UseGuards(IdpGuard)
+  async getUserInfo(
+    @GetUser() user: Omit<User, 'password'>,
+  ): Promise<UserResDto> {
+    return user;
   }
 }

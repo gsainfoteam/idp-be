@@ -167,4 +167,11 @@ export class UserService {
     }
     return user;
   }
+
+  async findUserByUuid({
+    uuid,
+  }: Pick<User, 'uuid'>): Promise<Omit<User, 'password'>> {
+    this.logger.log(`find user by uuid: ${uuid}`);
+    return this.userRepository.findUserByUuid(uuid);
+  }
 }
