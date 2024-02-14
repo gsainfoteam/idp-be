@@ -2,7 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { IsEmail, IsJWT, IsString } from 'class-validator';
 import { IsGistEmail } from 'src/global/validator/gistEmail.validator';
 
-export class ChandgePasswordDto {
+export class ChangePasswordDto {
   @ApiProperty({
     example: 'JohnDoe@gm.gist.ac.kr',
     description: 'GIST 이메일',

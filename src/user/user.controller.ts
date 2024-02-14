@@ -5,6 +5,7 @@ import {
   Delete,
   UsePipes,
   ValidationPipe,
+  Patch,
 } from '@nestjs/common';
 import {
   ApiConflictResponse,
@@ -20,6 +21,7 @@ import { ValidateCertificationJwtResDto } from './dto/res/validateCertificationJ
 import { ValidationCertificationCodeDto } from './dto/req/validateCertificatioinCode.dto';
 import { RegisterDto } from './dto/req/register.dto';
 import { DeleteUserDto } from './dto/req/deleteUser.dto';
+import { ChangePasswordDto } from './dto/req/changePassword.dto';
 
 @ApiTags('user')
 @Controller('user')
@@ -71,6 +73,18 @@ export class UserController {
   @Post('/register')
   async register(@Body() body: RegisterDto): Promise<void> {
     return this.userService.register(body);
+  }
+
+  @ApiOperation({
+    summary: '비밀번호 변경',
+    description: '비밀번호를 변경하는 api이다.',
+  })
+  @ApiResponse({ status: 200, description: '성공' })
+  @ApiForbiddenResponse({ description: '유효하지 않은 토큰' })
+  @ApiInternalServerErrorResponse({ description: '서버 에러' })
+  @Patch('/password')
+  async changePassword(@Body() body: ChangePasswordDto): Promise<void> {
+    return this.userService.changePassword(body);
   }
 
   @ApiOperation({

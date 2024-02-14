@@ -16,6 +16,7 @@ import { CertificationJwtPayload } from './types/certificationJwtPayload.type';
 import { UserRepository } from './user.repository';
 import { User } from '@prisma/client';
 import { DeleteUserDto } from './dto/req/deleteUser.dto';
+import { ChangePasswordDto } from './dto/req/changePassword.dto';
 
 @Injectable()
 export class UserService {
@@ -89,7 +90,7 @@ export class UserService {
         throw new ForbiddenException('인증 토큰이 만료되었습니다.');
       });
 
-    if (!payload) {
+    if (payload.sub !== email) {
       throw new ForbiddenException('인증 토큰이 만료되었습니다.');
     }
 
@@ -106,10 +107,20 @@ export class UserService {
     });
   }
 
-  async changePassword(email: string, password: string): Promise<void> {
-    const user: User = await this.userRepository.findUserByEmail(email);
-    if (!(await bcrypt.compare(password, user.password))) {
-      throw new ForbiddenException('비밀번호가 일치하지 않습니다.');
+  async changePassword({
+    email,
+    password,
+    certificationJwtToken,
+  }: ChangePasswordDto): Promise<void> {
+    const payload: CertificationJwtPayload = await this.jwtService
+      .verifyAsync<CertificationJwtPayload>(certificationJwtToken, {
+        subject: email,
+      })
+      .catch(() => {
+        throw new ForbiddenException('인증 토큰이 만료되었습니다.');
+      });
+    if (payload.sub !== email) {
+      throw new ForbiddenException('인증 토큰이 만료되었습니다.');
     }
     const hashedPassword: string = await bcrypt.hashSync(
       password,
