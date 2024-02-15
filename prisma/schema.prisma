@@ -39,7 +39,7 @@ model User {
 
 model Client {
   uuid      String   @id @default(uuid())
-  id        Int      @unique
+  id        String   @unique
   password  String
   name      String
   urls      Json     @default("[]")

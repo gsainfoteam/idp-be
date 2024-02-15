@@ -1,11 +1,15 @@
 import {
+  ConflictException,
   ForbiddenException,
   Injectable,
   InternalServerErrorException,
   Logger,
 } from '@nestjs/common';
 import { Client } from '@prisma/client';
-import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
+import {
+  JsonArray,
+  PrismaClientKnownRequestError,
+} from '@prisma/client/runtime/library';
 import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
@@ -69,6 +73,44 @@ export class ClientRepository {
           throw new ForbiddenException();
         }
         this.logger.error(`findClientByUuid: error=${error}`);
+        throw new InternalServerErrorException();
+      });
+  }
+
+  async createClient(
+    {
+      id,
+      name,
+      urls,
+      password,
+    }: Pick<Client, 'id' | 'urls' | 'name' | 'password'>,
+    userUuid: string,
+  ): Promise<Client> {
+    this.logger.log(`createClient: id=${id}, name=${name}`);
+    const inputUrls = urls === null ? [] : (urls as JsonArray);
+    return this.prismaService.client
+      .create({
+        data: {
+          id,
+          name,
+          urls: inputUrls,
+          password,
+          member: {
+            connect: {
+              uuid: userUuid,
+            },
+          },
+        },
+      })
+      .catch((error) => {
+        if (
+          error instanceof PrismaClientKnownRequestError &&
+          error.code === 'P2002'
+        ) {
+          this.logger.debug(`createClient: error=${error}`);
+          throw new ConflictException('Client already exists');
+        }
+        this.logger.error(`createClient: error=${error}`);
         throw new InternalServerErrorException();
       });
   }
