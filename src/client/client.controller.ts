@@ -4,12 +4,14 @@ import {
   Get,
   Param,
   ParseUUIDPipe,
+  Patch,
   Post,
   UseGuards,
 } from '@nestjs/common';
 import { ClientService } from './client.service';
 import {
   ApiConflictResponse,
+  ApiForbiddenResponse,
   ApiInternalServerErrorResponse,
   ApiOperation,
   ApiResponse,
@@ -22,6 +24,7 @@ import { GetUser } from 'src/idp/decorator/getUser.decorator';
 import { ClientResDto } from './dto/res/clientRes.dto';
 import { CreateClientDto } from './dto/req/createClient.dto';
 import { ClientCredentialResDto } from './dto/res/ClinetCredential.dto';
+import { UpdateClientDto } from './dto/req/updateClient.dto';
 
 @ApiTags('client')
 @Controller('client')
@@ -72,5 +75,49 @@ export class ClientController {
     @GetUser() user: Omit<User, 'password' | 'id'>,
   ): Promise<ClientCredentialResDto> {
     return this.clientService.registerClient(createClientDto, user);
+  }
+
+  @Post('admin')
+  @UseGuards(IdpGuard)
+  async adminRequest(
+    @Param('uuid') uuid: string,
+    @GetUser() user: Omit<User, 'password'>,
+  ): Promise<void> {
+    return this.clientService.adminRequest(uuid, user);
+  }
+
+  @ApiOperation({
+    summary: 'Reset client secret',
+    description: '유저가 client의 secret을 재설정한다.',
+  })
+  @ApiResponse({ status: 200, type: ClientCredentialResDto })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  @ApiForbiddenResponse({ description: 'Forbidden' })
+  @ApiInternalServerErrorResponse({ description: 'Internal Server Error' })
+  @Patch(':uuid/reset-secret')
+  @UseGuards(IdpGuard)
+  async resetClientSecret(
+    @Param('uuid', ParseUUIDPipe) uuid: string,
+    @GetUser() user: Omit<User, 'password' | 'id'>,
+  ): Promise<ClientCredentialResDto> {
+    return this.clientService.resetClientSecret(uuid, user);
+  }
+
+  @ApiOperation({
+    summary: 'Update client',
+    description: '유저가 client의 정보를 수정한다.',
+  })
+  @ApiResponse({ status: 200, type: ClientResDto })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  @ApiForbiddenResponse({ description: 'Forbidden' })
+  @ApiInternalServerErrorResponse({ description: 'Internal Server Error' })
+  @Patch(':uuid')
+  @UseGuards(IdpGuard)
+  async updateClient(
+    @Param('uuid') uuid: string,
+    @Body() body: UpdateClientDto,
+    @GetUser() user: Omit<User, 'password' | 'id'>,
+  ): Promise<ClientResDto> {
+    return this.clientService.updateClient(uuid, body, user);
   }
 }

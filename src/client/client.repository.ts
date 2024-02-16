@@ -83,7 +83,7 @@ export class ClientRepository {
       name,
       urls,
       password,
-    }: Pick<Client, 'id' | 'urls' | 'name' | 'password'>,
+    }: Pick<Client, 'id' | 'name' | 'password'> & Partial<Pick<Client, 'urls'>>,
     userUuid: string,
   ): Promise<Client> {
     this.logger.log(`createClient: id=${id}, name=${name}`);
@@ -111,6 +111,84 @@ export class ClientRepository {
           throw new ConflictException('Client already exists');
         }
         this.logger.error(`createClient: error=${error}`);
+        throw new InternalServerErrorException();
+      });
+  }
+
+  async updateClientSecret(
+    { uuid, password }: Pick<Client, 'uuid' | 'password'>,
+    userUuid: string,
+  ): Promise<Client> {
+    this.logger.log(`updateClientSecret: uuid=${uuid}`);
+    return this.prismaService.client
+      .update({
+        where: {
+          uuid,
+          member: {
+            some: {
+              uuid: userUuid,
+            },
+          },
+        },
+        data: {
+          password,
+        },
+      })
+      .catch((error) => {
+        if (
+          error instanceof PrismaClientKnownRequestError &&
+          error.code === 'P2025'
+        ) {
+          this.logger.debug(`updateClientSecret: error=${error}`);
+          throw new ForbiddenException();
+        }
+        this.logger.error(`updateClientSecret: error=${error}`);
+        throw new InternalServerErrorException();
+      });
+  }
+
+  async updateClient(
+    {
+      uuid,
+      name,
+      urls,
+    }: Pick<Client, 'uuid'> & Partial<Pick<Client, 'name' | 'urls'>>,
+    userUuid: string,
+  ): Promise<Omit<Client, 'password' | 'id'>> {
+    this.logger.log(`updateClient: uuid=${uuid}`);
+    const inputUrls = urls === null ? [] : (urls as JsonArray);
+    return this.prismaService.client
+      .update({
+        where: {
+          uuid,
+          member: {
+            some: {
+              uuid: userUuid,
+            },
+          },
+        },
+        data: {
+          name,
+          urls: inputUrls,
+        },
+        select: {
+          uuid: true,
+          name: true,
+          urls: true,
+          role: true,
+          createdAt: true,
+          updatedAt: true,
+        },
+      })
+      .catch((error) => {
+        if (
+          error instanceof PrismaClientKnownRequestError &&
+          error.code === 'P2025'
+        ) {
+          this.logger.debug(`updateClient: error=${error}`);
+          throw new ForbiddenException();
+        }
+        this.logger.error(`updateClient: error=${error}`);
         throw new InternalServerErrorException();
       });
   }

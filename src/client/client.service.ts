@@ -7,6 +7,8 @@ import { Client, User } from '@prisma/client';
 import { ClientResDto } from './dto/res/clientRes.dto';
 import { CreateClientDto } from './dto/req/createClient.dto';
 import { ClientCredentialResDto } from './dto/res/ClinetCredential.dto';
+import { firstValueFrom } from 'rxjs';
+import { UpdateClientDto } from './dto/req/updateClient.dto';
 
 @Injectable()
 export class ClientService {
@@ -54,6 +56,67 @@ export class ClientService {
       id: client.id,
       clientSecret: secretKey,
     };
+  }
+
+  async resetClientSecret(
+    uuid: string,
+    user: Omit<User, 'password'>,
+  ): Promise<ClientCredentialResDto> {
+    this.logger.log(`resetClientSecret: uuid=${uuid}`);
+    const { secretKey, hashed } = this.generateClientSecret();
+    const client = await this.clientRepository.updateClientSecret(
+      {
+        uuid,
+        password: hashed,
+      },
+      user.uuid,
+    );
+    return {
+      uuid: client.uuid,
+      id: client.id,
+      clientSecret: secretKey,
+    };
+  }
+
+  async updateClient(
+    uuid: string,
+    { name, urls }: UpdateClientDto,
+    user: Omit<User, 'password'>,
+  ): Promise<ClientResDto> {
+    this.logger.log(`updateClient: uuid=${uuid}`);
+    return this.convertToClientResDto(
+      await this.clientRepository.updateClient({ uuid, name, urls }, user.uuid),
+    );
+  }
+
+  async adminRequest(
+    uuid: string,
+    user: Omit<User, 'password'>,
+  ): Promise<void> {
+    this.logger.log(`adminRequest: uuid=${uuid}`);
+    const { name } = await this.clientRepository.findClientByUuidAndUserUuid(
+      uuid,
+      user.uuid,
+    );
+    await firstValueFrom(
+      this.httpService.post(
+        this.configService.getOrThrow<string>('SLACK_WEBHOOK_URL'),
+        {
+          text: `Service server sends permission request for client ${name}(${uuid})`,
+          attachments: [
+            {
+              color: '#36a64f',
+              title: 'Details',
+              fields: [
+                { title: 'client name', value: name },
+                { title: 'client uuid', value: uuid },
+                { title: 'user id', value: user.uuid },
+              ],
+            },
+          ],
+        },
+      ),
+    );
   }
 
   private generateClientSecret(): { secretKey: string; hashed: string } {

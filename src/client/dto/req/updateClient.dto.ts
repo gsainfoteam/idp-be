@@ -1,20 +1,14 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsArray, IsOptional, IsString, IsUrl } from 'class-validator';
 
-export class CreateClientDto {
-  @ApiProperty({
-    description: 'The unique id of the client',
-    example: 'client-1',
-  })
-  @IsString()
-  id: string;
-
+export class UpdateClientDto {
   @ApiProperty({
     description: 'The name of the client',
     example: 'client-1',
   })
   @IsString()
-  name: string;
+  @IsOptional()
+  name?: string;
 
   @ApiProperty({
     description: 'The urls of the client',
