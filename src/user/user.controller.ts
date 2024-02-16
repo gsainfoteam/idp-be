@@ -34,7 +34,7 @@ export class UserController {
     description:
       '이메일 코드를 전송하는 api이다. gist이메일이여야지 작동한다는 사실을 주의해야 한다.',
   })
-  @ApiResponse({ status: 200, description: '성공' })
+  @ApiResponse({ status: 201, description: '성공' })
   @ApiInternalServerErrorResponse({ description: '서버 에러' })
   @Post('/register/code')
   async sendEmailCertificationCode(
@@ -66,7 +66,7 @@ export class UserController {
     summary: '회원가입',
     description: '회원가입하는 api이다.',
   })
-  @ApiResponse({ status: 200, description: '성공' })
+  @ApiResponse({ status: 201, description: '성공' })
   @ApiConflictResponse({ description: '이미 존재하는 유저' })
   @ApiForbiddenResponse({ description: '인증 토큰이 일치하지 않음' })
   @ApiInternalServerErrorResponse({ description: '서버 에러' })
