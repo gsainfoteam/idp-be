@@ -19,7 +19,7 @@ import { IdpGuard } from './guard/idp.guard';
       useFactory: (configService: ConfigService) => ({
         secret: configService.get<string>('JWT_SECRET'),
         signOptions: {
-          expiresIn: configService.get<string>('JWT_EXPIRES_IN'),
+          expiresIn: configService.get<string>('JWT_EXPIRE'),
           algorithm: 'HS256',
           audience: configService.get<string>('JWT_AUDIENCE'),
           issuer: configService.get<string>('JWT_ISSUER'),

@@ -12,6 +12,7 @@ import {
 } from '@nestjs/common';
 import { IdpService } from './idp.service';
 import {
+  ApiBearerAuth,
   ApiInternalServerErrorResponse,
   ApiOperation,
   ApiResponse,
@@ -87,6 +88,14 @@ export class IdpController {
     return rest;
   }
 
+  @ApiOperation({
+    summary: '회원 정보',
+    description: '회원 정보를 반환합니다.',
+  })
+  @ApiResponse({ type: UserResDto })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  @ApiInternalServerErrorResponse({ description: 'Internal Server Error' })
+  @ApiBearerAuth('access-token')
   @Get('user')
   @UseGuards(IdpGuard)
   async getUserInfo(

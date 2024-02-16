@@ -25,6 +25,15 @@ async function bootstrap() {
     .setTitle('Infoteam-Idp API Docs')
     .setDescription('인포팀 idp의 API 문서입니다.')
     .setVersion('1.0')
+    .addBearerAuth(
+      {
+        type: 'http',
+        scheme: 'bearer',
+        name: 'JWT',
+        in: 'header',
+      },
+      'access-token',
+    )
     .build();
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, document);
