@@ -7,6 +7,7 @@ import { IdpModule } from './idp/idp.module';
 import { UserModule } from './user/user.module';
 import { EmailModule } from './email/email.module';
 import { RedisModule } from './redis/redis.module';
+import { OauthModule } from './oauth/oauth.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { RedisModule } from './redis/redis.module';
     UserModule,
     EmailModule,
     RedisModule,
+    OauthModule,
   ],
   controllers: [AppController],
 })

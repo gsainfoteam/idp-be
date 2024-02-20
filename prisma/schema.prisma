@@ -6,7 +6,7 @@ generator client {
 }
 
 datasource db {
-  provider = "mysql"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
@@ -42,7 +42,7 @@ model Client {
   id        String   @unique
   password  String
   name      String
-  urls      Json     @default("[]")
+  urls      String[] 
   role      Role     @default(DISALLOW)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -55,7 +55,7 @@ model Client {
 
 model RefreshToken {
   token     String   @id
-  scopes    Json     @default("[]")
+  scopes    String[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -67,7 +67,7 @@ model RefreshToken {
 model Consent {
   clientUuid String
   userUuid   String
-  scopes     Json     @default("[]")
+  scopes     String[]
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 
