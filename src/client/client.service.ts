@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, UnauthorizedException } from '@nestjs/common';
 import { ClientRepository } from './client.repository';
 import { HttpService } from '@nestjs/axios';
 import * as bcrypt from 'bcryptjs';
@@ -118,6 +118,21 @@ export class ClientService {
         },
       ),
     );
+  }
+
+  async validateClient(id: string, secret: string): Promise<Client> {
+    const client = await this.clientRepository.findById(id).catch((error) => {
+      this.logger.error(`validateClient: error=${error}`);
+      throw new UnauthorizedException('invalid_client');
+    });
+    if (
+      !(await bcrypt.compare(secret, client.password).catch(() => {
+        throw new UnauthorizedException('invalid_client');
+      }))
+    ) {
+      throw new UnauthorizedException('invalid_client');
+    }
+    return this.clientRepository.findById(id);
   }
 
   private generateClientSecret(): { secretKey: string; hashed: string } {
