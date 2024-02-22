@@ -1,4 +1,4 @@
-const scopesRequireConsent = [
+export const scopesRequireConsent = [
   'profile',
   'email',
   'phone',

@@ -6,10 +6,7 @@ import {
   Logger,
 } from '@nestjs/common';
 import { Client } from '@prisma/client';
-import {
-  JsonArray,
-  PrismaClientKnownRequestError,
-} from '@prisma/client/runtime/library';
+import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
@@ -38,6 +35,27 @@ export class ClientRepository {
         updatedAt: true,
       },
     });
+  }
+
+  async findById(id: string): Promise<Client> {
+    this.logger.log(`findById: id=${id}`);
+    return this.prismaService.client
+      .findUniqueOrThrow({
+        where: {
+          id,
+        },
+      })
+      .catch((error) => {
+        if (
+          error instanceof PrismaClientKnownRequestError &&
+          error.code === 'P2025'
+        ) {
+          this.logger.debug(`findById: error=${error}`);
+          throw new ForbiddenException();
+        }
+        this.logger.error(`findById: error=${error}`);
+        throw new InternalServerErrorException();
+      });
   }
 
   async findClientByUuidAndUserUuid(
@@ -87,13 +105,12 @@ export class ClientRepository {
     userUuid: string,
   ): Promise<Client> {
     this.logger.log(`createClient: id=${id}, name=${name}`);
-    const inputUrls = urls === null ? [] : (urls as JsonArray);
     return this.prismaService.client
       .create({
         data: {
           id,
           name,
-          urls: inputUrls,
+          urls,
           password,
           member: {
             connect: {
@@ -156,7 +173,6 @@ export class ClientRepository {
     userUuid: string,
   ): Promise<Omit<Client, 'password' | 'id'>> {
     this.logger.log(`updateClient: uuid=${uuid}`);
-    const inputUrls = urls === null ? [] : (urls as JsonArray);
     return this.prismaService.client
       .update({
         where: {
@@ -169,7 +185,7 @@ export class ClientRepository {
         },
         data: {
           name,
-          urls: inputUrls,
+          urls,
         },
         select: {
           uuid: true,

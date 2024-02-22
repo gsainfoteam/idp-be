@@ -1,8 +1,8 @@
 import { ExecutionContext, createParamDecorator } from '@nestjs/common';
-import { User } from '@prisma/client';
+import { UserInfo } from '../types/userInfo.type';
 
 export const GetUser = createParamDecorator(
-  (data, ctx: ExecutionContext): Omit<User, 'password'> => {
+  (data, ctx: ExecutionContext): UserInfo => {
     return ctx.switchToHttp().getRequest().user;
   },
 );

@@ -7,7 +7,6 @@ import cookieParser from 'cookie-parser';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  app.use(cookieParser());
   // Swagger 보안 설정
   const configService = app.get(ConfigService);
   app.use(
@@ -37,6 +36,23 @@ async function bootstrap() {
     .build();
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, document);
+  // Cookie 설정
+  app.use(cookieParser());
+  // CORS 설정
+  const whitelist = [/https:\/\/.*idp.gistory.me/];
+  app.enableCors({
+    origin: function (origin, callback) {
+      if (!origin || whitelist.some((regex) => regex.test(origin))) {
+        callback(null, origin);
+      } else {
+        callback(new Error('Not allowed by CORS'));
+      }
+    },
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    preflightContinue: false,
+    optionsSuccessStatus: 204,
+    credentials: true,
+  });
   await app.listen(3000);
 }
 bootstrap();

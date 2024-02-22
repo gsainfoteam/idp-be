@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { OauthService } from './oauth.service';
-import { OauthController } from './oauth.controller';
+import { OauthController, OpenIDDiscoveryController } from './oauth.controller';
 import { OauthRepository } from './oauth.repository';
 import { PrismaModule } from 'src/prisma/prisma.module';
 import { RedisModule } from 'src/redis/redis.module';
@@ -48,6 +48,6 @@ import { JwtModule } from '@nestjs/jwt';
     }),
   ],
   providers: [OauthService, OauthRepository],
-  controllers: [OauthController],
+  controllers: [OauthController, OpenIDDiscoveryController],
 })
 export class OauthModule {}

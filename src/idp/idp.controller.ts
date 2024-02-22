@@ -24,8 +24,8 @@ import { LoginResDto } from './dto/res/loginRes.dto';
 import { Request, Response } from 'express';
 import { IdpGuard } from './guard/idp.guard';
 import { GetUser } from './decorator/getUser.decorator';
-import { User } from '@prisma/client';
 import { UserResDto } from './dto/res/userRes.dto';
+import { UserInfo } from './types/userInfo.type';
 
 @ApiTags('idp')
 @Controller('idp')
@@ -98,9 +98,7 @@ export class IdpController {
   @ApiBearerAuth('access-token')
   @Get('user')
   @UseGuards(IdpGuard)
-  async getUserInfo(
-    @GetUser() user: Omit<User, 'password'>,
-  ): Promise<UserResDto> {
+  async getUserInfo(@GetUser() user: UserInfo): Promise<UserResDto> {
     return user;
   }
 }

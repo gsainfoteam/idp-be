@@ -20,12 +20,12 @@ import {
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { IdpGuard } from 'src/idp/guard/idp.guard';
-import { User } from '@prisma/client';
 import { GetUser } from 'src/idp/decorator/getUser.decorator';
 import { ClientResDto } from './dto/res/clientRes.dto';
 import { CreateClientDto } from './dto/req/createClient.dto';
 import { ClientCredentialResDto } from './dto/res/ClinetCredential.dto';
 import { UpdateClientDto } from './dto/req/updateClient.dto';
+import { UserInfo } from 'src/idp/types/userInfo.type';
 
 @ApiTags('client')
 @Controller('client')
@@ -42,7 +42,7 @@ export class ClientController {
   @ApiInternalServerErrorResponse({ description: 'Internal Server Error' })
   @Get()
   @UseGuards(IdpGuard)
-  async getClientList(@GetUser() user: Omit<User, 'password' | 'id'>) {
+  async getClientList(@GetUser() user: UserInfo) {
     return this.clientService.getClientList(user);
   }
 
@@ -58,7 +58,7 @@ export class ClientController {
   @UseGuards(IdpGuard)
   async getClient(
     @Param('uuid', ParseUUIDPipe) uuid: string,
-    @GetUser() user: Omit<User, 'password' | 'id'>,
+    @GetUser() user: UserInfo,
   ): Promise<ClientResDto> {
     return this.clientService.getClient(uuid, user);
   }
@@ -76,7 +76,7 @@ export class ClientController {
   @UseGuards(IdpGuard)
   async registerClient(
     @Body() createClientDto: CreateClientDto,
-    @GetUser() user: Omit<User, 'password' | 'id'>,
+    @GetUser() user: UserInfo,
   ): Promise<ClientCredentialResDto> {
     return this.clientService.registerClient(createClientDto, user);
   }
@@ -94,7 +94,7 @@ export class ClientController {
   @UseGuards(IdpGuard)
   async adminRequest(
     @Param('uuid', ParseUUIDPipe) uuid: string,
-    @GetUser() user: Omit<User, 'password'>,
+    @GetUser() user: UserInfo,
   ): Promise<void> {
     return this.clientService.adminRequest(uuid, user);
   }
@@ -112,7 +112,7 @@ export class ClientController {
   @UseGuards(IdpGuard)
   async resetClientSecret(
     @Param('uuid', ParseUUIDPipe) uuid: string,
-    @GetUser() user: Omit<User, 'password' | 'id'>,
+    @GetUser() user: UserInfo,
   ): Promise<ClientCredentialResDto> {
     return this.clientService.resetClientSecret(uuid, user);
   }
@@ -131,7 +131,7 @@ export class ClientController {
   async updateClient(
     @Param('uuid') uuid: string,
     @Body() body: UpdateClientDto,
-    @GetUser() user: Omit<User, 'password' | 'id'>,
+    @GetUser() user: UserInfo,
   ): Promise<ClientResDto> {
     return this.clientService.updateClient(uuid, body, user);
   }

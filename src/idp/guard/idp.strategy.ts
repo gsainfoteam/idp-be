@@ -1,10 +1,10 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
-import { User } from '@prisma/client';
 import { JwtPayload } from 'jsonwebtoken';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { UserService } from 'src/user/user.service';
+import { UserInfo } from '../types/userInfo.type';
 
 @Injectable()
 export class IdpStrategy extends PassportStrategy(Strategy, 'idp') {
@@ -20,7 +20,7 @@ export class IdpStrategy extends PassportStrategy(Strategy, 'idp') {
     });
   }
 
-  async validate({ sub }: JwtPayload): Promise<Omit<User, 'password'>> {
+  async validate({ sub }: JwtPayload): Promise<UserInfo> {
     if (!sub) throw new UnauthorizedException('유효하지 않은 토큰입니다.');
     return this.userService
       .findUserByUuid({

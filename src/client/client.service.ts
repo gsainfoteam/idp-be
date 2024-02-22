@@ -3,12 +3,13 @@ import { ClientRepository } from './client.repository';
 import { HttpService } from '@nestjs/axios';
 import * as bcrypt from 'bcryptjs';
 import { ConfigService } from '@nestjs/config';
-import { Client, User } from '@prisma/client';
+import { Client } from '@prisma/client';
 import { ClientResDto } from './dto/res/clientRes.dto';
 import { CreateClientDto } from './dto/req/createClient.dto';
 import { ClientCredentialResDto } from './dto/res/ClinetCredential.dto';
 import { firstValueFrom } from 'rxjs';
 import { UpdateClientDto } from './dto/req/updateClient.dto';
+import { UserInfo } from 'src/idp/types/userInfo.type';
 
 @Injectable()
 export class ClientService {
@@ -19,17 +20,14 @@ export class ClientService {
     private readonly configService: ConfigService,
   ) {}
 
-  async getClientList(user: Omit<User, 'password'>): Promise<ClientResDto[]> {
+  async getClientList(user: UserInfo): Promise<ClientResDto[]> {
     this.logger.log(`getClientList: user=${JSON.stringify(user)}`);
     return (await this.clientRepository.findClientsByUserUuid(user.uuid)).map(
       this.convertToClientResDto,
     );
   }
 
-  async getClient(
-    uuid: string,
-    user: Omit<User, 'password'>,
-  ): Promise<ClientResDto> {
+  async getClient(uuid: string, user: UserInfo): Promise<ClientResDto> {
     this.logger.log(`getClient: uuid=${uuid}`);
     return this.convertToClientResDto(
       await this.clientRepository.findClientByUuidAndUserUuid(uuid, user.uuid),
@@ -38,7 +36,7 @@ export class ClientService {
 
   async registerClient(
     { id, name, urls }: CreateClientDto,
-    user: Omit<User, 'password'>,
+    user: UserInfo,
   ): Promise<ClientCredentialResDto> {
     this.logger.log(`registerClient: id=${id}, name=${name}`);
     const { secretKey, hashed } = this.generateClientSecret();
@@ -60,7 +58,7 @@ export class ClientService {
 
   async resetClientSecret(
     uuid: string,
-    user: Omit<User, 'password'>,
+    user: UserInfo,
   ): Promise<ClientCredentialResDto> {
     this.logger.log(`resetClientSecret: uuid=${uuid}`);
     const { secretKey, hashed } = this.generateClientSecret();
@@ -81,7 +79,7 @@ export class ClientService {
   async updateClient(
     uuid: string,
     { name, urls }: UpdateClientDto,
-    user: Omit<User, 'password'>,
+    user: UserInfo,
   ): Promise<ClientResDto> {
     this.logger.log(`updateClient: uuid=${uuid}`);
     return this.convertToClientResDto(
@@ -89,10 +87,13 @@ export class ClientService {
     );
   }
 
-  async adminRequest(
-    uuid: string,
-    user: Omit<User, 'password'>,
-  ): Promise<void> {
+  async validateUri(id: string, url: string): Promise<boolean> {
+    const client = await this.clientRepository.findById(id);
+    if (client.urls.length === 0) return false;
+    return client.urls.includes(url);
+  }
+
+  async adminRequest(uuid: string, user: UserInfo): Promise<void> {
     this.logger.log(`adminRequest: uuid=${uuid}`);
     const { name } = await this.clientRepository.findClientByUuidAndUserUuid(
       uuid,

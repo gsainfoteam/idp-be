@@ -11,5 +11,6 @@ import { IdpModule } from 'src/idp/idp.module';
   imports: [PrismaModule, HttpModule, ConfigModule, IdpModule],
   controllers: [ClientController],
   providers: [ClientService, ClientRepository],
+  exports: [ClientService],
 })
 export class ClientModule {}
