@@ -4,24 +4,24 @@ export type AuthorizeResType = Partial<CodeResType> &
   Partial<RefreshTokenResType> &
   Partial<ScopeType>;
 
-type CodeResType = {
+export type CodeResType = {
   code: string;
 };
 
-type ScopeType = {
+export type ScopeType = {
   scope: string;
 };
 
-type AccessTokenResType = {
+export type AccessTokenResType = {
   accessToken: string;
   tokenType: string;
   expiresIn: number;
 };
 
-type IdTokenResType = {
+export type IdTokenResType = {
   idToken: string;
 };
 
-type RefreshTokenResType = {
+export type RefreshTokenResType = {
   refreshToken: string;
 };

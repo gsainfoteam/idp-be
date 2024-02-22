@@ -10,6 +10,8 @@ import { IdpModule } from 'src/idp/idp.module';
 import * as crypto from 'crypto';
 import { UserModule } from 'src/user/user.module';
 import { JwtModule } from '@nestjs/jwt';
+import { Oauth2Strategy } from './guard/oauth2.strategy';
+import { Oauth2Guard } from './guard/oauth2.guard';
 
 @Module({
   imports: [
@@ -47,7 +49,7 @@ import { JwtModule } from '@nestjs/jwt';
       },
     }),
   ],
-  providers: [OauthService, OauthRepository],
+  providers: [OauthService, OauthRepository, Oauth2Strategy, Oauth2Guard],
   controllers: [OauthController, OpenIDDiscoveryController],
 })
 export class OauthModule {}

@@ -22,6 +22,10 @@ import { CodeCacheType } from './types/codeCache.type';
 import { CreateTokenType } from './types/createToken.type';
 import { TokenCacheType } from './types/tokenCache.type';
 import { UserService } from 'src/user/user.service';
+import { TokenDto } from './dto/req/token.dto';
+import { Client } from '@prisma/client';
+import { RevokeDto } from './dto/req/revoke.dto';
+import { JwtPayload } from 'jsonwebtoken';
 
 @Injectable()
 export class OauthService {
@@ -38,6 +42,7 @@ export class OauthService {
   ) {}
 
   certs(): object {
+    this.logger.log('certs');
     return {
       keys: [this.cert()],
     };
@@ -47,6 +52,7 @@ export class OauthService {
     { clientId, redirectUri, nonce, scope, responseType }: AuthorizeDto,
     userInfo: UserInfo,
   ): Promise<AuthorizeResType> {
+    this.logger.log('authorize');
     if (!(await this.clientService.validateUri(clientId, redirectUri))) {
       throw new UnauthorizedException('unauthroized_clie');
     }
@@ -90,6 +96,90 @@ export class OauthService {
 
     return {
       code,
+    };
+  }
+
+  async token(
+    { code, redirectUri, grantType, refreshToken, ...clientInfo }: TokenDto,
+    client?: Client,
+  ): Promise<AuthorizeResType> {
+    this.logger.log('token');
+    const clientId = client === undefined ? clientInfo.clientId : client.id;
+    if (
+      clientInfo.clientId &&
+      clientInfo.clientSecret &&
+      !(await this.clientService.validateClient(
+        clientInfo.clientId,
+        clientInfo.clientSecret,
+      ))
+    )
+      throw new UnauthorizedException('unauthorized_client');
+
+    if (grantType === 'authorization_code') {
+      if (!code || !redirectUri || !clientId)
+        throw new BadRequestException('invalid_request');
+      return this.generateAccessToken(code, redirectUri, clientId);
+    }
+
+    if (!refreshToken) throw new BadRequestException('invalid_request');
+    const refreshTokenFromDB =
+      await this.oauthRepository.findRefreshToken(refreshToken);
+    if (!clientId) throw new BadRequestException('invalid_request');
+    await this.oauthRepository.updateRefreshToken(
+      refreshTokenFromDB.consent.user,
+      clientId,
+      refreshTokenFromDB.token,
+      refreshTokenFromDB.scopes as Readonly<Scope[]>,
+    );
+    return this.createToken({
+      scope: refreshTokenFromDB.scopes as Readonly<Scope[]>,
+      clientId,
+      user: refreshTokenFromDB.consent.user,
+      excludeIdToken: true,
+    });
+  }
+
+  async revoke(
+    { token, tokenTypeHint, ...clientInfo }: RevokeDto,
+    client?: Client,
+  ): Promise<void> {
+    this.logger.log('revoke');
+    const clientId = client === undefined ? clientInfo.clientId : client.id;
+    if (tokenTypeHint === 'access_token') {
+      await this.revokeAccessToken(token, clientId);
+      return;
+    }
+    if (tokenTypeHint === 'refresh_token') {
+      await this.revokeRefreshToken(token, clientId);
+      return;
+    }
+    if (!(await this.revokeAccessToken(token, clientId))) {
+      await this.revokeRefreshToken(token, clientId);
+    }
+  }
+
+  async validateToken(
+    token: string,
+  ): Promise<Partial<Omit<UserInfo, 'accessLevel'>>> {
+    const tokenCache: TokenCacheType | undefined = await this.redisService.get(
+      token,
+      {
+        prefix: this.TokenPrefix,
+      },
+    );
+    if (tokenCache) {
+      const user = await this.userService.findUserByUuid({
+        uuid: tokenCache.userUuid,
+      });
+      return this.filterUserInfo(user, tokenCache.scope);
+    }
+    const jwt: JwtPayload = this.jwtService.verify(token);
+    return {
+      uuid: jwt.sub,
+      name: jwt.name,
+      email: jwt.email,
+      phoneNumber: jwt.phone_number,
+      studentId: jwt.studentId,
     };
   }
 
