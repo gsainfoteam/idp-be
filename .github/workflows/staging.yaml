@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-      ECR_REPOSITORY: vapor-auth-backend
+      ECR_REPOSITORY: idp-backend
       IMAGE_TAG: dev${{ github.run_number }}
 
     steps:
@@ -37,7 +37,7 @@ jobs:
         uses: docker/build-push-action@v2
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          ECR_REPOSITORY: vapor-auth-backend
+          ECR_REPOSITORY: idp-backend
           IMAGE_TAG: dev${{ github.run_number }} # Use run number as image tag
         with:
           context: .
@@ -64,7 +64,7 @@ jobs:
           ECR_REPOSITORY: ${{ needs.build.outputs.ECR_REPOSITORY }}
           IMAGE_TAG: ${{ needs.build.outputs.IMAGE_TAG }}
         run: |
-          sed -i "s|image:.*|image: $ECR_REGISTRY\/$ECR_REPOSITORY:$IMAGE_TAG|g" infoteam/service/vapor/auth-stg.yaml
+          sed -i "s|image:.*|image: $ECR_REGISTRY\/$ECR_REPOSITORY:$IMAGE_TAG|g" infoteam/service/idp/stg.yaml
 
       - name: Commit and Push
         env:
