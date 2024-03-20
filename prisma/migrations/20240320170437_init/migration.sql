@@ -6,7 +6,7 @@ CREATE TYPE "Role" AS ENUM ('DISALLOW', 'ALLOW');
 
 -- CreateTable
 CREATE TABLE "user_tb" (
-    "uuid" TEXT NOT NULL,
+    "uuid" UUID NOT NULL,
     "name" TEXT NOT NULL,
     "email" TEXT NOT NULL,
     "password" TEXT NOT NULL,
@@ -21,7 +21,7 @@ CREATE TABLE "user_tb" (
 
 -- CreateTable
 CREATE TABLE "client_tb" (
-    "uuid" TEXT NOT NULL,
+    "uuid" UUID NOT NULL,
     "id" TEXT NOT NULL,
     "password" TEXT NOT NULL,
     "name" TEXT NOT NULL,
@@ -39,16 +39,16 @@ CREATE TABLE "RefreshToken" (
     "scopes" TEXT[],
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
-    "clientUuid" TEXT NOT NULL,
-    "userUuid" TEXT NOT NULL,
+    "clientUuid" UUID NOT NULL,
+    "userUuid" UUID NOT NULL,
 
     CONSTRAINT "RefreshToken_pkey" PRIMARY KEY ("token")
 );
 
 -- CreateTable
 CREATE TABLE "consent_tb" (
-    "clientUuid" TEXT NOT NULL,
-    "userUuid" TEXT NOT NULL,
+    "clientUuid" UUID NOT NULL,
+    "userUuid" UUID NOT NULL,
     "scopes" TEXT[],
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
@@ -58,8 +58,8 @@ CREATE TABLE "consent_tb" (
 
 -- CreateTable
 CREATE TABLE "_ClientToUser" (
-    "A" TEXT NOT NULL,
-    "B" TEXT NOT NULL
+    "A" UUID NOT NULL,
+    "B" UUID NOT NULL
 );
 
 -- CreateIndex

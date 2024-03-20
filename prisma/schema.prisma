@@ -21,7 +21,7 @@ enum Role {
 }
 
 model User {
-  uuid        String      @id @default(uuid())
+  uuid        String      @id @default(uuid()) @db.Uuid
   name        String
   email       String      @unique
   password    String
@@ -38,11 +38,11 @@ model User {
 }
 
 model Client {
-  uuid      String   @id @default(uuid())
+  uuid      String   @id @default(uuid()) @db.Uuid
   id        String   @unique
   password  String
   name      String
-  urls      String[] 
+  urls      String[]
   role      Role     @default(DISALLOW)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -59,14 +59,14 @@ model RefreshToken {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  clientUuid String
-  userUuid   String
+  clientUuid String  @db.Uuid
+  userUuid   String  @db.Uuid
   consent    Consent @relation(fields: [clientUuid, userUuid], references: [clientUuid, userUuid])
 }
 
 model Consent {
-  clientUuid String
-  userUuid   String
+  clientUuid String   @db.Uuid
+  userUuid   String   @db.Uuid
   scopes     String[]
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
