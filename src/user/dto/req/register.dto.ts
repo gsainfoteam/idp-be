@@ -45,5 +45,5 @@ export class RegisterDto {
     description: '이메일 인증 jwt 토큰',
   })
   @IsJWT()
-  certificationJwt: string;
+  certificationJwtToken: string;
 }

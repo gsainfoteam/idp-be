@@ -87,23 +87,23 @@ export class UserService {
     name,
     studentId,
     phoneNumber,
-    certificationJwt,
+    certificationJwtToken,
   }: RegisterDto): Promise<void> {
     this.logger.log(`register user: ${email}`);
     const payload: CertificationJwtPayload = await this.jwtService
-      .verifyAsync<CertificationJwtPayload>(certificationJwt, {
+      .verifyAsync<CertificationJwtPayload>(certificationJwtToken, {
         subject: email,
       })
       .catch(() => {
         this.logger.debug(
-          `certification jwt token out-dated: ${certificationJwt}`,
+          `certification jwt token out-dated: ${certificationJwtToken}`,
         );
         throw new ForbiddenException('인증 토큰이 만료되었습니다.');
       });
 
     if (payload.sub !== email) {
       this.logger.debug(
-        `certification jwt token not valid: ${certificationJwt}`,
+        `certification jwt token not valid: ${certificationJwtToken}`,
       );
       throw new ForbiddenException('인증 토큰이 유효하지 않습니다.');
     }
