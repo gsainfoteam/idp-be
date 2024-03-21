@@ -2,6 +2,7 @@ import { Injectable, Logger, UnauthorizedException } from '@nestjs/common';
 import { ClientRepository } from './client.repository';
 import { HttpService } from '@nestjs/axios';
 import * as bcrypt from 'bcryptjs';
+import * as crypto from 'crypto';
 import { ConfigService } from '@nestjs/config';
 import { Client } from '@prisma/client';
 import { ClientResDto } from './dto/res/clientRes.dto';
@@ -136,7 +137,10 @@ export class ClientService {
   }
 
   private generateClientSecret(): { secretKey: string; hashed: string } {
-    const secretKey = Math.random().toString(36).substring(2, 12);
+    const secretKey = crypto
+      .randomBytes(32)
+      .toString('base64')
+      .replace(/[+\/=]/g, '');
     return {
       secretKey,
       hashed: bcrypt.hashSync(secretKey, bcrypt.genSaltSync(10)),
