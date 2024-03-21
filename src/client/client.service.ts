@@ -146,7 +146,7 @@ export class ClientService {
   private convertToClientResDto({
     urls,
     ...rest
-  }: Omit<Client, 'id' | 'password'>): ClientResDto {
+  }: Omit<Client, 'password'>): ClientResDto {
     if (urls === null) {
       return {
         ...rest,

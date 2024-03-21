@@ -16,7 +16,7 @@ export class ClientRepository {
 
   async findClientsByUserUuid(
     userUuid: string,
-  ): Promise<Omit<Client, 'password' | 'id'>[]> {
+  ): Promise<Omit<Client, 'password'>[]> {
     this.logger.log(`findClientsByUserUuid: userUuid=${userUuid}`);
     return this.prismaService.client.findMany({
       where: {
@@ -27,6 +27,7 @@ export class ClientRepository {
         },
       },
       select: {
+        id: true,
         uuid: true,
         name: true,
         urls: true,
@@ -61,7 +62,7 @@ export class ClientRepository {
   async findClientByUuidAndUserUuid(
     uuid: string,
     userUuid: string,
-  ): Promise<Omit<Client, 'password' | 'id'>> {
+  ): Promise<Omit<Client, 'password'>> {
     this.logger.log(`findClientByUuid: uuid=${uuid}`);
     return this.prismaService.client
       .findUniqueOrThrow({
@@ -74,6 +75,7 @@ export class ClientRepository {
           },
         },
         select: {
+          id: true,
           uuid: true,
           name: true,
           urls: true,
@@ -171,7 +173,7 @@ export class ClientRepository {
       urls,
     }: Pick<Client, 'uuid'> & Partial<Pick<Client, 'name' | 'urls'>>,
     userUuid: string,
-  ): Promise<Omit<Client, 'password' | 'id'>> {
+  ): Promise<Omit<Client, 'password'>> {
     this.logger.log(`updateClient: uuid=${uuid}`);
     return this.prismaService.client
       .update({
@@ -188,6 +190,7 @@ export class ClientRepository {
           urls,
         },
         select: {
+          id: true,
           uuid: true,
           name: true,
           urls: true,

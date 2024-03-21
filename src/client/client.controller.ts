@@ -42,7 +42,7 @@ export class ClientController {
   @ApiInternalServerErrorResponse({ description: 'Internal Server Error' })
   @Get()
   @UseGuards(IdpGuard)
-  async getClientList(@GetUser() user: UserInfo) {
+  async getClientList(@GetUser() user: UserInfo): Promise<ClientResDto[]> {
     return this.clientService.getClientList(user);
   }
 

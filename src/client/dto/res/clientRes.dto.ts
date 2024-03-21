@@ -1,12 +1,18 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Client, Role } from '@prisma/client';
 
-export class ClientResDto implements Omit<Client, 'password' | 'id'> {
+export class ClientResDto implements Omit<Client, 'password'> {
   @ApiProperty({
     description: 'The UUID of the client',
     example: 'd290f1ee-6c54-4b01-90e6-d701748f0851',
   })
   uuid: string;
+
+  @ApiProperty({
+    description: 'The name of the client',
+    example: 'client id',
+  })
+  id: string;
 
   @ApiProperty({
     description: 'The name of the client',
