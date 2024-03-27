@@ -25,7 +25,7 @@ export class UserRepository {
       .catch((error) => {
         if (
           error instanceof PrismaClientKnownRequestError &&
-          error.code === 'P2022'
+          (error.code === 'P2002' || error.code === 'P2025')
         ) {
           this.logger.debug(`user not found: ${email}`);
           throw new ForbiddenException('존재하지 않는 유저입니다.');
@@ -56,7 +56,7 @@ export class UserRepository {
       .catch((error) => {
         if (
           error instanceof PrismaClientKnownRequestError &&
-          error.code === 'P2022'
+          error.code === 'P2025'
         ) {
           this.logger.debug(`user not found: ${uuid}`);
           throw new ForbiddenException('존재하지 않는 유저입니다.');
@@ -113,7 +113,7 @@ export class UserRepository {
       })
       .catch((error) => {
         if (error instanceof PrismaClientKnownRequestError) {
-          if (error.code === 'P2022' || error.code === 'P2002') {
+          if (error.code === 'P2025' || error.code === 'P2002') {
             this.logger.debug(`user not found: ${email}`);
             throw new ForbiddenException('존재하지 않는 유저입니다.');
           }
@@ -136,7 +136,7 @@ export class UserRepository {
       .catch((error) => {
         if (
           error instanceof PrismaClientKnownRequestError &&
-          error.code === 'P2022'
+          error.code === 'P2025'
         ) {
           this.logger.debug(`user not found: ${email}`);
           throw new ForbiddenException('존재하지 않는 유저입니다.');
