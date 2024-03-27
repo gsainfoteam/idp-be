@@ -112,12 +112,13 @@ export class UserRepository {
         },
       })
       .catch((error) => {
-        if (
-          error instanceof PrismaClientKnownRequestError &&
-          (error.code === 'P2022' || error.code === 'P2002')
-        ) {
-          this.logger.debug(`user not found: ${email}`);
-          throw new ForbiddenException('존재하지 않는 유저입니다.');
+        if (error instanceof PrismaClientKnownRequestError) {
+          if (error.code === 'P2022' || error.code === 'P2002') {
+            this.logger.debug(`user not found: ${email}`);
+            throw new ForbiddenException('존재하지 않는 유저입니다.');
+          }
+          this.logger.debug(`error occurred: ${error.code}`);
+          throw new InternalServerErrorException();
         }
         this.logger.error(`update user password error: ${error}`);
         throw new InternalServerErrorException();
