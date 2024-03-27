@@ -100,9 +100,9 @@ export class UserRepository {
       });
   }
 
-  async updateUserPassword(email: string, password: string): Promise<void> {
+  async updateUserPassword(email: string, password: string): Promise<User> {
     this.logger.log(`update user password: ${email}`);
-    this.prismaService.user
+    return this.prismaService.user
       .update({
         where: {
           email,
