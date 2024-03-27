@@ -30,6 +30,12 @@ export class UserService {
     private readonly userRepository: UserRepository,
   ) {}
 
+  /**
+   * send the email certification code to the email address (using node mailer)
+   * and save the certification code to the redis
+   * @param param0 it contains email
+   * @returns void, but it sends email to the email address
+   */
   async sendEmailCertificationCode({
     email,
   }: SendCertificationCodeDto): Promise<void> {
@@ -51,6 +57,11 @@ export class UserService {
     return;
   }
 
+  /**
+   * validate the certification code (compare user and redis) and return jwt token
+   * @param param0 it contains email and code
+   * @returns jwt token if the certification code is valid
+   */
   async validateCertificationCode({
     email,
     code,
@@ -81,6 +92,10 @@ export class UserService {
     };
   }
 
+  /**
+   * register the user to the database
+   * @param param0 it contains email, password, name, studentId, phoneNumber, certificationJwtToken
+   */
   async register({
     email,
     password,
@@ -121,6 +136,10 @@ export class UserService {
     });
   }
 
+  /**
+   * change the user password (validate the user from the jwt token that comes from the email)
+   * @param param0 it contains email, password, certificationJwtToken
+   */
   async changePassword({
     email,
     password,
@@ -150,12 +169,21 @@ export class UserService {
     await this.userRepository.updateUserPassword(email, hashedPassword);
   }
 
+  /**
+   * delete the user from the database
+   * @param param0 it contains email, password
+   */
   async deleteUser({ email, password }: DeleteUserDto): Promise<void> {
     this.logger.log(`delete user: ${email}`);
     await this.validateUserPassword({ email, password });
     await this.userRepository.deleteUser(email);
   }
 
+  /**
+   * validate the user password
+   * @param param0 it contains email, password
+   * @returns user if the password is correct
+   */
   async validateUserPassword({
     email,
     password,
@@ -168,6 +196,11 @@ export class UserService {
     return user;
   }
 
+  /**
+   * find the user by email
+   * @param param0 it contains email
+   * @returns user if the user exists
+   */
   async findUserByUuid({
     uuid,
   }: Pick<User, 'uuid'>): Promise<Omit<User, 'password'>> {

@@ -21,6 +21,11 @@ export class ClientService {
     private readonly configService: ConfigService,
   ) {}
 
+  /**
+   * Get client list
+   * @param user the user who wants to get the client list
+   * @returns client list
+   */
   async getClientList(user: UserInfo): Promise<ClientResDto[]> {
     this.logger.log(`getClientList: user=${JSON.stringify(user)}`);
     return (await this.clientRepository.findClientsByUserUuid(user.uuid)).map(
@@ -28,6 +33,12 @@ export class ClientService {
     );
   }
 
+  /**
+   * Get client information
+   * @param uuid client's uuid
+   * @param user user who wants to get the client
+   * @returns client information
+   */
   async getClient(uuid: string, user: UserInfo): Promise<ClientResDto> {
     this.logger.log(`getClient: uuid=${uuid}`);
     return this.convertToClientResDto(
@@ -35,6 +46,12 @@ export class ClientService {
     );
   }
 
+  /**
+   * Register client
+   * @param param0 client information
+   * @param user user who wants to register the client
+   * @returns client credential information
+   */
   async registerClient(
     { id, name, urls }: CreateClientDto,
     user: UserInfo,
@@ -57,6 +74,12 @@ export class ClientService {
     };
   }
 
+  /**
+   * to reset the client secret, generate a new secret key and update the client secret
+   * @param uuid client's uuid
+   * @param user user who wants to reset the client secret
+   * @returns client credential information
+   */
   async resetClientSecret(
     uuid: string,
     user: UserInfo,
@@ -77,6 +100,13 @@ export class ClientService {
     };
   }
 
+  /**
+   * update client information (name, urls)
+   * @param uuid client's uuid
+   * @param param1 client's name and urls that will be updated
+   * @param user user who wants to update the client
+   * @returns updated client information
+   */
   async updateClient(
     uuid: string,
     { name, urls }: UpdateClientDto,
@@ -88,12 +118,23 @@ export class ClientService {
     );
   }
 
+  /**
+   * validate the uri
+   * @param id client's id
+   * @param url url that will be validated
+   * @returns true if the url is valid
+   */
   async validateUri(id: string, url: string): Promise<boolean> {
     const client = await this.clientRepository.findById(id);
     if (client.urls.length === 0) return false;
     return client.urls.includes(url);
   }
 
+  /**
+   * send a slack message to notify the permission request
+   * @param uuid client's uuid
+   * @param user user who sends the permission request
+   */
   async adminRequest(uuid: string, user: UserInfo): Promise<void> {
     this.logger.log(`adminRequest: uuid=${uuid}`);
     const { name } = await this.clientRepository.findClientByUuidAndUserUuid(
@@ -121,6 +162,12 @@ export class ClientService {
     );
   }
 
+  /**
+   * validate the client
+   * @param id client's id
+   * @param secret client's secret
+   * @returns client information if the client is valid
+   */
   async validateClient(id: string, secret: string): Promise<Client> {
     const client = await this.clientRepository.findById(id).catch((error) => {
       this.logger.error(`validateClient: error=${error}`);
@@ -147,6 +194,11 @@ export class ClientService {
     };
   }
 
+  /**
+   * convert client to client response dto
+   * @param param0 Client
+   * @returns ClientResDto
+   */
   private convertToClientResDto({
     urls,
     ...rest

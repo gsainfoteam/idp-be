@@ -41,6 +41,10 @@ export class OauthService {
     private readonly clientService: ClientService,
   ) {}
 
+  /**
+   * it returns certificate for jwt
+   * @returns certificate for jwt
+   */
   certs(): object {
     this.logger.log('certs');
     return {
@@ -48,6 +52,12 @@ export class OauthService {
     };
   }
 
+  /**
+   * it returns code or access token or id token or refresh token it depends on the response type
+   * @param param0 the information for authorization
+   * @param userInfo user information
+   * @returns the result of authorization
+   */
   async authorize(
     { clientId, redirectUri, nonce, scope, responseType }: AuthorizeDto,
     userInfo: UserInfo,
@@ -99,6 +109,12 @@ export class OauthService {
     };
   }
 
+  /**
+   * it returns access token or refresh token
+   * @param param0 the information for generating token
+   * @param client the client information
+   * @returns generated token
+   */
   async token(
     { code, redirectUri, grantType, refreshToken, ...clientInfo }: TokenDto,
     client?: Client,
@@ -139,6 +155,12 @@ export class OauthService {
     });
   }
 
+  /**
+   * revokes the token
+   * @param param0 the information for revoking token
+   * @param client client information
+   * @returns void revokes the token
+   */
   async revoke(
     { token, tokenTypeHint, ...clientInfo }: RevokeDto,
     client?: Client,
@@ -158,6 +180,11 @@ export class OauthService {
     }
   }
 
+  /**
+   * validate the token and returns the user information
+   * @param token the token that will be validated
+   * @returns return the user information
+   */
   async validateToken(
     token: string,
   ): Promise<Partial<Omit<UserInfo, 'accessLevel'>>> {
@@ -173,7 +200,12 @@ export class OauthService {
       });
       return this.filterUserInfo(user, tokenCache.scope);
     }
-    const jwt: JwtPayload = this.jwtService.verify(token);
+    const jwt: JwtPayload = await this.jwtService
+      .verifyAsync(token)
+      .catch(() => {
+        this.logger.error('invalid_token');
+        throw new UnauthorizedException('invalid_token');
+      });
     return {
       uuid: jwt.sub,
       name: jwt.name,
@@ -183,6 +215,11 @@ export class OauthService {
     };
   }
 
+  /**
+   * create tokens from the options
+   * @param param0 the information for creating token
+   * @returns created tokens
+   */
   private async createToken({
     user,
     clientId,
@@ -251,6 +288,13 @@ export class OauthService {
     };
   }
 
+  /**
+   * generate access token
+   * @param code the code that will be used to generate access token
+   * @param redirectUri client's redirect uri
+   * @param clientId client's id
+   * @returns access token
+   */
   private async generateAccessToken(
     code: string,
     redirectUri: string,
@@ -277,6 +321,12 @@ export class OauthService {
     });
   }
 
+  /**
+   * returns the certificate for jwt
+   * @param token the token that will be revoked
+   * @param clientId client's id
+   * @returns whether the token is revoked or not
+   */
   private async revokeAccessToken(
     token: string,
     clientId: string,
@@ -303,6 +353,10 @@ export class OauthService {
     return true;
   }
 
+  /**
+   * generate certificate for jwt
+   * @returns certificate for jwt
+   */
   private cert(): object {
     const sk = crypto.createPrivateKey(
       this.configService
@@ -323,6 +377,12 @@ export class OauthService {
     };
   }
 
+  /**
+   * filter user information that will be included in the token
+   * @param user entire user information
+   * @param scopes scopes that will be included in the token
+   * @returns filtered user information
+   */
   private filterUserInfo(
     user: UserInfo,
     scopes: Readonly<Scope[]> = allowedScopes,
@@ -336,6 +396,10 @@ export class OauthService {
     };
   }
 
+  /**
+   * generate opaque token that does not have any meaning
+   * @returns opaque token
+   */
   private generateOpaqueToken(): string {
     return crypto
       .randomBytes(32)
@@ -343,6 +407,10 @@ export class OauthService {
       .replace(/[+\/=]/g, '');
   }
 
+  /**
+   * generate openid connect discovery
+   * @returns openid connect discovery
+   */
   discovery(): object {
     const baseUrl: string = this.configService.getOrThrow<string>('BASE_URL');
     return {

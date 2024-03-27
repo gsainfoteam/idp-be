@@ -11,10 +11,14 @@ import {
 import { OauthService } from './oauth.service';
 import { ConvertCaseInterceptor } from 'src/global/interceptor/convertCase.interceptor';
 import {
+  ApiCreatedResponse,
+  ApiForbiddenResponse,
   ApiInternalServerErrorResponse,
+  ApiOkResponse,
   ApiOperation,
   ApiResponse,
   ApiTags,
+  ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { IdpGuard } from 'src/idp/guard/idp.guard';
 import { AuthorizeDto } from './dto/req/authorize.dto';
@@ -27,22 +31,38 @@ import { Client } from '@prisma/client';
 import { TokenResDto } from './dto/res/tokenRes.dto';
 import { RevokeDto } from './dto/req/revoke.dto';
 import { Oauth2Guard } from './guard/oauth2.guard';
+import { AuthorizeResDto } from './dto/res/authorizeRes.dto';
 
+@ApiTags('oauth')
 @Controller('oauth')
 @UseInterceptors(ConvertCaseInterceptor)
 export class OauthController {
   constructor(private readonly oauthService: OauthService) {}
 
+  @ApiOperation({
+    summary: 'Authorize',
+    description: 'Authorize',
+  })
+  @ApiCreatedResponse({ description: 'Authorize', type: AuthorizeResDto })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  @ApiForbiddenResponse({ description: 'Forbidden' })
   @Post('authorize')
   @UseGuards(IdpGuard)
   @UsePipes(new ValidationPipe({ transform: true }))
   async authorize(
     @Body() authorizeDto: AuthorizeDto,
     @GetUser() user: UserInfo,
-  ) {
+  ): Promise<AuthorizeResDto> {
     return this.oauthService.authorize(authorizeDto, user);
   }
 
+  @ApiOperation({
+    summary: 'Token',
+    description: 'Token',
+  })
+  @ApiCreatedResponse({ description: 'Token', type: TokenResDto })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  @ApiForbiddenResponse({ description: 'Forbidden' })
   @Post('token')
   @UseGuards(ClientOptionalGuard)
   async token(
@@ -52,21 +72,41 @@ export class OauthController {
     return this.oauthService.token(body, client);
   }
 
+  @ApiOperation({
+    summary: 'Revoke',
+    description: 'Revoke the token',
+  })
+  @ApiCreatedResponse({ description: 'Revoke' })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  @ApiForbiddenResponse({ description: 'Forbidden' })
   @Post('revoke')
   @UseGuards(ClientOptionalGuard)
   @UsePipes(new ValidationPipe({ transform: true }))
-  async revoke(@Body() body: RevokeDto, @GetClient() client: Client) {
+  async revoke(
+    @Body() body: RevokeDto,
+    @GetClient() client: Client,
+  ): Promise<void> {
     return this.oauthService.revoke(body, client);
   }
 
+  @ApiOperation({
+    summary: 'certs',
+    description: 'returns the public key',
+  })
+  @ApiOkResponse({ description: 'certs' })
   @Get('certs')
-  async certs() {
+  async certs(): Promise<object> {
     return this.oauthService.certs();
   }
 
+  @ApiOperation({
+    summary: 'userinfo',
+    description: 'returns userinfo',
+  })
+  @ApiOkResponse({ description: 'userinfo' })
   @Get('userinfo')
   @UseGuards(Oauth2Guard)
-  async userinfo(@GetUser() user: UserInfo) {
+  async userinfo(@GetUser() user: UserInfo): Promise<UserInfo> {
     return user;
   }
 }
