@@ -23,7 +23,7 @@ async function bootstrap() {
   const config = new DocumentBuilder()
     .setTitle('Infoteam-Idp API Docs')
     .setDescription('인포팀 idp의 API 문서입니다.')
-    .setVersion('1.0')
+    .setVersion('2024-04')
     .addBearerAuth(
       {
         type: 'http',
