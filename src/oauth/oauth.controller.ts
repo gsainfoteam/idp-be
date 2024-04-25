@@ -11,6 +11,7 @@ import {
 import { OauthService } from './oauth.service';
 import { ConvertCaseInterceptor } from 'src/global/interceptor/convertCase.interceptor';
 import {
+  ApiBearerAuth,
   ApiCreatedResponse,
   ApiForbiddenResponse,
   ApiInternalServerErrorResponse,
@@ -47,6 +48,7 @@ export class OauthController {
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   @ApiForbiddenResponse({ description: 'Forbidden' })
   @Post('authorize')
+  @ApiBearerAuth('access-token')
   @UseGuards(IdpGuard)
   @UsePipes(new ValidationPipe({ transform: true }))
   async authorize(
