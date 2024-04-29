@@ -33,6 +33,13 @@ async function bootstrap() {
       },
       'access-token',
     )
+    .addBasicAuth(
+      {
+        type: 'http',
+        scheme: 'basic',
+      },
+      'client-auth',
+    )
     .build();
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, document);

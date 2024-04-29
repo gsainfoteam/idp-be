@@ -66,7 +66,7 @@ export class OauthController {
   @ApiCreatedResponse({ description: 'Token', type: TokenResDto })
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   @ApiForbiddenResponse({ description: 'Forbidden' })
-  @ApiBasicAuth()
+  @ApiBasicAuth('client-auth')
   @Post('token')
   @UseGuards(ClientOptionalGuard)
   async token(
