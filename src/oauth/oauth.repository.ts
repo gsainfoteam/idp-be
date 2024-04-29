@@ -23,10 +23,16 @@ export class OauthRepository {
     clientId: string,
   ): Promise<void> {
     this.logger.log(`updateUserConsent: user=${JSON.stringify(user)}`);
+    // TODO: reduce this query
+    const client = await this.prismaService.client.findUniqueOrThrow({
+      where: {
+        id: clientId,
+      },
+    });
     await this.prismaService.consent.update({
       where: {
         clientUuid_userUuid: {
-          clientUuid: clientId,
+          clientUuid: client?.uuid,
           userUuid: user.uuid,
         },
       },

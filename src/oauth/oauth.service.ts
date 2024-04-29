@@ -53,7 +53,7 @@ export class OauthService {
   }
 
   /**
-   * it returns code or access token or id token or refresh token it depends on the response type
+   * it returns code or access token or id token it depends on the response type
    * @param param0 the information for authorization
    * @param userInfo user information
    * @returns the result of authorization
@@ -63,9 +63,13 @@ export class OauthService {
     userInfo: UserInfo,
   ): Promise<AuthorizeResType> {
     this.logger.log('authorize');
+
+    // if the client is not valid, it throws an error
     if (!(await this.clientService.validateUri(clientId, redirectUri))) {
       throw new UnauthorizedException('unauthroized_clie');
     }
+
+    // if the code is included in the response type, it generates the code
     const code = responseType.includes('code')
       ? await (async () => {
           const code = this.generateOpaqueToken();
@@ -84,13 +88,16 @@ export class OauthService {
         })()
       : undefined;
 
+    // if the response type includes token or id_token, it generates the token
     if (responseType.includes('token') || responseType.includes('id_token')) {
-      if (responseType.includes('id_token') && !nonce) {
+      // if the nonce is not included in the response type, it throws an error
+      if (
+        (responseType.includes('id_token') && !nonce) ||
+        (!responseType.includes('id_token') && nonce)
+      ) {
         throw new BadRequestException('invalid_request');
       }
-      if (!responseType.includes('id_token') && nonce) {
-        throw new BadRequestException('invalid_request');
-      }
+
       return this.createToken({
         user: userInfo,
         clientId,
@@ -104,13 +111,14 @@ export class OauthService {
       });
     }
 
+    // if the response type only have code, it returns the code
     return {
       code,
     };
   }
 
   /**
-   * it returns access token or refresh token
+   * it returns access token or refresh token, it does not return id token
    * @param param0 the information for generating token
    * @param client the client information
    * @returns generated token
@@ -232,6 +240,8 @@ export class OauthService {
     code,
   }: CreateTokenType): Promise<AuthorizeResType> {
     const filteredUser = this.filterUserInfo(user);
+
+    // make user's consent log
     await this.oauthRepository.updateUserConsent(
       user,
       scope.filter((s) =>
@@ -239,8 +249,10 @@ export class OauthService {
       ),
       clientId,
     );
+
     return {
       code,
+      // if excludeAccessToken is true, it does not include access token
       ...(excludeAccessToken
         ? {}
         : {
@@ -260,7 +272,11 @@ export class OauthService {
             tokenType: 'Bearer',
             expiresIn: 3600,
           }),
+
+      // if excludeScope is true, it does not include scope
       scope: excludeScope ? undefined : scope.join(' '),
+
+      // if excludeIdToken is true, it does not include id token
       idToken: excludeIdToken
         ? undefined
         : this.jwtService.sign(
@@ -273,6 +289,8 @@ export class OauthService {
               audience: clientId,
             },
           ),
+
+      // if includeRefreshToken is true, it includes refresh token
       refreshToken: includeRefreshToken
         ? await (async () => {
             const token = this.generateOpaqueToken();
