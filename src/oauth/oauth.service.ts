@@ -335,6 +335,7 @@ export class OauthService {
       user: await this.userService.findUserByUuid({ uuid: codeCache.userUuid }),
       ...codeCache,
       clientId,
+      excludeIdToken: !codeCache.scope.includes('openid'),
       includeRefreshToken: codeCache.scope.includes('offline_access'),
     });
   }
