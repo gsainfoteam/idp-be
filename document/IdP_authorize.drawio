@@ -1,0 +1,219 @@
+<mxfile host="Electron" modified="2024-04-30T09:13:27.770Z" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/24.2.5 Chrome/120.0.6099.109 Electron/28.1.0 Safari/537.36" etag="YNwJR74wFZmlAIx8fsT1" version="24.2.5" type="device">
+  <diagram id="yPxyJZ8AM_hMuL3Unpa9" name="simple gitflow">
+    <mxGraphModel dx="1500" dy="1093" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1100" pageHeight="850" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="FeYWc5H8x6b1aRbzY2Nt-5" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;endArrow=none;endFill=0;strokeWidth=3;" parent="1" source="FeYWc5H8x6b1aRbzY2Nt-1" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="380" y="840" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="FeYWc5H8x6b1aRbzY2Nt-1" value="Client&lt;br&gt;Frontend" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+          <mxGeometry x="320" y="120" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="FeYWc5H8x6b1aRbzY2Nt-6" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;endArrow=none;endFill=0;strokeWidth=3;" parent="1" source="FeYWc5H8x6b1aRbzY2Nt-2" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="660" y="840" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="FeYWc5H8x6b1aRbzY2Nt-2" value="Client" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+          <mxGeometry x="600" y="120" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="FeYWc5H8x6b1aRbzY2Nt-7" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;endArrow=none;endFill=0;strokeWidth=3;" parent="1" source="FeYWc5H8x6b1aRbzY2Nt-3" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="940" y="841.60009765625" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="FeYWc5H8x6b1aRbzY2Nt-3" value="IdP" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+          <mxGeometry x="880" y="120" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="lhxbwTUGpvmLTgG_RypY-2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;endArrow=none;endFill=0;strokeWidth=3;" edge="1" parent="1" source="lhxbwTUGpvmLTgG_RypY-3">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="100" y="840" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="lhxbwTUGpvmLTgG_RypY-3" value="IdP&lt;br&gt;Frontend" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="40" y="120" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="lhxbwTUGpvmLTgG_RypY-4" value="" style="endArrow=classicThin;html=1;rounded=0;startArrow=none;startFill=0;endFill=1;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="380" y="200" as="sourcePoint" />
+            <mxPoint x="660" y="200" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="lhxbwTUGpvmLTgG_RypY-5" value="" style="endArrow=none;html=1;rounded=0;startArrow=classicThin;startFill=1;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="100" y="210" as="sourcePoint" />
+            <mxPoint x="660" y="210" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="lhxbwTUGpvmLTgG_RypY-6" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=none;dashed=1;" vertex="1" parent="1">
+          <mxGeometry x="80" y="190" width="600" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="lhxbwTUGpvmLTgG_RypY-7" value="&lt;font color=&quot;#ff6666&quot;&gt;Requesting login&lt;/font&gt;" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="180" y="170" width="120" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="lhxbwTUGpvmLTgG_RypY-8" value="" style="endArrow=none;html=1;rounded=0;edgeStyle=orthogonalEdgeStyle;endFill=0;startArrow=classicThin;startFill=1;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="100" y="280" as="sourcePoint" />
+            <mxPoint x="100" y="240" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="100" y="280" />
+              <mxPoint x="60" y="280" />
+              <mxPoint x="60" y="240" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="lhxbwTUGpvmLTgG_RypY-9" value="&lt;font color=&quot;#ff9999&quot;&gt;&amp;lt;login&amp;gt;&lt;/font&gt;&lt;div&gt;&lt;font color=&quot;#ff9999&quot;&gt;or &amp;lt;signup&amp;gt;&lt;/font&gt;&lt;/div&gt;" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="100" y="240" width="80" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="lhxbwTUGpvmLTgG_RypY-10" value="" style="endArrow=openThin;html=1;rounded=0;endFill=0;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="100" y="320" as="sourcePoint" />
+            <mxPoint x="940" y="320" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="lhxbwTUGpvmLTgG_RypY-11" value="" style="endArrow=none;html=1;rounded=0;startArrow=classicThin;startFill=1;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="100" y="330" as="sourcePoint" />
+            <mxPoint x="940" y="330" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="lhxbwTUGpvmLTgG_RypY-16" value="" style="endArrow=classicThin;html=1;rounded=0;endFill=1;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="100" y="400" as="sourcePoint" />
+            <mxPoint x="380" y="400" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="lhxbwTUGpvmLTgG_RypY-17" value="" style="endArrow=classicThin;html=1;rounded=0;endFill=1;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="380" y="410" as="sourcePoint" />
+            <mxPoint x="660" y="410" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="lhxbwTUGpvmLTgG_RypY-19" value="" style="endArrow=classicThin;html=1;rounded=0;endFill=1;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="660" y="420" as="sourcePoint" />
+            <mxPoint x="940" y="420" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="lhxbwTUGpvmLTgG_RypY-20" value="" style="endArrow=classicThin;html=1;rounded=0;endFill=1;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="940" y="440" as="sourcePoint" />
+            <mxPoint x="660" y="440" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="lhxbwTUGpvmLTgG_RypY-21" value="" style="endArrow=classicThin;html=1;rounded=0;endFill=1;edgeStyle=orthogonalEdgeStyle;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="660" y="480" as="sourcePoint" />
+            <mxPoint x="660" y="520" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="700" y="480" />
+              <mxPoint x="700" y="520" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="lhxbwTUGpvmLTgG_RypY-22" value="" style="endArrow=classicThin;html=1;rounded=0;endFill=1;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="660" y="540" as="sourcePoint" />
+            <mxPoint x="380" y="540" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="lhxbwTUGpvmLTgG_RypY-23" value="Authorize with the code" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry y="80" width="140" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="lhxbwTUGpvmLTgG_RypY-24" value="&lt;font color=&quot;#6666ff&quot;&gt;POST&lt;/font&gt; /oauth/authorize" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="940" y="310" width="130" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="lhxbwTUGpvmLTgG_RypY-25" value="code" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="490" y="330" width="60" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="lhxbwTUGpvmLTgG_RypY-26" value="Client id, redirect uri, scope, response type" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="400" y="300" width="240" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="lhxbwTUGpvmLTgG_RypY-27" value="&lt;font color=&quot;#00ff00&quot;&gt;REDIRECT &lt;/font&gt;redirect uri?code={code}" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="120" y="380" width="240" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="lhxbwTUGpvmLTgG_RypY-28" value="&lt;font color=&quot;#009999&quot;&gt;GET &lt;/font&gt;redirect uri?code={code}" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="430" y="390" width="180" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="lhxbwTUGpvmLTgG_RypY-29" value="Client id, Client secret&lt;div&gt;code, redirect uri, grant type&lt;/div&gt;" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="720" y="390" width="160" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="lhxbwTUGpvmLTgG_RypY-30" value="&lt;font color=&quot;#6666ff&quot;&gt;POST&lt;/font&gt;&lt;font color=&quot;#3399ff&quot;&gt; &lt;/font&gt;/oauth/revoke" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="940" y="730" width="120" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="lhxbwTUGpvmLTgG_RypY-31" value="Access token, or Refresh token" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="465" y="540" width="110" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="lhxbwTUGpvmLTgG_RypY-32" value="Service logic" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="700" y="490" width="60" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="lhxbwTUGpvmLTgG_RypY-33" value="Access token, or Refresh token" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="755" y="450" width="110" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="lhxbwTUGpvmLTgG_RypY-34" value="" style="endArrow=classicThin;html=1;rounded=0;endFill=1;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="380" y="620" as="sourcePoint" />
+            <mxPoint x="660" y="620" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="lhxbwTUGpvmLTgG_RypY-35" value="" style="endArrow=classicThin;html=1;rounded=0;endFill=1;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="660" y="630" as="sourcePoint" />
+            <mxPoint x="940" y="630" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="lhxbwTUGpvmLTgG_RypY-36" value="" style="endArrow=none;html=1;rounded=0;startArrow=classicThin;startFill=1;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="660" y="650" as="sourcePoint" />
+            <mxPoint x="940" y="650" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="lhxbwTUGpvmLTgG_RypY-37" value="" style="endArrow=none;html=1;rounded=0;startArrow=classicThin;startFill=1;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="380" y="660" as="sourcePoint" />
+            <mxPoint x="660" y="660" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="lhxbwTUGpvmLTgG_RypY-41" value="" style="endArrow=classicThin;html=1;rounded=0;endFill=1;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="380" y="720" as="sourcePoint" />
+            <mxPoint x="660" y="720" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="lhxbwTUGpvmLTgG_RypY-42" value="" style="endArrow=classicThin;html=1;rounded=0;endFill=1;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="660" y="730" as="sourcePoint" />
+            <mxPoint x="940" y="730" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="lhxbwTUGpvmLTgG_RypY-43" value="Access token" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="480" y="600" width="80" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="lhxbwTUGpvmLTgG_RypY-44" value="Access token" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="760" y="610" width="80" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="lhxbwTUGpvmLTgG_RypY-45" value="&lt;span style=&quot;color: rgb(0, 153, 153);&quot;&gt;GET&amp;nbsp;&lt;/span&gt;oauth/userinfo" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="940" y="630" width="110" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="lhxbwTUGpvmLTgG_RypY-46" value="User info" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="490" y="660" width="60" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="lhxbwTUGpvmLTgG_RypY-47" value="User info" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="770" y="650" width="60" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="lhxbwTUGpvmLTgG_RypY-48" value="Access token, or Refresh token" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="465" y="690" width="110" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="lhxbwTUGpvmLTgG_RypY-50" value="Access token, or Refresh token" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="745" y="700" width="110" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="lhxbwTUGpvmLTgG_RypY-51" value="&lt;font color=&quot;#6666ff&quot;&gt;POST&lt;/font&gt;&lt;font color=&quot;#3399ff&quot;&gt; &lt;/font&gt;/oauth/token" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="940" y="420" width="110" height="20" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
