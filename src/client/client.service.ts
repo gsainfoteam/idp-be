@@ -11,6 +11,7 @@ import { ClientCredentialResDto } from './dto/res/ClinetCredential.dto';
 import { firstValueFrom } from 'rxjs';
 import { UpdateClientDto } from './dto/req/updateClient.dto';
 import { UserInfo } from 'src/idp/types/userInfo.type';
+import { ClientPublicResDto } from './dto/res/clientPublicRes.dto';
 
 @Injectable()
 export class ClientService {
@@ -44,6 +45,30 @@ export class ClientService {
     return this.convertToClientResDto(
       await this.clientRepository.findClientByUuidAndUserUuid(uuid, user.uuid),
     );
+  }
+
+  /**
+   * Get client public information
+   * @param uuid client's uuid
+   * @param user user who wants to get the client
+   * @returns client public information with specific user
+   */
+  async getClientPublicInformation(
+    uuid: string,
+    user: UserInfo,
+  ): Promise<ClientPublicResDto> {
+    this.logger.log(`getClientPublicInformation: uuid=${uuid}`);
+    const client =
+      await this.clientRepository.findClientWithConsentByUuidAndUserUuid(
+        uuid,
+        user.uuid,
+      );
+    return {
+      id: client.id,
+      name: client.name,
+      uuid: client.uuid,
+      recentConsent: client.consent.flatMap((consent) => consent.scopes),
+    };
   }
 
   /**

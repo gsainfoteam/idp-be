@@ -8,6 +8,7 @@ import {
 import { Client } from '@prisma/client';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { ConsentClient } from './types/consentClient.type';
 
 @Injectable()
 export class ClientRepository {
@@ -59,11 +60,39 @@ export class ClientRepository {
       });
   }
 
+  async findClientWithConsentByUuidAndUserUuid(
+    uuid: string,
+    userUuid: string,
+  ): Promise<ConsentClient> {
+    this.logger.log(`findClientByUuid: uuid=${uuid}`);
+    return this.prismaService.client
+      .findUniqueOrThrow({
+        where: { uuid },
+        include: {
+          consent: {
+            where: { user: { uuid: userUuid } },
+            select: { scopes: true },
+          },
+        },
+      })
+      .catch((error) => {
+        if (
+          error instanceof PrismaClientKnownRequestError &&
+          error.code === 'P2025'
+        ) {
+          this.logger.debug(`findClientByUuid: error=${error}`);
+          throw new ForbiddenException();
+        }
+        this.logger.error(`findClientByUuid: error=${error}`);
+        throw new InternalServerErrorException();
+      });
+  }
+
   async findClientByUuidAndUserUuid(
     uuid: string,
     userUuid: string,
   ): Promise<Omit<Client, 'password'>> {
-    this.logger.log(`findClientByUuid: uuid=${uuid}`);
+    this.logger.log(`findClientByUuidAndUserUuid: uuid=${uuid}`);
     return this.prismaService.client
       .findUniqueOrThrow({
         where: {
@@ -89,10 +118,10 @@ export class ClientRepository {
           error instanceof PrismaClientKnownRequestError &&
           error.code === 'P2025'
         ) {
-          this.logger.debug(`findClientByUuid: error=${error}`);
+          this.logger.debug(`findClientByUuidAndUserUuid: error=${error}`);
           throw new ForbiddenException();
         }
-        this.logger.error(`findClientByUuid: error=${error}`);
+        this.logger.error(`findClientByUuidAndUserUuid: error=${error}`);
         throw new InternalServerErrorException();
       });
   }

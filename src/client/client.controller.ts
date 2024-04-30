@@ -26,6 +26,7 @@ import { CreateClientDto } from './dto/req/createClient.dto';
 import { ClientCredentialResDto } from './dto/res/ClinetCredential.dto';
 import { UpdateClientDto } from './dto/req/updateClient.dto';
 import { UserInfo } from 'src/idp/types/userInfo.type';
+import { ClientPublicResDto } from './dto/res/clientPublicRes.dto';
 
 @ApiTags('client')
 @Controller('client')
@@ -61,6 +62,23 @@ export class ClientController {
     @GetUser() user: UserInfo,
   ): Promise<ClientResDto> {
     return this.clientService.getClient(uuid, user);
+  }
+
+  @ApiOperation({
+    summary: 'Get client public information',
+    description: 'client의 공개 정보를 알려준다.',
+  })
+  @ApiBearerAuth('access-token')
+  @ApiResponse({ status: 200, type: ClientPublicResDto })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  @ApiInternalServerErrorResponse({ description: 'Internal Server Error' })
+  @Get(':uuid/public')
+  @UseGuards(IdpGuard)
+  async getClientPublicInformation(
+    @Param('uuid', ParseUUIDPipe) uuid: string,
+    @GetUser() user: UserInfo,
+  ): Promise<ClientPublicResDto> {
+    return this.clientService.getClientPublicInformation(uuid, user);
   }
 
   @ApiOperation({
