@@ -72,13 +72,13 @@ export class ClientController {
   @ApiResponse({ status: 200, type: ClientPublicResDto })
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   @ApiInternalServerErrorResponse({ description: 'Internal Server Error' })
-  @Get(':uuid/public')
+  @Get(':id/public')
   @UseGuards(IdpGuard)
   async getClientPublicInformation(
-    @Param('uuid', ParseUUIDPipe) uuid: string,
+    @Param('id') id: string,
     @GetUser() user: UserInfo,
   ): Promise<ClientPublicResDto> {
-    return this.clientService.getClientPublicInformation(uuid, user);
+    return this.clientService.getClientPublicInformation(id, user);
   }
 
   @ApiOperation({

@@ -54,13 +54,13 @@ export class ClientService {
    * @returns client public information with specific user
    */
   async getClientPublicInformation(
-    uuid: string,
+    id: string,
     user: UserInfo,
   ): Promise<ClientPublicResDto> {
-    this.logger.log(`getClientPublicInformation: uuid=${uuid}`);
+    this.logger.log(`getClientPublicInformation: id=${id}`);
     const client =
-      await this.clientRepository.findClientWithConsentByUuidAndUserUuid(
-        uuid,
+      await this.clientRepository.findClientWithConsentByIdAndUserUuid(
+        id,
         user.uuid,
       );
     return {

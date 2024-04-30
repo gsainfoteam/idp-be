@@ -60,14 +60,14 @@ export class ClientRepository {
       });
   }
 
-  async findClientWithConsentByUuidAndUserUuid(
-    uuid: string,
+  async findClientWithConsentByIdAndUserUuid(
+    id: string,
     userUuid: string,
   ): Promise<ConsentClient> {
-    this.logger.log(`findClientByUuid: uuid=${uuid}`);
+    this.logger.log(`findClientWithConsentByIdAndUserUuid: id=${id}`);
     return this.prismaService.client
       .findUniqueOrThrow({
-        where: { uuid },
+        where: { id },
         include: {
           consent: {
             where: { user: { uuid: userUuid } },
@@ -80,10 +80,14 @@ export class ClientRepository {
           error instanceof PrismaClientKnownRequestError &&
           error.code === 'P2025'
         ) {
-          this.logger.debug(`findClientByUuid: error=${error}`);
+          this.logger.debug(
+            `findClientWithConsentByIdAndUserUuid: error=${error}`,
+          );
           throw new ForbiddenException();
         }
-        this.logger.error(`findClientByUuid: error=${error}`);
+        this.logger.error(
+          `findClientWithConsentByIdAndUserUuid: error=${error}`,
+        );
         throw new InternalServerErrorException();
       });
   }
