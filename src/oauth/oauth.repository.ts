@@ -62,6 +62,11 @@ export class OauthRepository {
     scopes: Readonly<Scope[]>,
   ): Promise<void> {
     const boundaryDate = new Date(new Date().getMonth() - 1);
+    const client = await this.prismaService.client.findUniqueOrThrow({
+      where: {
+        id: clientId,
+      },
+    });
     await this.prismaService.$transaction([
       this.prismaService.refreshToken.create({
         data: {
@@ -70,7 +75,7 @@ export class OauthRepository {
           consent: {
             connect: {
               clientUuid_userUuid: {
-                clientUuid: clientId,
+                clientUuid: client.uuid,
                 userUuid: user.uuid,
               },
             },
@@ -80,7 +85,7 @@ export class OauthRepository {
       this.prismaService.consent.update({
         where: {
           clientUuid_userUuid: {
-            clientUuid: clientId,
+            clientUuid: client.uuid,
             userUuid: user.uuid,
           },
         },
@@ -90,7 +95,7 @@ export class OauthRepository {
               await this.prismaService.refreshToken.findMany({
                 where: {
                   consent: {
-                    clientUuid: clientId,
+                    clientUuid: client.uuid,
                     userUuid: user.uuid,
                   },
                 },
