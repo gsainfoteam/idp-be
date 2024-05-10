@@ -432,9 +432,10 @@ export class OauthService {
    */
   discovery(): object {
     const baseUrl: string = this.configService.getOrThrow<string>('BASE_URL');
+    const issuer = baseUrl.replace('api.', '');
     return {
-      issuer: 'https://idp.gistory.me',
-      authorization_endpoint: `${baseUrl}/oauth/authorize`,
+      issuer,
+      authorization_endpoint: `${issuer}/authorize`,
       token_endpoint: `${baseUrl}/oauth/token`,
       userinfo_endpoint: `${baseUrl}/oauth/userinfo`,
       jwks_uri: `${baseUrl}/oauth/certs`,
