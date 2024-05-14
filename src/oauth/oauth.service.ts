@@ -220,6 +220,14 @@ export class OauthService {
       email: jwt.email,
       phoneNumber: jwt.phone_number,
       studentId: jwt.studentId,
+
+      ...{
+        user_uuid: jwt.sub,
+        user_name: jwt.name,
+        user_email_id: jwt.email,
+        user_phone_number: jwt.phone_number,
+        student_id: jwt.studentId,
+      },
     };
   }
 
