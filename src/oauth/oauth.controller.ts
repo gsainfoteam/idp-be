@@ -2,6 +2,8 @@ import {
   Body,
   Controller,
   Get,
+  HttpCode,
+  HttpStatus,
   Post,
   UseGuards,
   UseInterceptors,
@@ -67,6 +69,7 @@ export class OauthController {
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   @ApiForbiddenResponse({ description: 'Forbidden' })
   @ApiBasicAuth('client-auth')
+  @HttpCode(HttpStatus.OK)
   @Post('token')
   @UseGuards(ClientOptionalGuard)
   async token(
