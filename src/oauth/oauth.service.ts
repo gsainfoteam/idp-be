@@ -66,7 +66,7 @@ export class OauthService {
 
     // if the client is not valid, it throws an error
     if (!(await this.clientService.validateUri(clientId, redirectUri))) {
-      throw new UnauthorizedException('unauthroized_clie');
+      throw new UnauthorizedException('unauthorized_client');
     }
 
     // if the code is included in the response type, it generates the code
