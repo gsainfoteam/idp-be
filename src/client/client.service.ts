@@ -58,7 +58,8 @@ export class ClientService {
     user: UserInfo,
   ): Promise<ClientPublicResDto> {
     this.logger.log(`getClientPublicInformation: id=${id}`);
-    const client =
+    const client = await this.clientRepository.findById(id);
+    const clientWithConsent =
       await this.clientRepository.findClientWithConsentByIdAndUserUuid(
         id,
         user.uuid,
@@ -67,7 +68,8 @@ export class ClientService {
       id: client.id,
       name: client.name,
       uuid: client.uuid,
-      recentConsent: client.consent.flatMap((consent) => consent.scopes),
+      recentConsent:
+        clientWithConsent?.consent.flatMap((consent) => consent.scopes) ?? [],
     };
   }
 

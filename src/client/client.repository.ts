@@ -63,10 +63,10 @@ export class ClientRepository {
   async findClientWithConsentByIdAndUserUuid(
     id: string,
     userUuid: string,
-  ): Promise<ConsentClient> {
+  ): Promise<ConsentClient | null> {
     this.logger.log(`findClientWithConsentByIdAndUserUuid: id=${id}`);
     return this.prismaService.client
-      .findUniqueOrThrow({
+      .findUnique({
         where: { id },
         include: {
           consent: {
@@ -76,15 +76,6 @@ export class ClientRepository {
         },
       })
       .catch((error) => {
-        if (
-          error instanceof PrismaClientKnownRequestError &&
-          error.code === 'P2025'
-        ) {
-          this.logger.debug(
-            `findClientWithConsentByIdAndUserUuid: error=${error}`,
-          );
-          throw new ForbiddenException();
-        }
         this.logger.error(
           `findClientWithConsentByIdAndUserUuid: error=${error}`,
         );
