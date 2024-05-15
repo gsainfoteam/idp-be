@@ -46,10 +46,7 @@ async function bootstrap() {
   // Cookie 설정
   app.use(cookieParser());
   // CORS 설정
-  const whitelist = [
-    /https:\/\/.*idp.gistory.me/,
-    /http:\/\/localhost:3000\/*/,
-  ];
+  const whitelist = [/https:\/\/.*idp.gistory.me/, /http:\/\/localhost:3000/];
   app.enableCors({
     origin: function (origin, callback) {
       if (!origin || whitelist.some((regex) => regex.test(origin))) {
