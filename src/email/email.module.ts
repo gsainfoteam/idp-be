@@ -13,10 +13,15 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
         transport: {
           host: configService.get<string>('EMAIL_HOST'),
           port: configService.get<number>('EMAIL_PORT'),
-          secure: false,
+          secure: true,
           auth: {
+            type: 'oauth2',
             user: configService.get<string>('EMAIL_USER'),
-            pass: configService.get<string>('EMAIL_PASSWORD'),
+            serviceClient: configService.get<string>('EMAIL_SERVICE_CLIENT'),
+            privateKey: configService
+              .get<string>('EMAIL_PRIVATE_KEY')
+              ?.replace(/\\n/g, '\n'),
+            accessUrl: configService.get<string>('EMAIL_ACCESS_URL'),
           },
         },
         defaults: {
