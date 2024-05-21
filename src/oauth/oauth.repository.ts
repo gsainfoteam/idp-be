@@ -160,10 +160,15 @@ export class OauthRepository {
   }
 
   async deleteRefreshToken(token: string, clientId: string): Promise<void> {
+    const client = await this.prismaService.client.findUniqueOrThrow({
+      where: {
+        id: clientId,
+      },
+    });
     await this.prismaService.refreshToken.delete({
       where: {
         token,
-        clientUuid: clientId,
+        clientUuid: client.uuid,
       },
     });
   }
