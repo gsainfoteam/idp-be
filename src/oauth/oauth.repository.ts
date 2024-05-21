@@ -68,9 +68,23 @@ export class OauthRepository {
       },
     });
     await this.prismaService.$transaction([
-      this.prismaService.refreshToken.create({
-        data: {
+      this.prismaService.refreshToken.upsert({
+        where: {
           token,
+        },
+        create: {
+          token,
+          scopes: [...scopes],
+          consent: {
+            connect: {
+              clientUuid_userUuid: {
+                clientUuid: client.uuid,
+                userUuid: user.uuid,
+              },
+            },
+          },
+        },
+        update: {
           scopes: [...scopes],
           consent: {
             connect: {
