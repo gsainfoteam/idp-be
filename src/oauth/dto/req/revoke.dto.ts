@@ -1,9 +1,10 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsEnum, IsOptional, IsString } from 'class-validator';
+import { IsEnum, IsOptional, IsString, IsUUID } from 'class-validator';
 
 export class RevokeDto {
   @ApiProperty()
   @IsString()
+  @IsUUID()
   token: string;
 
   @ApiPropertyOptional()
