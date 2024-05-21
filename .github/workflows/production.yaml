@@ -12,7 +12,7 @@ jobs:
     outputs:
       ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
       ECR_REPOSITORY: idp-backend
-      IMAGE_TAG: dev${{ github.run_number }}
+      IMAGE_TAG: prod${{ github.run_number }}
 
     steps:
       - name: Checkout
