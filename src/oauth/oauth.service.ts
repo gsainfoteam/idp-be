@@ -226,7 +226,7 @@ export class OauthService {
         user_name: jwt.name,
         user_email_id: jwt.email,
         user_phone_number: jwt.phone_number,
-        student_id: jwt.studentId,
+        student_number: jwt.studentId,
       },
     };
   }
@@ -420,6 +420,18 @@ export class OauthService {
       name: scopes.includes('profile') ? user.name : undefined,
       studentId: scopes.includes('student_id') ? user.studentId : undefined,
       phoneNumber: scopes.includes('phone') ? user.phoneNumber : undefined,
+
+      ...{
+        user_uuid: user.uuid,
+        user_name: scopes.includes('profile') ? user.name : undefined,
+        user_email_id: scopes.includes('email') ? user.email : undefined,
+        user_phone_number: scopes.includes('phone')
+          ? user.phoneNumber
+          : undefined,
+        student_number: scopes.includes('student_id')
+          ? user.studentId
+          : undefined,
+      },
     };
   }
 
