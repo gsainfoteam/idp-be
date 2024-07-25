@@ -8,7 +8,6 @@ import { OauthRepository } from './oauth.repository';
 import { JwtService } from '@nestjs/jwt';
 import * as crypto from 'crypto';
 import { ConfigService } from '@nestjs/config';
-import { RedisService } from 'src/redis/redis.service';
 import { AuthorizeDto } from './dto/req/authorize.dto';
 import { ClientService } from 'src/client/client.service';
 import {
@@ -26,6 +25,7 @@ import { TokenDto } from './dto/req/token.dto';
 import { Client } from '@prisma/client';
 import { RevokeDto } from './dto/req/revoke.dto';
 import { JwtPayload } from 'jsonwebtoken';
+import { CacheService } from 'src/cache/cache.service';
 
 @Injectable()
 export class OauthService {
@@ -37,7 +37,7 @@ export class OauthService {
     private readonly userService: UserService,
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
-    private readonly redisService: RedisService,
+    private readonly cacheService: CacheService,
     private readonly clientService: ClientService,
   ) {}
 
@@ -73,7 +73,7 @@ export class OauthService {
     const code = responseType.includes('code')
       ? await (async () => {
           const code = this.generateOpaqueToken();
-          await this.redisService.set<CodeCacheType>(
+          await this.cacheService.set<CodeCacheType>(
             code,
             {
               userUuid: userInfo.uuid,
@@ -196,7 +196,7 @@ export class OauthService {
   async validateToken(
     token: string,
   ): Promise<Partial<Omit<UserInfo, 'accessLevel'>>> {
-    const tokenCache: TokenCacheType | undefined = await this.redisService.get(
+    const tokenCache: TokenCacheType | undefined = await this.cacheService.get(
       token,
       {
         prefix: this.TokenPrefix,
@@ -266,7 +266,7 @@ export class OauthService {
         : {
             accessToken: await (async () => {
               const token = this.generateOpaqueToken();
-              await this.redisService.set<TokenCacheType>(
+              await this.cacheService.set<TokenCacheType>(
                 token,
                 {
                   userUuid: user.uuid,
@@ -326,7 +326,7 @@ export class OauthService {
     redirectUri: string,
     clientId: string,
   ): Promise<AuthorizeResType> {
-    const codeCache: CodeCacheType = await this.redisService
+    const codeCache: CodeCacheType = await this.cacheService
       .getOrThrow<CodeCacheType>(code, {
         prefix: this.CodePrefix,
       })
@@ -359,14 +359,14 @@ export class OauthService {
     clientId: string,
   ): Promise<boolean> {
     const tokenCache: TokenCacheType | undefined =
-      await this.redisService.get<TokenCacheType>(token, {
+      await this.cacheService.get<TokenCacheType>(token, {
         prefix: this.TokenPrefix,
       });
     if (!tokenCache) return false;
     if (clientId !== tokenCache.clientId) {
       return false;
     }
-    await this.redisService.del(token, {
+    await this.cacheService.del(token, {
       prefix: this.TokenPrefix,
     });
     return true;

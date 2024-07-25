@@ -5,10 +5,7 @@ import {
   Logger,
 } from '@nestjs/common';
 import { EmailService } from 'src/email/email.service';
-import { RedisService } from 'src/redis/redis.service';
 import { SendCertificationCodeDto } from './dto/req/sendCertificationCode.dto';
-import { ValidationCertificationCodeDto } from './dto/req/validateCertificatioinCode.dto';
-import { RedisNotFoundException } from 'src/redis/exceptions/redisNotFound.exception';
 import { ValidateCertificationJwtResDto } from './dto/res/validateCertificationJwtRes.dto';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcryptjs';
@@ -18,6 +15,9 @@ import { UserRepository } from './user.repository';
 import { User } from '@prisma/client';
 import { DeleteUserDto } from './dto/req/deleteUser.dto';
 import { ChangePasswordDto } from './dto/req/changePassword.dto';
+import { CacheService } from 'src/cache/cache.service';
+import { ValidationCertificationCodeDto } from './dto/req/validateCertificationCode.dto';
+import { CacheNotFoundException } from 'src/cache/exceptions/cacheNotFound.exception';
 
 @Injectable()
 export class UserService {
@@ -25,7 +25,7 @@ export class UserService {
   private readonly logger = new Logger(UserService.name);
   constructor(
     private readonly emailService: EmailService,
-    private readonly redisService: RedisService,
+    private readonly cacheService: CacheService,
     private readonly jwtService: JwtService,
     private readonly userRepository: UserRepository,
   ) {}
@@ -49,7 +49,7 @@ export class UserService {
       emailCertificationCode,
     );
 
-    await this.redisService.set<string>(email, emailCertificationCode, {
+    await this.cacheService.set<string>(email, emailCertificationCode, {
       ttl: 3 * 60,
       prefix: this.EmailCertificationCodePrefix,
     });
@@ -67,12 +67,12 @@ export class UserService {
     code,
   }: ValidationCertificationCodeDto): Promise<ValidateCertificationJwtResDto> {
     this.logger.log(`validate certification code to ${email}`);
-    const certificationCode: string = await this.redisService
+    const certificationCode: string = await this.cacheService
       .getOrThrow<string>(email, {
         prefix: this.EmailCertificationCodePrefix,
       })
       .catch((error) => {
-        if (error instanceof RedisNotFoundException) {
+        if (error instanceof CacheNotFoundException) {
           this.logger.debug(`Redis key not found: ${email}`);
           throw new ForbiddenException('인증 코드가 만료되었습니다.');
         }
@@ -83,7 +83,7 @@ export class UserService {
       this.logger.debug(`certification code not match: ${code}`);
       throw new ForbiddenException('인증 코드가 일치하지 않습니다.');
     }
-    await this.redisService.del(email, {
+    await this.cacheService.del(email, {
       prefix: this.EmailCertificationCodePrefix,
     });
     const payload: CertificationJwtPayload = { sub: email };

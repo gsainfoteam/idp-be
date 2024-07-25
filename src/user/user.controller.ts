@@ -18,10 +18,10 @@ import {
 import { UserService } from './user.service';
 import { SendCertificationCodeDto } from './dto/req/sendCertificationCode.dto';
 import { ValidateCertificationJwtResDto } from './dto/res/validateCertificationJwtRes.dto';
-import { ValidationCertificationCodeDto } from './dto/req/validateCertificatioinCode.dto';
 import { RegisterDto } from './dto/req/register.dto';
 import { DeleteUserDto } from './dto/req/deleteUser.dto';
 import { ChangePasswordDto } from './dto/req/changePassword.dto';
+import { ValidationCertificationCodeDto } from './dto/req/validateCertificationCode.dto';
 
 @ApiTags('user')
 @Controller('user')

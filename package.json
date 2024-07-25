@@ -21,6 +21,7 @@
     "test:e2e": "jest --config ./test/jest-e2e.json"
   },
   "dependencies": {
+    "@nestjs-modules/ioredis": "^2.0.2",
     "@nestjs-modules/mailer": "^2.0.2",
     "@nestjs/axios": "^3.0.2",
     "@nestjs/common": "^10.0.0",
@@ -37,6 +38,7 @@
     "class-validator": "^0.14.1",
     "cookie-parser": "^1.4.6",
     "express-basic-auth": "^1.2.1",
+    "ioredis": "^5.4.1",
     "nodemailer": "^6.9.14",
     "passport-anonymous": "^1.0.1",
     "passport-auth-token": "^1.0.1",
