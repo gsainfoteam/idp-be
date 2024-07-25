@@ -247,7 +247,7 @@ export class OauthService {
     includeRefreshToken,
     code,
   }: CreateTokenType): Promise<AuthorizeResType> {
-    const filteredUser = this.filterUserInfo(user);
+    const filteredUser = this.filterUserInfo(user, scope);
 
     // make user's consent log
     await this.oauthRepository.updateUserConsent(
