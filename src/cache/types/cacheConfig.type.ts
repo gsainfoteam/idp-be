@@ -1,4 +1,4 @@
-export type RedisConfig = {
+export type CacheConfig = {
   ttl: number;
   prefix?: string;
 };

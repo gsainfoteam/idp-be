@@ -3,7 +3,6 @@ import { OauthService } from './oauth.service';
 import { OauthController, OpenIDDiscoveryController } from './oauth.controller';
 import { OauthRepository } from './oauth.repository';
 import { PrismaModule } from 'src/prisma/prisma.module';
-import { RedisModule } from 'src/redis/redis.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ClientModule } from 'src/client/client.module';
 import { IdpModule } from 'src/idp/idp.module';
@@ -12,11 +11,12 @@ import { UserModule } from 'src/user/user.module';
 import { JwtModule } from '@nestjs/jwt';
 import { Oauth2Strategy } from './guard/oauth2.strategy';
 import { Oauth2Guard } from './guard/oauth2.guard';
+import { CacheModule } from 'src/cache/cache.module';
 
 @Module({
   imports: [
     PrismaModule,
-    RedisModule,
+    CacheModule,
     ConfigModule,
     ClientModule,
     IdpModule,

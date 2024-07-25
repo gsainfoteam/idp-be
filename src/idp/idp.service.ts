@@ -1,19 +1,19 @@
 import { Injectable, Logger, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as crypto from 'crypto';
-import { RedisService } from 'src/redis/redis.service';
 import { UserService } from 'src/user/user.service';
 import { LoginDto } from './dto/req/login.dto';
 import { User } from '@prisma/client';
 import { LoginResultType } from './types/loginResult.type';
+import { CacheService } from 'src/cache/cache.service';
 
 @Injectable()
 export class IdpService {
   private readonly logger = new Logger(IdpService.name);
   private readonly refreshTokenPrefix = 'refreshToken';
   constructor(
+    private readonly cacheService: CacheService,
     private readonly jwtService: JwtService,
-    private readonly redisService: RedisService,
     private readonly userService: UserService,
   ) {}
 
@@ -29,7 +29,7 @@ export class IdpService {
         throw new UnauthorizedException();
       });
     const refreshToken: string = this.generateOpaqueToken();
-    this.redisService.set<Pick<User, 'uuid'>>(
+    this.cacheService.set<Pick<User, 'uuid'>>(
       refreshToken,
       {
         uuid: user.uuid,
@@ -47,7 +47,7 @@ export class IdpService {
 
   async logout(refreshToken: string): Promise<void> {
     this.logger.log(`logout: ${refreshToken}`);
-    await this.redisService.del(refreshToken, {
+    await this.cacheService.del(refreshToken, {
       prefix: this.refreshTokenPrefix,
     });
   }
@@ -55,7 +55,7 @@ export class IdpService {
   async refresh(refreshToken: string): Promise<LoginResultType> {
     this.logger.log(`refresh: ${refreshToken}`);
     if (!refreshToken) throw new UnauthorizedException();
-    const user: Pick<User, 'uuid'> = await this.redisService
+    const user: Pick<User, 'uuid'> = await this.cacheService
       .getOrThrow<Pick<User, 'uuid'>>(refreshToken, {
         prefix: this.refreshTokenPrefix,
       })
@@ -63,12 +63,12 @@ export class IdpService {
         this.logger.debug(`refreshToken not found: ${refreshToken}`);
         throw new UnauthorizedException();
       });
-    await this.redisService.del(refreshToken, {
+    await this.cacheService.del(refreshToken, {
       prefix: this.refreshTokenPrefix,
     });
 
     const newRefreshToken: string = this.generateOpaqueToken();
-    this.redisService.set<Pick<User, 'uuid'>>(newRefreshToken, user, {
+    this.cacheService.set<Pick<User, 'uuid'>>(newRefreshToken, user, {
       prefix: this.refreshTokenPrefix,
       ttl: 60 * 60 * 24 * 30 * 6,
     });
@@ -79,7 +79,10 @@ export class IdpService {
     };
   }
 
-  // 유저의 정보와 관련이 없는 토큰을 생성하는 함수
+  /**
+   * 유저의 정보와 상관이 없은 토큰을 만들어내는 함수.
+   * @returns Opaque token
+   */
   private generateOpaqueToken() {
     return crypto
       .randomBytes(32)

@@ -3,14 +3,14 @@ import { UserController } from './user.controller';
 import { UserService } from './user.service';
 import { UserRepository } from './user.repository';
 import { EmailModule } from 'src/email/email.module';
-import { RedisModule } from 'src/redis/redis.module';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { CacheModule } from 'src/cache/cache.module';
 
 @Module({
   imports: [
     EmailModule,
-    RedisModule,
+    CacheModule,
     JwtModule.registerAsync({
       imports: [ConfigModule],
       inject: [ConfigService],

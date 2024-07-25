@@ -1,16 +1,16 @@
 import { Module } from '@nestjs/common';
 import { IdpController } from './idp.controller';
 import { IdpService } from './idp.service';
-import { RedisModule } from 'src/redis/redis.module';
 import { UserModule } from 'src/user/user.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
 import { IdpStrategy } from './guard/idp.strategy';
 import { IdpGuard } from './guard/idp.guard';
+import { CacheModule } from 'src/cache/cache.module';
 
 @Module({
   imports: [
-    RedisModule,
+    CacheModule,
     UserModule,
     ConfigModule,
     JwtModule.registerAsync({
