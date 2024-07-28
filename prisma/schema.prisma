@@ -33,8 +33,27 @@ model User {
 
   clients Client[]  @relation("ClientToUser")
   consent Consent[]
+  Passkey Passkey[]
 
   @@map("user_tb")
+}
+
+model Passkey {
+  credId            String    @id
+  credPublicKey     Bytes
+  internalUserId    String    @db.Uuid
+  webauthnUserId    String
+  counter           Int       @default(0)
+  transports        String[]
+  createdAt         DateTime  @default(now())
+  lastUsed          DateTime?
+  deleteAt          DateTime?
+  userNotes         String    @default("")
+
+  User User @relation(fields: [internalUserId], references: [uuid])
+
+  @@index([internalUserId])
+  @@map("passkey_tb")
 }
 
 model Client {

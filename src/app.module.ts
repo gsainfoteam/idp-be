@@ -8,6 +8,7 @@ import { UserModule } from './user/user.module';
 import { EmailModule } from './email/email.module';
 import { OauthModule } from './oauth/oauth.module';
 import { CacheModule } from './cache/cache.module';
+import { PasskeyModule } from './passkey/passkey.module';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { CacheModule } from './cache/cache.module';
     EmailModule,
     OauthModule,
     CacheModule,
+    PasskeyModule,
   ],
   controllers: [AppController],
 })
