@@ -6,5 +6,6 @@
     "infoteam",
     "nestjs",
     "noreply"
-  ]
+  ],
+  "git.branchProtection": ["main"]
 }
