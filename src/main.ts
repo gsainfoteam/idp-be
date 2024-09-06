@@ -42,7 +42,11 @@ async function bootstrap() {
     )
     .build();
   const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('api', app, document);
+  SwaggerModule.setup('api', app, document, {
+    swaggerOptions: {
+      displayRequestDuration: true,
+    },
+  });
   // Cookie 설정
   app.use(cookieParser());
   // CORS 설정
