@@ -1,32 +1,23 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import {
-  FastifyAdapter,
-  NestFastifyApplication,
-} from '@nestjs/platform-fastify';
-import fastifyCookie from '@fastify/cookie';
+import expressBasicAuth from 'express-basic-auth';
+import { ConfigService } from '@nestjs/config';
+import cookieParser from 'cookie-parser';
 
 async function bootstrap() {
-  const adapter = new FastifyAdapter();
-  // CORS 설정
-  const whitelist = [/https:\/\/.*gistory.me/, /http:\/\/localhost:3000/];
-  adapter.enableCors({
-    origin: function (origin, callback) {
-      if (!origin || whitelist.some((regex) => regex.test(origin))) {
-        callback(null, origin);
-      } else {
-        callback(new Error('Not allowed by CORS'));
-      }
-    },
-    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
-    preflightContinue: false,
-    optionsSuccessStatus: 204,
-    credentials: true,
-  });
-  const app = await NestFactory.create<NestFastifyApplication>(
-    AppModule,
-    new FastifyAdapter(),
+  const app = await NestFactory.create(AppModule);
+  // Swagger 보안 설정
+  const configService = app.get(ConfigService);
+  app.use(
+    ['/api'],
+    expressBasicAuth({
+      challenge: true,
+      users: {
+        [configService.getOrThrow<string>('SWAGGER_USER')]:
+          configService.getOrThrow<string>('SWAGGER_PASSWORD'),
+      },
+    }),
   );
   // Swagger 설정
   const config = new DocumentBuilder()
@@ -51,13 +42,24 @@ async function bootstrap() {
     )
     .build();
   const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('api', app, document, {
-    swaggerOptions: {
-      displayRequestDuration: true,
-    },
-  });
+  SwaggerModule.setup('api', app, document);
   // Cookie 설정
-  app.register(fastifyCookie);
-  await app.listen(3000, '0.0.0.0');
+  app.use(cookieParser());
+  // CORS 설정
+  const whitelist = [/https:\/\/.*gistory.me/, /http:\/\/localhost:3000/];
+  app.enableCors({
+    origin: function (origin, callback) {
+      if (!origin || whitelist.some((regex) => regex.test(origin))) {
+        callback(null, origin);
+      } else {
+        callback(new Error('Not allowed by CORS'));
+      }
+    },
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    preflightContinue: false,
+    optionsSuccessStatus: 204,
+    credentials: true,
+  });
+  await app.listen(3000);
 }
 bootstrap();
