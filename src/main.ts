@@ -4,6 +4,7 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import expressBasicAuth from 'express-basic-auth';
 import { ConfigService } from '@nestjs/config';
 import cookieParser from 'cookie-parser';
+import { ExceptionLogFilter } from './global/filter/exceptionLog.filter';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -64,6 +65,7 @@ async function bootstrap() {
     optionsSuccessStatus: 204,
     credentials: true,
   });
+  app.useGlobalFilters(new ExceptionLogFilter());
   await app.listen(3000);
 }
 bootstrap();
