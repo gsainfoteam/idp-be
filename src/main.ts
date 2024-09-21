@@ -5,10 +5,9 @@ import {
   FastifyAdapter,
   NestFastifyApplication,
 } from '@nestjs/platform-fastify';
-import expressBasicAuth from 'express-basic-auth';
 import { ConfigService } from '@nestjs/config';
 import { ExceptionLogFilter } from './global/filter/exceptionLog.filter';
-import fastifyCookie from '@fastify/cookie';
+import { fastifyCookie } from '@fastify/cookie';
 
 async function bootstrap() {
   const adapter = new FastifyAdapter();
@@ -33,18 +32,8 @@ async function bootstrap() {
   );
   // cookie 설정
   await app.register(fastifyCookie);
-  // Swagger 보안 설정
+  // ConfigService 주입
   const configService = app.get(ConfigService);
-  app.use(
-    ['/api'],
-    expressBasicAuth({
-      challenge: true,
-      users: {
-        [configService.getOrThrow<string>('SWAGGER_USER')]:
-          configService.getOrThrow<string>('SWAGGER_PASSWORD'),
-      },
-    }),
-  );
   // Swagger 설정
   const config = new DocumentBuilder()
     .setTitle('Infoteam-Idp API Docs')
