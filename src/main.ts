@@ -12,10 +12,13 @@ import { fastifyCookie } from '@fastify/cookie';
 async function bootstrap() {
   const adapter = new FastifyAdapter();
   // CORS 설정
-  const whitelist = [/https:\/\/.*gistory.me/, /http:\/\/localhost:3000/];
+  const whitelist = [
+    /^https:\/\/.*.idp.gistory.me$/,
+    /^http:\/\/localhost:3000$/,
+  ];
   adapter.enableCors({
     origin: function (origin, callback) {
-      if (!origin || whitelist.some((regex) => regex.test(origin))) {
+      if (origin && whitelist.some((regex) => regex.test(origin))) {
         callback(null, origin);
       } else {
         callback(new Error('Not allowed by CORS'));
