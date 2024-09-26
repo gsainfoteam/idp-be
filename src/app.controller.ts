@@ -1,7 +1,8 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller, Get, HttpCode } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import {
   ApiInternalServerErrorResponse,
+  ApiNoContentResponse,
   ApiOkResponse,
   ApiOperation,
 } from '@nestjs/swagger';
@@ -27,4 +28,14 @@ export class AppController {
       publishedAt: this.publishedAt,
     };
   }
+
+  @ApiOperation({
+    summary: 'Disable favicon',
+    description: '파비콘 요청을 무시합니다.',
+  })
+  @ApiNoContentResponse()
+  @ApiInternalServerErrorResponse()
+  @Get('favicon.ico')
+  @HttpCode(204)
+  async favicon() {}
 }
