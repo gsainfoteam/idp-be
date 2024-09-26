@@ -45,6 +45,7 @@
     "passport-auth-token": "^1.0.1",
     "passport-http": "^0.3.0",
     "passport-jwt": "^4.0.1",
+    "prisma-dbml-generator": "^0.12.0",
     "pug": "^3.0.3",
     "reflect-metadata": "^0.1.13",
     "rxjs": "^7.8.1",
