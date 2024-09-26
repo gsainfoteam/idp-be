@@ -1,6 +1,7 @@
 {
   "cSpell.words": [
     "Buildx",
+    "dbdocs",
     "Fastify",
     "gistory",
     "gitops",
@@ -8,7 +9,13 @@
     "infoteam",
     "mjml",
     "nestjs",
-    "noreply"
+    "noreply",
+    "signup",
+    "userinfo"
   ],
-  "git.branchProtection": ["main"]
+  "git.branchProtection": ["main"],
+  "markdownlint.config": {
+    "MD033": false,
+    "MD041": false
+  }
 }
