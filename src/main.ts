@@ -40,7 +40,7 @@ async function bootstrap() {
   // Swagger 설정
   const config = new DocumentBuilder()
     .setTitle('Infoteam-Idp API Docs')
-    .setDescription('인포팀 idp의 API 문서입니다.')
+    .setDescription('infoteam-idp의 API 문서입니다.')
     .setVersion(configService.getOrThrow<string>('API_VERSION'))
     .addBearerAuth(
       {
