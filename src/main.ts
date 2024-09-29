@@ -13,7 +13,7 @@ async function bootstrap() {
   const adapter = new FastifyAdapter();
   // CORS 설정
   const whitelist = [
-    /^https:\/\/.*.idp.gistory.me$/,
+    /^https:\/\/*.idp.gistory.me$/,
     /^http:\/\/localhost:3000$/,
   ];
   adapter.enableCors({
