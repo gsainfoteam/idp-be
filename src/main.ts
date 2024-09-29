@@ -31,7 +31,7 @@ async function bootstrap() {
   });
   const app = await NestFactory.create<NestFastifyApplication>(
     AppModule,
-    new FastifyAdapter(),
+    adapter,
   );
   // cookie 설정
   await app.register(fastifyCookie);
