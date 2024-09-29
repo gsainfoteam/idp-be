@@ -12,19 +12,10 @@ import { fastifyCookie } from '@fastify/cookie';
 async function bootstrap() {
   const adapter = new FastifyAdapter();
   // CORS 설정
-  const whitelist = [
-    /^https:\/\/*.idp.gistory.me$/,
-    /^http:\/\/localhost:3000$/,
-  ];
   adapter.enableCors({
-    origin: function (origin, callback) {
-      if (origin && whitelist.some((regex) => regex.test(origin))) {
-        callback(null, origin);
-      } else {
-        callback(new Error('Not allowed by CORS'));
-      }
-    },
-    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    origin: [/^https:\/\/*.idp.gistory.me$/, /^http:\/\/localhost:3000$/],
+    exposedHeaders: ['Authorization'],
+    methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE'],
     preflightContinue: false,
     optionsSuccessStatus: 204,
     credentials: true,
