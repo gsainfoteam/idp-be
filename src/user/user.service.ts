@@ -95,7 +95,6 @@ export class UserService {
         this.logger.error(`validate certification code error: ${error}`);
         throw new InternalServerErrorException();
       });
-    console.log(certificationCode, code);
 
     if (certificationCode !== code) {
       this.logger.debug(`certification code not match: ${code}`);
