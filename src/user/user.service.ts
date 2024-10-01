@@ -1,4 +1,5 @@
 import {
+  ConflictException,
   ForbiddenException,
   Injectable,
   InternalServerErrorException,
@@ -39,6 +40,21 @@ export class UserService {
   async sendEmailCertificationCode({
     email,
   }: SendCertificationCodeDto): Promise<void> {
+    const user = await this.userRepository
+      .findUserByEmail(email)
+      .catch((error) => {
+        if (error instanceof ForbiddenException) {
+          return;
+        }
+        this.logger.error(`send email Ceritfication code error: ${error}`);
+        throw new InternalServerErrorException();
+      });
+
+    if (user) {
+      this.logger.debug(`user already exists: ${email}`);
+      throw new ConflictException('이미 존재하는 유저입니다.');
+    }
+
     this.logger.log(`send certification code to ${email}`);
     const emailCertificationCode: string = Math.random()
       .toString(36)
@@ -79,6 +95,8 @@ export class UserService {
         this.logger.error(`validate certification code error: ${error}`);
         throw new InternalServerErrorException();
       });
+    console.log(certificationCode, code);
+
     if (certificationCode !== code) {
       this.logger.debug(`certification code not match: ${code}`);
       throw new ForbiddenException('인증 코드가 일치하지 않습니다.');
