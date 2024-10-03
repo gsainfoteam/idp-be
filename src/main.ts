@@ -16,7 +16,6 @@ async function bootstrap() {
     origin: [/^https:\/\/*.idp.gistory.me$/, /^http:\/\/localhost:3000$/],
     exposedHeaders: ['Authorization'],
     methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE'],
-    preflightContinue: false,
     optionsSuccessStatus: 204,
     credentials: true,
   });
