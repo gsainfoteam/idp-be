@@ -12,11 +12,21 @@ import { fastifyCookie } from '@fastify/cookie';
 async function bootstrap() {
   const adapter = new FastifyAdapter();
   // CORS 설정
+  const whitelist = [
+    /^https:\/\/*.idp.gistory.me$/,
+    /^http:\/\/localhost:3000$/,
+  ];
   adapter.enableCors({
-    origin: [/^https:\/\/*.idp.gistory.me$/, /^http:\/\/localhost:3000$/],
-    exposedHeaders: ['Authorization'],
+    origin: function (origin, callback) {
+      if (!origin || whitelist.some((regex) => regex.test(origin))) {
+        callback(null, origin);
+      } else {
+        callback(new Error('Not allowed by CORS'));
+      }
+    },
     methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE'],
     optionsSuccessStatus: 204,
+    preflightContinue: false,
     credentials: true,
   });
   const app = await NestFactory.create<NestFastifyApplication>(
