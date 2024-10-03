@@ -17,7 +17,7 @@ async function bootstrap() {
   );
   // CORS 설정
   const whitelist = [
-    /^https:\/\/.*.idp-fe.pages.dev$/, // for idp fe preview pages
+    /^https:\/\/.*\.idp-fe\.pages\.dev$/, // for idp fe preview pages
     /^https:\/\/.*idp\.gistory\.me$/, // for idp fe production pages
     /^http:\/\/localhost:3000$/, // for local development
   ];
