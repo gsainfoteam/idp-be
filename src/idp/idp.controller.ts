@@ -52,6 +52,7 @@ export class IdpController {
       secure: true,
       sameSite: 'strict',
       expires: new Date(Date.now() + 1000 * 60 * 60 * 24 * 30 * 6),
+      path: '/idp',
     });
     return rest;
   }
@@ -65,7 +66,12 @@ export class IdpController {
     @Res({ passthrough: true }) response: Response,
   ): Promise<void> {
     await this.idpService.logout(request.cookies.refreshToken);
-    response.clearCookie('refreshToken');
+    response.clearCookie('refreshToken', {
+      httpOnly: true,
+      secure: true,
+      sameSite: 'strict',
+      path: '/idp',
+    });
   }
 
   @ApiOperation({
@@ -88,6 +94,7 @@ export class IdpController {
       secure: true,
       sameSite: 'strict',
       expires: new Date(Date.now() + 1000 * 60 * 60 * 24 * 30 * 6),
+      path: '/idp',
     });
     return rest;
   }
