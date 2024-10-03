@@ -8,20 +8,26 @@ import {
 import { ConfigService } from '@nestjs/config';
 import { ExceptionLogFilter } from './global/filter/exceptionLog.filter';
 import { fastifyCookie } from '@fastify/cookie';
+import cors from '@fastify/cors';
 
 async function bootstrap() {
-  const adapter = new FastifyAdapter();
+  const app = await NestFactory.create<NestFastifyApplication>(
+    AppModule,
+    new FastifyAdapter(),
+  );
   // CORS 설정
   const whitelist = [
     /^https:\/\/*.idp.gistory.me$/,
     /^http:\/\/localhost:3000$/,
   ];
-  adapter.enableCors({
+  await app.register(cors, {
     origin: function (origin, callback) {
-      if (!origin || whitelist.some((regex) => regex.test(origin))) {
+      if (origin && whitelist.some((regex) => regex.test(origin))) {
         callback(null, origin);
+      } else if (!origin) {
+        callback(null, whitelist);
       } else {
-        callback(new Error('Not allowed by CORS'));
+        callback(new Error('Not allowed by CORS'), whitelist);
       }
     },
     methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE'],
@@ -29,10 +35,6 @@ async function bootstrap() {
     preflightContinue: false,
     credentials: true,
   });
-  const app = await NestFactory.create<NestFastifyApplication>(
-    AppModule,
-    adapter,
-  );
   // cookie 설정
   await app.register(fastifyCookie);
   // ConfigService 주입
