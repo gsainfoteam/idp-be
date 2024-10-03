@@ -60,7 +60,11 @@ export class IdpController {
   @ApiResponse({ status: 204, description: '로그아웃 성공' })
   @ApiInternalServerErrorResponse({ description: '서버 에러' })
   @Delete('logout')
-  async logout(@Res({ passthrough: true }) response: Response): Promise<void> {
+  async logout(
+    @Req() request: Request,
+    @Res({ passthrough: true }) response: Response,
+  ): Promise<void> {
+    await this.idpService.logout(request.cookies.refreshToken);
     response.clearCookie('refreshToken');
   }
 
