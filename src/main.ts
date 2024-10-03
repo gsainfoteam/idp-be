@@ -17,7 +17,7 @@ async function bootstrap() {
   );
   // CORS 설정
   const whitelist = [
-    /^https:\/\/*.idp.gistory.me$/,
+    /^https:\/\/.*.idp.gistory.me$/,
     /^http:\/\/localhost:3000$/,
   ];
   await app.register(cors, {
