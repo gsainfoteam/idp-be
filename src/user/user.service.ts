@@ -19,6 +19,7 @@ import { ChangePasswordDto } from './dto/req/changePassword.dto';
 import { CacheService } from 'src/cache/cache.service';
 import { ValidationCertificationCodeDto } from './dto/req/validateCertificationCode.dto';
 import { CacheNotFoundException } from 'src/cache/exceptions/cacheNotFound.exception';
+import { CertificationCodeEnum } from './types/certificationCode.type';
 
 @Injectable()
 export class UserService {
@@ -39,6 +40,7 @@ export class UserService {
    */
   async sendEmailCertificationCode({
     email,
+    type,
   }: SendCertificationCodeDto): Promise<void> {
     const user = await this.userRepository
       .findUserByEmail(email)
@@ -46,13 +48,17 @@ export class UserService {
         if (error instanceof ForbiddenException) {
           return;
         }
-        this.logger.error(`send email Ceritfication code error: ${error}`);
+        this.logger.error(`send email Certification code error: ${error}`);
         throw new InternalServerErrorException();
       });
 
-    if (user) {
+    if (user && type === CertificationCodeEnum.REGISTER) {
       this.logger.debug(`user already exists: ${email}`);
       throw new ConflictException('이미 존재하는 유저입니다.');
+    }
+    if (!user && type === CertificationCodeEnum.PASSWORD) {
+      this.logger.debug(`user not found: ${email}`);
+      throw new ForbiddenException('존재하지 않는 유저입니다.');
     }
 
     this.logger.log(`send certification code to ${email}`);
