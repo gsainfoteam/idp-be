@@ -7,26 +7,28 @@ import {
 } from '@nestjs/common';
 import { FastifyReply } from 'fastify';
 
-@Catch(HttpException)
+@Catch()
 export class ExceptionLogFilter implements ExceptionFilter {
-  private readonly logger = new Logger('HttpExceptionFilter');
+  private readonly logger = new Logger('ExceptionLogFilter');
   catch(exception: HttpException, host: ArgumentsHost) {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<FastifyReply>();
     const request = ctx.getRequest();
-    const status = exception.getStatus();
+    const status = 
+      exception instanceof HttpException ? exception.getStatus() : 500;
 
-    this.logger.debug(
-      exception.message +
-        '\nwhere ' +
-        request.url +
-        '\ncaused by ' +
-        exception.cause,
+    const message = exception instanceof HttpException
+      ? exception.message
+      : 'Internal server error';
+    const stack = exception instanceof Error ? exception.stack : '';
+
+    this.logger.error(
+      `Status: ${status} - Error Message: ${message}\nPath: ${request.url}\nStack Trace: ${stack}`
     );
 
     response.status(status).send({
       statusCode: status,
-      message: exception.message,
+      message,
       timestamp: new Date().toISOString(),
       path: request.url,
     });
