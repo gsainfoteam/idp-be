@@ -10,7 +10,7 @@ import { FastifyReply } from 'fastify';
 @Catch()
 export class ExceptionLogFilter implements ExceptionFilter {
   private readonly logger = new Logger('ExceptionLogFilter');
-  catch(exception: HttpException, host: ArgumentsHost) {
+  catch(exception: Error | HttpException, host: ArgumentsHost) {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<FastifyReply>();
     const request = ctx.getRequest();
