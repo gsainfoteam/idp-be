@@ -3,6 +3,7 @@ import {
   Injectable,
   Logger,
   UnauthorizedException,
+  InternalServerErrorException,
 } from '@nestjs/common';
 import { OauthRepository } from './oauth.repository';
 import { JwtService } from '@nestjs/jwt';
@@ -46,10 +47,15 @@ export class OauthService {
    * @returns certificate for jwt
    */
   certs(): object {
-    this.logger.log('certs');
-    return {
-      keys: [this.cert()],
-    };
+    try {
+      this.logger.log('certs');
+      return {
+        keys: [this.cert()],
+      };
+    } catch (error) {
+      this.logger.error('Error generating JWT certificate', error.stack);
+      throw new InternalServerErrorException('Failed to retrieve certificates');
+    }
   }
 
   /**
@@ -63,6 +69,7 @@ export class OauthService {
     userInfo: UserInfo,
   ): Promise<AuthorizeResType> {
     this.logger.log('authorize');
+    try {
 
     // if the client is not valid, it throws an error
     if (!(await this.clientService.validateUri(clientId, redirectUri))) {
@@ -112,9 +119,11 @@ export class OauthService {
     }
 
     // if the response type only have code, it returns the code
-    return {
-      code,
-    };
+    return { code };
+  } catch (error) {
+    this.logger.error(`Error in authorization process: ${error.message}`, error.stack);
+    throw error;
+  }
   }
 
   /**
@@ -128,6 +137,7 @@ export class OauthService {
     client?: Client,
   ): Promise<AuthorizeResType> {
     this.logger.log('token');
+    try {
     const clientId = client === undefined ? clientInfo.clientId : client.id;
     if (
       clientInfo.clientId &&
@@ -161,6 +171,12 @@ export class OauthService {
       user: refreshTokenFromDB.consent.user,
       excludeIdToken: true,
     });
+  } catch (error) {
+    this.logger.error(`Error in token generation: ${error.message}`, error.stack);
+    throw error instanceof BadRequestException || error instanceof UnauthorizedException
+      ? error
+      : new InternalServerErrorException('Failed to generate token');
+  }
   }
 
   /**
@@ -174,6 +190,7 @@ export class OauthService {
     client?: Client,
   ): Promise<void> {
     this.logger.log('revoke');
+    try {
     const clientId = client === undefined ? clientInfo.clientId : client.id;
     if (tokenTypeHint === 'access_token') {
       await this.revokeAccessToken(token, clientId);
@@ -186,6 +203,10 @@ export class OauthService {
     if (!(await this.revokeAccessToken(token, clientId))) {
       await this.revokeRefreshToken(token, clientId);
     }
+  } catch (error) {
+    this.logger.error(`Error in revoking token: ${error.message}`, error.stack);
+    throw new InternalServerErrorException('Failed to revoke token');
+  }
   }
 
   /**
@@ -196,6 +217,7 @@ export class OauthService {
   async validateToken(
     token: string,
   ): Promise<Partial<Omit<UserInfo, 'accessLevel'>>> {
+    try {
     const tokenCache: TokenCacheType | undefined = await this.cacheService.get(
       token,
       {
@@ -229,6 +251,10 @@ export class OauthService {
         student_number: jwt.studentId,
       },
     };
+  } catch (error) {
+    this.logger.error(`Error validating token: ${error.message}`, error.stack);
+    throw new UnauthorizedException('Token validation failed');
+  }
   }
 
   /**
