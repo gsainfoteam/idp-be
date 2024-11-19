@@ -12,8 +12,10 @@ import { firstValueFrom } from 'rxjs';
 import { UpdateClientDto } from './dto/req/updateClient.dto';
 import { UserInfo } from 'src/idp/types/userInfo.type';
 import { ClientPublicResDto } from './dto/res/clientPublicRes.dto';
+import { Loggable } from '@lib/logger/decorator/loggable';
 
 @Injectable()
+@Loggable()
 export class ClientService {
   private readonly logger = new Logger(ClientService.name);
   constructor(
@@ -28,7 +30,6 @@ export class ClientService {
    * @returns client list
    */
   async getClientList(user: UserInfo): Promise<ClientResDto[]> {
-    this.logger.log(`getClientList: user=${JSON.stringify(user)}`);
     return (await this.clientRepository.findClientsByUserUuid(user.uuid)).map(
       this.convertToClientResDto,
     );
@@ -41,7 +42,6 @@ export class ClientService {
    * @returns client information
    */
   async getClient(uuid: string, user: UserInfo): Promise<ClientResDto> {
-    this.logger.log(`getClient: uuid=${uuid}`);
     return this.convertToClientResDto(
       await this.clientRepository.findClientByUuidAndUserUuid(uuid, user.uuid),
     );
@@ -57,7 +57,6 @@ export class ClientService {
     id: string,
     user: UserInfo,
   ): Promise<ClientPublicResDto> {
-    this.logger.log(`getClientPublicInformation: id=${id}`);
     const client = await this.clientRepository.findById(id);
     const clientWithConsent =
       await this.clientRepository.findClientWithConsentByIdAndUserUuid(
@@ -83,7 +82,6 @@ export class ClientService {
     { id, name, urls }: CreateClientDto,
     user: UserInfo,
   ): Promise<ClientCredentialResDto> {
-    this.logger.log(`registerClient: id=${id}, name=${name}`);
     const { secretKey, hashed } = this.generateClientSecret();
     const client = await this.clientRepository.createClient(
       {
@@ -111,7 +109,6 @@ export class ClientService {
     uuid: string,
     user: UserInfo,
   ): Promise<ClientCredentialResDto> {
-    this.logger.log(`resetClientSecret: uuid=${uuid}`);
     const { secretKey, hashed } = this.generateClientSecret();
     const client = await this.clientRepository.updateClientSecret(
       {
@@ -139,7 +136,6 @@ export class ClientService {
     { name, urls }: UpdateClientDto,
     user: UserInfo,
   ): Promise<ClientResDto> {
-    this.logger.log(`updateClient: uuid=${uuid}`);
     return this.convertToClientResDto(
       await this.clientRepository.updateClient({ uuid, name, urls }, user.uuid),
     );
@@ -163,7 +159,6 @@ export class ClientService {
    * @param user user who sends the permission request
    */
   async adminRequest(uuid: string, user: UserInfo): Promise<void> {
-    this.logger.log(`adminRequest: uuid=${uuid}`);
     const { name } = await this.clientRepository.findClientByUuidAndUserUuid(
       uuid,
       user.uuid,

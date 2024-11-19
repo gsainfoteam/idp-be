@@ -9,6 +9,7 @@ import { EmailModule } from './email/email.module';
 import { OauthModule } from './oauth/oauth.module';
 import { CacheModule } from './cache/cache.module';
 import { HealthModule } from './health/health.module';
+import { LoggerModule } from '@lib/logger';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { HealthModule } from './health/health.module';
     OauthModule,
     CacheModule,
     HealthModule,
+    LoggerModule,
   ],
   controllers: [AppController],
 })

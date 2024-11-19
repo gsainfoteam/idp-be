@@ -6,8 +6,10 @@ import { LoginDto } from './dto/req/login.dto';
 import { User } from '@prisma/client';
 import { LoginResultType } from './types/loginResult.type';
 import { CacheService } from 'src/cache/cache.service';
+import { Loggable } from '@lib/logger/decorator/loggable';
 
 @Injectable()
+@Loggable()
 export class IdpService {
   private readonly logger = new Logger(IdpService.name);
   private readonly refreshTokenPrefix = 'refreshToken';
@@ -18,7 +20,6 @@ export class IdpService {
   ) {}
 
   async login({ email, password }: LoginDto): Promise<LoginResultType> {
-    this.logger.log(`login: ${email}`);
     const user: User = await this.userService
       .validateUserPassword({
         email,
@@ -46,14 +47,12 @@ export class IdpService {
   }
 
   async logout(refreshToken: string): Promise<void> {
-    this.logger.log(`logout: ${refreshToken}`);
     await this.cacheService.del(refreshToken, {
       prefix: this.refreshTokenPrefix,
     });
   }
 
   async refresh(refreshToken: string): Promise<LoginResultType> {
-    this.logger.log(`refresh: ${refreshToken}`);
     if (!refreshToken) throw new UnauthorizedException();
     const user: Pick<User, 'uuid'> = await this.cacheService
       .getOrThrow<Pick<User, 'uuid'>>(refreshToken, {

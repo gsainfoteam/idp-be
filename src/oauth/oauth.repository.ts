@@ -9,10 +9,12 @@ import { Scope } from './types/Scopes.type';
 import { UserInfo } from 'src/idp/types/userInfo.type';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 import { ExtendedRefreshToken } from './types/extendedRefreshToken.type';
+import { Loggable } from '@lib/logger/decorator/loggable';
 
 const MAX_REFRESH_TOKEN_COUNT = 10;
 
 @Injectable()
+@Loggable()
 export class OauthRepository {
   private readonly logger = new Logger(OauthRepository.name);
   constructor(private readonly prismaService: PrismaService) {}
@@ -22,7 +24,6 @@ export class OauthRepository {
     scope: Readonly<Scope[]>,
     clientId: string,
   ): Promise<void> {
-    this.logger.log(`updateUserConsent: user=${JSON.stringify(user)}`);
     // TODO: reduce this query
     const client = await this.prismaService.client.findUniqueOrThrow({
       where: {
