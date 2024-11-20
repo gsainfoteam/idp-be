@@ -21,14 +21,13 @@ describe('CacheService Integration Test With Redis', () => {
 
     redis = new Redis(port, host);
 
-    await redis
-      .ping()
-      .then((res) => {
-        console.log('Redis connection established: ', res);
-      })
-      .catch((err) => {
-        console.log('Redis connection failed: ', err);
-      });
+    try {
+      const res = await redis.ping();
+      console.log('Redis connection established: ', res);
+    } catch (err) {
+      console.error('Redis connection failed: ', err);
+      throw err;
+    }
   });
 
   afterAll(async () => {
