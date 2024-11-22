@@ -4,6 +4,7 @@ import { Redis } from 'ioredis';
 import { GenericContainer, StartedTestContainer } from 'testcontainers';
 import { CacheNotFoundException } from '../../src/cache/exceptions/cacheNotFound.exception';
 
+jest.setTimeout(30000);
 describe('CacheService Integration Test With Redis', () => {
   let service: CacheService;
   let redis: Redis;
