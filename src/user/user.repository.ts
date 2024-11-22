@@ -1,3 +1,4 @@
+import { Loggable } from '@lib/logger/decorator/loggable';
 import {
   ConflictException,
   ForbiddenException,
@@ -10,12 +11,12 @@ import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
+@Loggable()
 export class UserRepository {
   private readonly logger = new Logger(UserRepository.name);
   constructor(private readonly prismaService: PrismaService) {}
 
   async findUserByEmail(email: string): Promise<User> {
-    this.logger.log(`find user by email: ${email}`);
     return this.prismaService.user
       .findUniqueOrThrow({
         where: {
@@ -36,7 +37,6 @@ export class UserRepository {
   }
 
   async findUserByUuid(uuid: string): Promise<Omit<User, 'password'>> {
-    this.logger.log(`find user by uuid: ${uuid}`);
     return this.prismaService.user
       .findUniqueOrThrow({
         where: {
@@ -76,7 +76,6 @@ export class UserRepository {
     User,
     'accessLevel' | 'uuid' | 'createdAt' | 'updatedAt'
   >): Promise<void> {
-    this.logger.log(`create user: ${email}`);
     await this.prismaService.user
       .create({
         data: {
@@ -101,7 +100,6 @@ export class UserRepository {
   }
 
   async updateUserPassword(email: string, password: string): Promise<void> {
-    this.logger.log(`update user password: ${email}`);
     await this.prismaService.user
       .update({
         where: {
@@ -126,7 +124,6 @@ export class UserRepository {
   }
 
   async deleteUser(email: string): Promise<void> {
-    this.logger.log(`delete user: ${email}`);
     await this.prismaService.user
       .delete({
         where: {

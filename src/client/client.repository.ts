@@ -9,8 +9,10 @@ import { Client } from '@prisma/client';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { ConsentClient } from './types/consentClient.type';
+import { Loggable } from '@lib/logger/decorator/loggable';
 
 @Injectable()
+@Loggable()
 export class ClientRepository {
   private readonly logger = new Logger(ClientRepository.name);
   constructor(private readonly prismaService: PrismaService) {}
@@ -18,7 +20,6 @@ export class ClientRepository {
   async findClientsByUserUuid(
     userUuid: string,
   ): Promise<Omit<Client, 'password'>[]> {
-    this.logger.log(`findClientsByUserUuid: userUuid=${userUuid}`);
     return this.prismaService.client.findMany({
       where: {
         member: {
@@ -40,7 +41,6 @@ export class ClientRepository {
   }
 
   async findById(id: string): Promise<Client> {
-    this.logger.log(`findById: id=${id}`);
     return this.prismaService.client
       .findUniqueOrThrow({
         where: {
@@ -64,7 +64,6 @@ export class ClientRepository {
     id: string,
     userUuid: string,
   ): Promise<ConsentClient | null> {
-    this.logger.log(`findClientWithConsentByIdAndUserUuid: id=${id}`);
     return this.prismaService.client
       .findUnique({
         where: { id },
@@ -87,7 +86,6 @@ export class ClientRepository {
     uuid: string,
     userUuid: string,
   ): Promise<Omit<Client, 'password'>> {
-    this.logger.log(`findClientByUuidAndUserUuid: uuid=${uuid}`);
     return this.prismaService.client
       .findUniqueOrThrow({
         where: {
@@ -130,7 +128,6 @@ export class ClientRepository {
     }: Pick<Client, 'id' | 'name' | 'password'> & Partial<Pick<Client, 'urls'>>,
     userUuid: string,
   ): Promise<Client> {
-    this.logger.log(`createClient: id=${id}, name=${name}`);
     return this.prismaService.client
       .create({
         data: {
@@ -162,7 +159,6 @@ export class ClientRepository {
     { uuid, password }: Pick<Client, 'uuid' | 'password'>,
     userUuid: string,
   ): Promise<Client> {
-    this.logger.log(`updateClientSecret: uuid=${uuid}`);
     return this.prismaService.client
       .update({
         where: {
@@ -198,7 +194,6 @@ export class ClientRepository {
     }: Pick<Client, 'uuid'> & Partial<Pick<Client, 'name' | 'urls'>>,
     userUuid: string,
   ): Promise<Omit<Client, 'password'>> {
-    this.logger.log(`updateClient: uuid=${uuid}`);
     return this.prismaService.client
       .update({
         where: {

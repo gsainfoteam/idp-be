@@ -26,8 +26,10 @@ import { Client } from '@prisma/client';
 import { RevokeDto } from './dto/req/revoke.dto';
 import { JwtPayload } from 'jsonwebtoken';
 import { CacheService } from 'src/cache/cache.service';
+import { Loggable } from '@lib/logger/decorator/loggable';
 
 @Injectable()
+@Loggable()
 export class OauthService {
   private readonly logger = new Logger(OauthService.name);
   private readonly CodePrefix = 'code';
@@ -46,7 +48,6 @@ export class OauthService {
    * @returns certificate for jwt
    */
   certs(): object {
-    this.logger.log('certs');
     return {
       keys: [this.cert()],
     };
@@ -62,8 +63,6 @@ export class OauthService {
     { clientId, redirectUri, nonce, scope, responseType }: AuthorizeDto,
     userInfo: UserInfo,
   ): Promise<AuthorizeResType> {
-    this.logger.log('authorize');
-
     // if the client is not valid, it throws an error
     if (!(await this.clientService.validateUri(clientId, redirectUri))) {
       throw new UnauthorizedException('unauthorized_client');
@@ -127,7 +126,6 @@ export class OauthService {
     { code, redirectUri, grantType, refreshToken, ...clientInfo }: TokenDto,
     client?: Client,
   ): Promise<AuthorizeResType> {
-    this.logger.log('token');
     const clientId = client === undefined ? clientInfo.clientId : client.id;
     if (
       clientInfo.clientId &&
@@ -173,7 +171,6 @@ export class OauthService {
     { token, tokenTypeHint, ...clientInfo }: RevokeDto,
     client?: Client,
   ): Promise<void> {
-    this.logger.log('revoke');
     const clientId = client === undefined ? clientInfo.clientId : client.id;
     if (tokenTypeHint === 'access_token') {
       await this.revokeAccessToken(token, clientId);

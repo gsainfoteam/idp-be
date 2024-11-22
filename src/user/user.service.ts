@@ -20,8 +20,10 @@ import { CacheService } from 'src/cache/cache.service';
 import { ValidationCertificationCodeDto } from './dto/req/validateCertificationCode.dto';
 import { CacheNotFoundException } from 'src/cache/exceptions/cacheNotFound.exception';
 import { CertificationCodeEnum } from './types/certificationCode.type';
+import { Loggable } from '@lib/logger/decorator/loggable';
 
 @Injectable()
+@Loggable()
 export class UserService {
   private readonly EmailCertificationCodePrefix = 'email_certification_code_';
   private readonly logger = new Logger(UserService.name);
@@ -61,7 +63,6 @@ export class UserService {
       throw new ForbiddenException('존재하지 않는 유저입니다.');
     }
 
-    this.logger.log(`send certification code to ${email}`);
     const emailCertificationCode: string = Math.random()
       .toString(36)
       .substring(2, 12);
@@ -88,7 +89,6 @@ export class UserService {
     email,
     code,
   }: ValidationCertificationCodeDto): Promise<ValidateCertificationJwtResDto> {
-    this.logger.log(`validate certification code to ${email}`);
     const certificationCode: string = await this.cacheService
       .getOrThrow<string>(email, {
         prefix: this.EmailCertificationCodePrefix,
@@ -127,7 +127,6 @@ export class UserService {
     phoneNumber,
     certificationJwtToken,
   }: RegisterDto): Promise<void> {
-    this.logger.log(`register user: ${email}`);
     const payload: CertificationJwtPayload = await this.jwtService
       .verifyAsync<CertificationJwtPayload>(certificationJwtToken, {
         subject: email,
@@ -168,7 +167,6 @@ export class UserService {
     password,
     certificationJwtToken,
   }: ChangePasswordDto): Promise<void> {
-    this.logger.log(`change password: ${email}`);
     const payload: CertificationJwtPayload = await this.jwtService
       .verifyAsync<CertificationJwtPayload>(certificationJwtToken, {
         subject: email,
@@ -197,7 +195,6 @@ export class UserService {
    * @param param0 it contains email, password
    */
   async deleteUser({ email, password }: DeleteUserDto): Promise<void> {
-    this.logger.log(`delete user: ${email}`);
     await this.validateUserPassword({ email, password });
     await this.userRepository.deleteUser(email);
   }
@@ -211,7 +208,6 @@ export class UserService {
     email,
     password,
   }: Pick<User, 'email' | 'password'>): Promise<User> {
-    this.logger.log(`validate user password: ${email}`);
     const user: User = await this.userRepository.findUserByEmail(email);
     if (!(await bcrypt.compare(password, user.password))) {
       throw new ForbiddenException('비밀번호가 일치하지 않습니다.');
@@ -227,7 +223,6 @@ export class UserService {
   async findUserByUuid({
     uuid,
   }: Pick<User, 'uuid'>): Promise<Omit<User, 'password'>> {
-    this.logger.log(`find user by uuid: ${uuid}`);
     return this.userRepository.findUserByUuid(uuid);
   }
 }
