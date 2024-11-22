@@ -1,0 +1,26 @@
+name: Run Tests on PR
+
+on:
+  pull_request:
+    branches:
+      - main
+      - chungjung/issue40
+
+jobs:
+  test:
+    runs-on: ubuntu-20.04
+
+    steps:
+      - name : Checkout
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name : Install Dependencies
+        run: npm install
+
+      - name: Run Tests
+        run: npm run test
