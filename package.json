@@ -108,7 +108,8 @@
     "testEnvironment": "node",
     "roots": [
       "<rootDir>/src/",
-      "<rootDir>/libs/"
+      "<rootDir>/libs/",
+      "<rootDir>/test/"
     ]
   }
 }
