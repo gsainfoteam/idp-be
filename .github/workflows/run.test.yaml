@@ -11,21 +11,26 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name : Checkout
+      - name: Checkout
         uses: actions/checkout@v3
 
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
           node-version: '18'
+          cache: 'npm'
 
-      - name : Install Dependencies
+      - name: Install Dependencies
         run: npm install
-
-      - name : Enable Docker daemon
-        run: |
-          sudo systemctl start docker
-          sudo systemctl enable docker
 
       - name: Run Tests
         run: npm run test
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: test-results
+          path: |
+            coverage/
+            junit.xml
