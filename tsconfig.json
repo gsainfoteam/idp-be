@@ -18,12 +18,30 @@
     "strictBindCallApply": true,
     "noFallthroughCasesInSwitch": true,
     "paths": {
-      "@lib/logger": ["libs/logger/src"],
-      "@lib/logger/*": ["libs/logger/src/*"],
-      "@lib/mail": ["libs/mail/src"],
-      "@lib/mail/*": ["libs/mail/src/*"],
-      "@lib/prisma": ["libs/prisma/src"],
-      "@lib/prisma/*": ["libs/prisma/src/*"]
+      "@lib/global": [
+        "libs/global/src"
+      ],
+      "@lib/global/*": [
+        "libs/global/src/*"
+      ],
+      "@lib/logger": [
+        "libs/logger/src"
+      ],
+      "@lib/logger/*": [
+        "libs/logger/src/*"
+      ],
+      "@lib/mail": [
+        "libs/mail/src"
+      ],
+      "@lib/mail/*": [
+        "libs/mail/src/*"
+      ],
+      "@lib/prisma": [
+        "libs/prisma/src"
+      ],
+      "@lib/prisma/*": [
+        "libs/prisma/src/*"
+      ]
     }
   }
 }

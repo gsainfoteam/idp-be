@@ -7,13 +7,13 @@
     "webpack": true
   },
   "projects": {
-    "cache": {
+    "global": {
       "type": "library",
-      "root": "libs/cache",
+      "root": "libs/global",
       "entryFile": "index",
-      "sourceRoot": "libs/cache/src",
+      "sourceRoot": "libs/global/src",
       "compilerOptions": {
-        "tsConfigPath": "libs/cache/tsconfig.lib.json"
+        "tsConfigPath": "libs/global/tsconfig.lib.json"
       }
     },
     "logger": {
