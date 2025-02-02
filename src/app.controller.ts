@@ -1,4 +1,3 @@
-import { Loggable } from '@lib/logger';
 import { Controller, Get } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import {
@@ -23,7 +22,7 @@ export class AppController {
   @ApiOkResponse()
   @ApiInternalServerErrorResponse()
   @Get()
-  async info() {
+  info() {
     return {
       name: 'infoteam-idp',
       version: this.apiVersion,

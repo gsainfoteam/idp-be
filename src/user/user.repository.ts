@@ -16,6 +16,11 @@ export class UserRepository {
   private readonly logger = new Logger(UserRepository.name);
   constructor(private readonly prismaService: PrismaService) {}
 
+  /**
+   * Find user by email
+   * @param email email of user to find
+   * @returns User object
+   */
   async findUserByEmail(email: string): Promise<User> {
     return this.prismaService.user
       .findUniqueOrThrow({
@@ -28,29 +33,24 @@ export class UserRepository {
           error instanceof PrismaClientKnownRequestError &&
           (error.code === 'P2002' || error.code === 'P2025')
         ) {
-          this.logger.debug(`user not found: ${email}`);
-          throw new ForbiddenException('존재하지 않는 유저입니다.');
+          this.logger.debug(`user not found with email: ${email}`);
+          throw new ForbiddenException('user not found');
         }
         this.logger.error(`find user by email error: ${error}`);
         throw new InternalServerErrorException();
       });
   }
 
-  async findUserByUuid(uuid: string): Promise<Omit<User, 'password'>> {
+  /**
+   * Find user by uuid
+   * @param uuid uuid of user to find
+   * @returns User object
+   */
+  async findUserByUuid(uuid: string): Promise<User> {
     return this.prismaService.user
       .findUniqueOrThrow({
         where: {
           uuid,
-        },
-        select: {
-          uuid: true,
-          email: true,
-          name: true,
-          studentId: true,
-          phoneNumber: true,
-          accessLevel: true,
-          createdAt: true,
-          updatedAt: true,
         },
       })
       .catch((error) => {
@@ -58,14 +58,18 @@ export class UserRepository {
           error instanceof PrismaClientKnownRequestError &&
           error.code === 'P2025'
         ) {
-          this.logger.debug(`user not found: ${uuid}`);
-          throw new ForbiddenException('존재하지 않는 유저입니다.');
+          this.logger.debug(`user not found with uuid: ${uuid}`);
+          throw new ForbiddenException('user not found');
         }
         this.logger.error(`find user by uuid error: ${error}`);
         throw new InternalServerErrorException();
       });
   }
 
+  /**
+   * create user
+   * @param param0 object containing user information
+   */
   async createUser({
     email,
     password,
@@ -91,14 +95,19 @@ export class UserRepository {
           error instanceof PrismaClientKnownRequestError &&
           error.code === 'P2002'
         ) {
-          this.logger.debug(`user already exists: ${email}`);
-          throw new ConflictException('이미 존재하는 유저입니다.');
+          this.logger.debug(`user already exists with email: ${email}`);
+          throw new ConflictException('user already exists');
         }
         this.logger.error(`create user error: ${error}`);
         throw new InternalServerErrorException();
       });
   }
 
+  /**
+   * update user's password
+   * @param email email of user to update
+   * @param password new password
+   */
   async updateUserPassword(email: string, password: string): Promise<void> {
     await this.prismaService.user
       .update({
@@ -112,10 +121,10 @@ export class UserRepository {
       .catch((error) => {
         if (error instanceof PrismaClientKnownRequestError) {
           if (error.code === 'P2025' || error.code === 'P2002') {
-            this.logger.debug(`user not found: ${email}`);
-            throw new ForbiddenException('존재하지 않는 유저입니다.');
+            this.logger.debug(`user not found with email: ${email}`);
+            throw new ForbiddenException('user not found');
           }
-          this.logger.debug(`error occurred: ${error.code}`);
+          this.logger.debug(`prisma error occurred: ${error.code}`);
           throw new InternalServerErrorException();
         }
         this.logger.error(`update user password error: ${error}`);
@@ -123,6 +132,10 @@ export class UserRepository {
       });
   }
 
+  /**
+   * delete user
+   * @param email email of user to delete
+   */
   async deleteUser(email: string): Promise<void> {
     await this.prismaService.user
       .delete({
@@ -135,8 +148,8 @@ export class UserRepository {
           error instanceof PrismaClientKnownRequestError &&
           error.code === 'P2025'
         ) {
-          this.logger.debug(`user not found: ${email}`);
-          throw new ForbiddenException('존재하지 않는 유저입니다.');
+          this.logger.debug(`user not found with email: ${email}`);
+          throw new ForbiddenException('user not found');
         }
         this.logger.error(`delete user error: ${error}`);
         throw new InternalServerErrorException();

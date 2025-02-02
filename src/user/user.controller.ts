@@ -1,11 +1,11 @@
 import {
   Body,
   Controller,
-  Post,
   Delete,
+  Patch,
+  Post,
   UsePipes,
   ValidationPipe,
-  Patch,
 } from '@nestjs/common';
 import {
   ApiConflictResponse,
@@ -15,13 +15,16 @@ import {
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
+
+import {
+  ChangePasswordDto,
+  DeleteUserDto,
+  RegisterDto,
+  SendCertificationCodeDto,
+  ValidationCertificationCodeDto,
+} from './dto/req.dto';
+import { ValidateCertificationJwtResDto } from './dto/res.dto';
 import { UserService } from './user.service';
-import { SendCertificationCodeDto } from './dto/req/sendCertificationCode.dto';
-import { ValidateCertificationJwtResDto } from './dto/res/validateCertificationJwtRes.dto';
-import { RegisterDto } from './dto/req/register.dto';
-import { DeleteUserDto } from './dto/req/deleteUser.dto';
-import { ChangePasswordDto } from './dto/req/changePassword.dto';
-import { ValidationCertificationCodeDto } from './dto/req/validateCertificationCode.dto';
 
 @ApiTags('user')
 @Controller('user')
@@ -30,7 +33,7 @@ export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @ApiOperation({
-    summary: '이메일 인증 코드 전송',
+    summary: 'send email certification code',
     description:
       '이메일 코드를 전송하는 api이다. gist이메일이여야지 작동한다는 사실을 주의해야 한다.',
   })
@@ -45,7 +48,7 @@ export class UserController {
   }
 
   @ApiOperation({
-    summary: '이메일 인증 코드 검증',
+    summary: 'verify email certification code',
     description:
       '이메일 코드를 검증하는 api이다. 이메일과 코드가 일치해야지 jwt토큰을 반환한다.',
   })
@@ -64,7 +67,7 @@ export class UserController {
   }
 
   @ApiOperation({
-    summary: '회원가입',
+    summary: 'sign up',
     description: '회원가입하는 api이다.',
   })
   @ApiResponse({ status: 201, description: '성공' })
@@ -77,7 +80,7 @@ export class UserController {
   }
 
   @ApiOperation({
-    summary: '비밀번호 변경',
+    summary: 'change password',
     description: '비밀번호를 변경하는 api이다.',
   })
   @ApiResponse({ status: 200, description: '성공' })
@@ -89,7 +92,7 @@ export class UserController {
   }
 
   @ApiOperation({
-    summary: '회원탈퇴',
+    summary: 'delete user',
     description: '회원탈퇴하는 api이다.',
   })
   @ApiResponse({ status: 200, description: '성공' })
