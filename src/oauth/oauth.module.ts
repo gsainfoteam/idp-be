@@ -8,8 +8,6 @@ import { ClientModule } from 'src/client/client.module';
 import { IdpModule } from 'src/idp/idp.module';
 import { UserModule } from 'src/user/user.module';
 
-import { Oauth2Guard } from './guard/oauth2.guard';
-import { Oauth2Strategy } from './guard/oauth2.strategy';
 import { OauthController, OpenIDDiscoveryController } from './oauth.controller';
 import { OauthRepository } from './oauth.repository';
 import { OauthService } from './oauth.service';
@@ -50,7 +48,7 @@ import { OauthService } from './oauth.service';
       },
     }),
   ],
-  providers: [OauthService, OauthRepository, Oauth2Strategy, Oauth2Guard],
+  providers: [OauthService, OauthRepository],
   controllers: [OauthController, OpenIDDiscoveryController],
 })
 export class OauthModule {}

@@ -1,15 +1,16 @@
+import { Loggable } from '@lib/logger/decorator/loggable';
+import { PrismaService } from '@lib/prisma';
 import {
   BadRequestException,
   Injectable,
   InternalServerErrorException,
   Logger,
 } from '@nestjs/common';
-import { Scope } from './types/Scopes.type';
-import { UserInfo } from 'src/idp/types/userInfo.type';
+import { User } from '@prisma/client';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
+
 import { ExtendedRefreshToken } from './types/extendedRefreshToken.type';
-import { Loggable } from '@lib/logger/decorator/loggable';
-import { PrismaService } from '@lib/prisma';
+import { Scope } from './types/Scopes.type';
 
 const MAX_REFRESH_TOKEN_COUNT = 10;
 
@@ -20,7 +21,7 @@ export class OauthRepository {
   constructor(private readonly prismaService: PrismaService) {}
 
   async updateUserConsent(
-    user: UserInfo,
+    user: User,
     scope: Readonly<Scope[]>,
     clientId: string,
   ): Promise<void> {
@@ -57,7 +58,7 @@ export class OauthRepository {
   }
 
   async updateRefreshToken(
-    user: UserInfo,
+    user: User,
     clientId: string,
     token: string,
     scopes: Readonly<Scope[]>,
@@ -155,7 +156,7 @@ export class OauthRepository {
           this.logger.debug(`findRefreshToken: ${error.message}`);
           throw new BadRequestException('invalid_grant');
         }
-        this.logger.error(`findRefreshToken: ${error.message}`);
+        this.logger.error(`findRefreshToken: ${error}`);
         throw new InternalServerErrorException();
       });
   }

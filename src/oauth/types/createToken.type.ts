@@ -1,8 +1,9 @@
-import { UserInfo } from 'src/idp/types/userInfo.type';
+import { User } from '@prisma/client';
+
 import { Scope } from './Scopes.type';
 
 export type CreateTokenType = {
-  user: UserInfo;
+  user: User;
   clientId: string;
   nonce?: string;
   scope: Readonly<Scope[]>;
