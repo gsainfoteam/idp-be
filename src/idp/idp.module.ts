@@ -1,27 +1,19 @@
+import { RedisModule } from '@lib/redis';
 import { Module } from '@nestjs/common';
-import { IdpController } from './idp.controller';
-import { IdpService } from './idp.service';
-import { UserModule } from 'src/user/user.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
-import { IdpStrategy } from './guard/idp.strategy';
+import { UserModule } from 'src/user/user.module';
+
 import { IdpGuard } from './guard/idp.guard';
-import { CacheModule } from '@nestjs/cache-manager';
-import { createKeyv } from '@keyv/redis';
+import { IdpStrategy } from './guard/idp.strategy';
+import { IdpController } from './idp.controller';
+import { IdpService } from './idp.service';
 
 @Module({
   imports: [
     UserModule,
     ConfigModule,
-    CacheModule.registerAsync({
-      imports: [ConfigModule],
-      inject: [ConfigService],
-      useFactory: (configService: ConfigService) => {
-        return {
-          stores: [createKeyv(configService.get<string>('REDIS_URL'))],
-        };
-      },
-    }),
+    RedisModule,
     JwtModule.registerAsync({
       imports: [ConfigModule],
       inject: [ConfigService],

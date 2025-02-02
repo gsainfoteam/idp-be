@@ -68,6 +68,9 @@ importers:
       nodemailer:
         specifier: ^6.10.0
         version: 6.10.0
+      passport:
+        specifier: ^0.7.0
+        version: 0.7.0
       passport-anonymous:
         specifier: ^1.0.1
         version: 1.0.1

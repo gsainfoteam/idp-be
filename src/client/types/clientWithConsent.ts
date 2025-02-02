@@ -1,6 +1,6 @@
 import { Prisma } from '@prisma/client';
 
-export type ConsentClient = Prisma.ClientGetPayload<{
+export type ClientWithConsent = Prisma.ClientGetPayload<{
   include: {
     consent: {
       select: { scopes: true };

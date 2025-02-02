@@ -1,18 +1,15 @@
-import { Injectable, Logger, UnauthorizedException } from '@nestjs/common';
-import { ClientRepository } from './client.repository';
+import { Loggable } from '@lib/logger/decorator/loggable';
 import { HttpService } from '@nestjs/axios';
+import { Injectable, Logger, UnauthorizedException } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { Client, User } from '@prisma/client';
 import * as bcrypt from 'bcryptjs';
 import * as crypto from 'crypto';
-import { ConfigService } from '@nestjs/config';
-import { Client } from '@prisma/client';
-import { ClientResDto } from './dto/res/clientRes.dto';
-import { CreateClientDto } from './dto/req/createClient.dto';
-import { ClientCredentialResDto } from './dto/res/ClinetCredential.dto';
 import { firstValueFrom } from 'rxjs';
-import { UpdateClientDto } from './dto/req/updateClient.dto';
-import { UserInfo } from 'src/idp/types/userInfo.type';
-import { ClientPublicResDto } from './dto/res/clientPublicRes.dto';
-import { Loggable } from '@lib/logger/decorator/loggable';
+
+import { ClientRepository } from './client.repository';
+import { CreateClientDto, UpdateClientDto } from './dto/req.dto';
+import { ClientWithConsent } from './types/clientWithConsent';
 
 @Injectable()
 @Loggable()
@@ -29,10 +26,8 @@ export class ClientService {
    * @param user the user who wants to get the client list
    * @returns client list
    */
-  async getClientList(user: UserInfo): Promise<ClientResDto[]> {
-    return (await this.clientRepository.findClientsByUserUuid(user.uuid)).map(
-      this.convertToClientResDto,
-    );
+  async getClientList(user: User): Promise<Client[]> {
+    return this.clientRepository.findClientListByUserUuid(user.uuid);
   }
 
   /**
@@ -41,10 +36,8 @@ export class ClientService {
    * @param user user who wants to get the client
    * @returns client information
    */
-  async getClient(uuid: string, user: UserInfo): Promise<ClientResDto> {
-    return this.convertToClientResDto(
-      await this.clientRepository.findClientByUuidAndUserUuid(uuid, user.uuid),
-    );
+  async getClient(uuid: string, user: User): Promise<Client> {
+    return this.clientRepository.findClientByUuidAndUserUuid(uuid, user.uuid);
   }
 
   /**
@@ -55,21 +48,12 @@ export class ClientService {
    */
   async getClientPublicInformation(
     id: string,
-    user: UserInfo,
-  ): Promise<ClientPublicResDto> {
-    const client = await this.clientRepository.findById(id);
-    const clientWithConsent =
-      await this.clientRepository.findClientWithConsentByIdAndUserUuid(
-        id,
-        user.uuid,
-      );
-    return {
-      id: client.id,
-      name: client.name,
-      uuid: client.uuid,
-      recentConsent:
-        clientWithConsent?.consent.flatMap((consent) => consent.scopes) ?? [],
-    };
+    user: User,
+  ): Promise<ClientWithConsent> {
+    return this.clientRepository.findClientWithConsentByIdAndUserUuid(
+      id,
+      user.uuid,
+    );
   }
 
   /**
@@ -80,8 +64,8 @@ export class ClientService {
    */
   async registerClient(
     { id, name, urls }: CreateClientDto,
-    user: UserInfo,
-  ): Promise<ClientCredentialResDto> {
+    user: User,
+  ): Promise<Client> {
     const { secretKey, hashed } = this.generateClientSecret();
     const client = await this.clientRepository.createClient(
       {
@@ -92,11 +76,8 @@ export class ClientService {
       },
       user.uuid,
     );
-    return {
-      uuid: client.uuid,
-      id: client.id,
-      clientSecret: secretKey,
-    };
+    client.password = secretKey;
+    return client;
   }
 
   /**
@@ -105,23 +86,17 @@ export class ClientService {
    * @param user user who wants to reset the client secret
    * @returns client credential information
    */
-  async resetClientSecret(
-    uuid: string,
-    user: UserInfo,
-  ): Promise<ClientCredentialResDto> {
+  async resetClientSecret(uuid: string, user: User): Promise<Client> {
     const { secretKey, hashed } = this.generateClientSecret();
-    const client = await this.clientRepository.updateClientSecret(
+    const client = await this.clientRepository.updateClientPassword(
       {
         uuid,
         password: hashed,
       },
       user.uuid,
     );
-    return {
-      uuid: client.uuid,
-      id: client.id,
-      clientSecret: secretKey,
-    };
+    client.password = secretKey;
+    return client;
   }
 
   /**
@@ -134,11 +109,9 @@ export class ClientService {
   async updateClient(
     uuid: string,
     { name, urls }: UpdateClientDto,
-    user: UserInfo,
-  ): Promise<ClientResDto> {
-    return this.convertToClientResDto(
-      await this.clientRepository.updateClient({ uuid, name, urls }, user.uuid),
-    );
+    user: User,
+  ): Promise<Client> {
+    return this.clientRepository.updateClient({ uuid, name, urls }, user.uuid);
   }
 
   /**
@@ -158,7 +131,7 @@ export class ClientService {
    * @param uuid client's uuid
    * @param user user who sends the permission request
    */
-  async adminRequest(uuid: string, user: UserInfo): Promise<void> {
+  async adminRequest(uuid: string, user: User): Promise<void> {
     const { name } = await this.clientRepository.findClientByUuidAndUserUuid(
       uuid,
       user.uuid,
@@ -191,18 +164,11 @@ export class ClientService {
    * @returns client information if the client is valid
    */
   async validateClient(id: string, secret: string): Promise<Client> {
-    const client = await this.clientRepository.findById(id).catch((error) => {
-      this.logger.error(`validateClient: error=${error}`);
-      throw new UnauthorizedException('invalid_client');
-    });
-    if (
-      !(await bcrypt.compare(secret, client.password).catch(() => {
-        throw new UnauthorizedException('invalid_client');
-      }))
-    ) {
+    const client = await this.clientRepository.findById(id);
+    if (!bcrypt.compareSync(secret, client.password)) {
       throw new UnauthorizedException('invalid_client');
     }
-    return this.clientRepository.findById(id);
+    return client;
   }
 
   private generateClientSecret(): { secretKey: string; hashed: string } {
@@ -213,28 +179,6 @@ export class ClientService {
     return {
       secretKey,
       hashed: bcrypt.hashSync(secretKey, bcrypt.genSaltSync(10)),
-    };
-  }
-
-  /**
-   * convert client to client response dto
-   * @param param0 Client
-   * @returns ClientResDto
-   */
-  private convertToClientResDto({
-    urls,
-    ...rest
-  }: Omit<Client, 'password'>): ClientResDto {
-    if (urls === null) {
-      return {
-        ...rest,
-        urls: [],
-      };
-    }
-    const listUrls = urls;
-    return {
-      ...rest,
-      urls: listUrls,
     };
   }
 }

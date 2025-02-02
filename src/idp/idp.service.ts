@@ -1,12 +1,13 @@
+import { Loggable } from '@lib/logger/decorator/loggable';
+import { RedisService } from '@lib/redis';
 import { Injectable, Logger, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
+import { User } from '@prisma/client';
 import * as crypto from 'crypto';
 import { UserService } from 'src/user/user.service';
-import { LoginDto } from './dto/req/login.dto';
-import { User } from '@prisma/client';
+
+import { LoginDto } from './dto/req.dto';
 import { LoginResultType } from './types/loginResult.type';
-import { Loggable } from '@lib/logger/decorator/loggable';
-import { Cache } from '@nestjs/cache-manager';
 
 @Injectable()
 @Loggable()
@@ -14,7 +15,7 @@ export class IdpService {
   private readonly logger = new Logger(IdpService.name);
   private readonly refreshTokenPrefix = 'refreshToken';
   constructor(
-    private readonly cacheService: Cache,
+    private readonly redisService: RedisService,
     private readonly jwtService: JwtService,
     private readonly userService: UserService,
   ) {}
@@ -30,12 +31,15 @@ export class IdpService {
         throw new UnauthorizedException();
       });
     const refreshToken: string = this.generateOpaqueToken();
-    this.cacheService.set<Pick<User, 'uuid'>>(
-      `${this.refreshTokenPrefix}${refreshToken}`,
+    await this.redisService.set<Pick<User, 'uuid'>>(
+      refreshToken,
       {
         uuid: user.uuid,
       },
-      60 * 60 * 24 * 30 * 6 * 1000,
+      {
+        prefix: this.refreshTokenPrefix,
+        ttl: 60 * 60 * 24 * 30 * 6,
+      },
     );
     return {
       accessToken: this.jwtService.sign({}, { subject: user.uuid }),
@@ -44,28 +48,31 @@ export class IdpService {
   }
 
   async logout(refreshToken: string): Promise<void> {
-    await this.cacheService.del(`${this.refreshTokenPrefix}${refreshToken}`);
+    await this.redisService.del(refreshToken, {
+      prefix: this.refreshTokenPrefix,
+    });
   }
 
   async refresh(refreshToken: string): Promise<LoginResultType> {
     if (!refreshToken) throw new UnauthorizedException();
-    const user: Pick<User, 'uuid'> = await this.cacheService
-      .get<Pick<User, 'uuid'>>(`${this.refreshTokenPrefix}${refreshToken}`)
-      .then((user) => {
-        if (user === null) {
-          throw new UnauthorizedException();
-        }
-        return user;
+    const user: Pick<User, 'uuid'> = await this.redisService
+      .getOrThrow<Pick<User, 'uuid'>>(refreshToken, {
+        prefix: this.refreshTokenPrefix,
+      })
+      .catch(() => {
+        this.logger.debug(`refreshToken not found: ${refreshToken}`);
+        throw new UnauthorizedException();
       });
 
-    await this.cacheService.del(`${this.refreshTokenPrefix}${refreshToken}`);
+    await this.redisService.del(refreshToken, {
+      prefix: this.refreshTokenPrefix,
+    });
 
     const newRefreshToken: string = this.generateOpaqueToken();
-    this.cacheService.set<Pick<User, 'uuid'>>(
-      `${this.refreshTokenPrefix}${newRefreshToken}`,
-      user,
-      60 * 60 * 24 * 30 * 6 * 1000,
-    );
+    void this.redisService.set<Pick<User, 'uuid'>>(newRefreshToken, user, {
+      prefix: this.refreshTokenPrefix,
+      ttl: 60 * 60 * 24 * 30 * 6,
+    });
 
     return {
       accessToken: this.jwtService.sign({}, { subject: user.uuid }),

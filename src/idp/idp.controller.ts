@@ -1,16 +1,17 @@
 import {
   Body,
+  ClassSerializerInterceptor,
   Controller,
   Delete,
-  Post,
   Get,
+  Post,
   Req,
   Res,
-  UsePipes,
   UseGuards,
+  UseInterceptors,
+  UsePipes,
   ValidationPipe,
 } from '@nestjs/common';
-import { IdpService } from './idp.service';
 import {
   ApiBearerAuth,
   ApiInternalServerErrorResponse,
@@ -19,22 +20,24 @@ import {
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
-import { LoginDto } from './dto/req/login.dto';
-import { LoginResDto } from './dto/res/loginRes.dto';
-import { IdpGuard } from './guard/idp.guard';
-import { GetUser } from './decorator/getUser.decorator';
-import { UserResDto } from './dto/res/userRes.dto';
-import { UserInfo } from './types/userInfo.type';
+import { User } from '@prisma/client';
 import { FastifyReply, FastifyRequest } from 'fastify';
+
+import { GetUser } from './decorator/getUser.decorator';
+import { LoginDto } from './dto/req.dto';
+import { LoginResDto, UserResDto } from './dto/res.dto';
+import { IdpGuard } from './guard/idp.guard';
+import { IdpService } from './idp.service';
 
 @ApiTags('idp')
 @Controller('idp')
 @UsePipes(ValidationPipe)
+@UseInterceptors(ClassSerializerInterceptor)
 export class IdpController {
   constructor(private readonly idpService: IdpService) {}
 
   @ApiOperation({
-    summary: '로그인',
+    summary: 'login',
     description:
       '로그인을 수행합니다. 이때, refreshToken은 cookie로 전달됩니다.',
   })
@@ -57,7 +60,7 @@ export class IdpController {
     return rest;
   }
 
-  @ApiOperation({ summary: '로그아웃' })
+  @ApiOperation({ summary: 'logout' })
   @ApiResponse({ status: 204, description: '로그아웃 성공' })
   @ApiInternalServerErrorResponse({ description: '서버 에러' })
   @Delete('logout')
@@ -75,7 +78,7 @@ export class IdpController {
   }
 
   @ApiOperation({
-    summary: '액세스 토큰 갱신',
+    summary: 'refresh access token',
     description:
       '액세스 토큰을 갱신합니다. 이때, refreshToken은 cookie로 전달됩니다.',
   })
@@ -100,7 +103,7 @@ export class IdpController {
   }
 
   @ApiOperation({
-    summary: '회원 정보',
+    summary: 'get user info',
     description: '회원 정보를 반환합니다.',
   })
   @ApiResponse({ type: UserResDto })
@@ -109,7 +112,7 @@ export class IdpController {
   @ApiBearerAuth('access-token')
   @Get('user')
   @UseGuards(IdpGuard)
-  getUserInfo(@GetUser() user: UserInfo): UserResDto {
-    return user;
+  getUserInfo(@GetUser() user: User): UserResDto {
+    return new UserResDto(user);
   }
 }

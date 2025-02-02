@@ -1,3 +1,5 @@
+import { Loggable } from '@lib/logger/decorator/loggable';
+import { PrismaService } from '@lib/prisma';
 import {
   ConflictException,
   ForbiddenException,
@@ -7,9 +9,8 @@ import {
 } from '@nestjs/common';
 import { Client } from '@prisma/client';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
-import { ConsentClient } from './types/consentClient.type';
-import { Loggable } from '@lib/logger/decorator/loggable';
-import { PrismaService } from '@lib/prisma';
+
+import { ClientWithConsent } from './types/clientWithConsent';
 
 @Injectable()
 @Loggable()
@@ -17,9 +18,7 @@ export class ClientRepository {
   private readonly logger = new Logger(ClientRepository.name);
   constructor(private readonly prismaService: PrismaService) {}
 
-  async findClientsByUserUuid(
-    userUuid: string,
-  ): Promise<Omit<Client, 'password'>[]> {
+  async findClientListByUserUuid(userUuid: string): Promise<Client[]> {
     return this.prismaService.client.findMany({
       where: {
         member: {
@@ -27,15 +26,6 @@ export class ClientRepository {
             uuid: userUuid,
           },
         },
-      },
-      select: {
-        id: true,
-        uuid: true,
-        name: true,
-        urls: true,
-        role: true,
-        createdAt: true,
-        updatedAt: true,
       },
     });
   }
@@ -52,10 +42,10 @@ export class ClientRepository {
           error instanceof PrismaClientKnownRequestError &&
           error.code === 'P2025'
         ) {
-          this.logger.debug(`findById: error=${error.stack}`);
+          this.logger.debug(`findById error: ${error.stack}`);
           throw new ForbiddenException();
         }
-        this.logger.error(`findById: error=${error}`);
+        this.logger.error(`findById error: ${error}`);
         throw new InternalServerErrorException();
       });
   }
@@ -63,9 +53,9 @@ export class ClientRepository {
   async findClientWithConsentByIdAndUserUuid(
     id: string,
     userUuid: string,
-  ): Promise<ConsentClient | null> {
+  ): Promise<ClientWithConsent> {
     return this.prismaService.client
-      .findUnique({
+      .findUniqueOrThrow({
         where: { id },
         include: {
           consent: {
@@ -75,8 +65,17 @@ export class ClientRepository {
         },
       })
       .catch((error) => {
+        if (
+          error instanceof PrismaClientKnownRequestError &&
+          error.code === 'P2025'
+        ) {
+          this.logger.debug(
+            `findClientWithConsentByIdAndUserUuid error: ${error.stack}`,
+          );
+          throw new ForbiddenException();
+        }
         this.logger.error(
-          `findClientWithConsentByIdAndUserUuid: error=${error}`,
+          `findClientWithConsentByIdAndUserUuid error: ${error}`,
         );
         throw new InternalServerErrorException();
       });
@@ -85,7 +84,7 @@ export class ClientRepository {
   async findClientByUuidAndUserUuid(
     uuid: string,
     userUuid: string,
-  ): Promise<Omit<Client, 'password'>> {
+  ): Promise<Client> {
     return this.prismaService.client
       .findUniqueOrThrow({
         where: {
@@ -96,15 +95,6 @@ export class ClientRepository {
             },
           },
         },
-        select: {
-          id: true,
-          uuid: true,
-          name: true,
-          urls: true,
-          role: true,
-          createdAt: true,
-          updatedAt: true,
-        },
       })
       .catch((error) => {
         if (
@@ -112,11 +102,11 @@ export class ClientRepository {
           error.code === 'P2025'
         ) {
           this.logger.debug(
-            `findClientByUuidAndUserUuid: error=${error.stack}`,
+            `findClientByUuidAndUserUuid error: ${error.stack}`,
           );
           throw new ForbiddenException();
         }
-        this.logger.error(`findClientByUuidAndUserUuid: error=${error}`);
+        this.logger.error(`findClientByUuidAndUserUuid error: ${error}`);
         throw new InternalServerErrorException();
       });
   }
@@ -152,12 +142,12 @@ export class ClientRepository {
           this.logger.debug(`createClient: error=${error.stack}`);
           throw new ConflictException('Client already exists');
         }
-        this.logger.error(`createClient: error=${error}`);
+        this.logger.error(`createClient error: ${error}`);
         throw new InternalServerErrorException();
       });
   }
 
-  async updateClientSecret(
+  async updateClientPassword(
     { uuid, password }: Pick<Client, 'uuid' | 'password'>,
     userUuid: string,
   ): Promise<Client> {
@@ -195,7 +185,7 @@ export class ClientRepository {
       urls,
     }: Pick<Client, 'uuid'> & Partial<Pick<Client, 'name' | 'urls'>>,
     userUuid: string,
-  ): Promise<Omit<Client, 'password'>> {
+  ): Promise<Client> {
     return this.prismaService.client
       .update({
         where: {
@@ -210,25 +200,16 @@ export class ClientRepository {
           name,
           urls,
         },
-        select: {
-          id: true,
-          uuid: true,
-          name: true,
-          urls: true,
-          role: true,
-          createdAt: true,
-          updatedAt: true,
-        },
       })
       .catch((error) => {
         if (
           error instanceof PrismaClientKnownRequestError &&
           error.code === 'P2025'
         ) {
-          this.logger.debug(`updateClient: error=${error.stack}`);
+          this.logger.debug(`updateClient error: ${error.stack}`);
           throw new ForbiddenException();
         }
-        this.logger.error(`updateClient: error=${error}`);
+        this.logger.error(`updateClient error: ${error}`);
         throw new InternalServerErrorException();
       });
   }

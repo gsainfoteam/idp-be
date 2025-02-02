@@ -1,5 +1,6 @@
 import {
   Body,
+  ClassSerializerInterceptor,
   Controller,
   Get,
   Param,
@@ -7,8 +8,8 @@ import {
   Patch,
   Post,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
-import { ClientService } from './client.service';
 import {
   ApiBearerAuth,
   ApiConflictResponse,
@@ -19,17 +20,21 @@ import {
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
-import { IdpGuard } from 'src/idp/guard/idp.guard';
+import { User } from '@prisma/client';
 import { GetUser } from 'src/idp/decorator/getUser.decorator';
-import { ClientResDto } from './dto/res/clientRes.dto';
-import { CreateClientDto } from './dto/req/createClient.dto';
-import { ClientCredentialResDto } from './dto/res/ClinetCredential.dto';
-import { UpdateClientDto } from './dto/req/updateClient.dto';
-import { UserInfo } from 'src/idp/types/userInfo.type';
-import { ClientPublicResDto } from './dto/res/clientPublicRes.dto';
+import { IdpGuard } from 'src/idp/guard/idp.guard';
+
+import { ClientService } from './client.service';
+import { CreateClientDto, UpdateClientDto } from './dto/req.dto';
+import {
+  ClientCredentialResDto,
+  ClientPublicResDto,
+  ClientResDto,
+} from './dto/res.dto';
 
 @ApiTags('client')
 @Controller('client')
+@UseInterceptors(ClassSerializerInterceptor)
 export class ClientController {
   constructor(private readonly clientService: ClientService) {}
 
@@ -43,8 +48,10 @@ export class ClientController {
   @ApiInternalServerErrorResponse({ description: 'Internal Server Error' })
   @Get()
   @UseGuards(IdpGuard)
-  async getClientList(@GetUser() user: UserInfo): Promise<ClientResDto[]> {
-    return this.clientService.getClientList(user);
+  async getClientList(@GetUser() user: User): Promise<ClientResDto[]> {
+    return (await this.clientService.getClientList(user)).map((client) => {
+      return new ClientResDto(client);
+    });
   }
 
   @ApiOperation({
@@ -59,9 +66,9 @@ export class ClientController {
   @UseGuards(IdpGuard)
   async getClient(
     @Param('uuid', ParseUUIDPipe) uuid: string,
-    @GetUser() user: UserInfo,
+    @GetUser() user: User,
   ): Promise<ClientResDto> {
-    return this.clientService.getClient(uuid, user);
+    return new ClientResDto(await this.clientService.getClient(uuid, user));
   }
 
   @ApiOperation({
@@ -76,9 +83,11 @@ export class ClientController {
   @UseGuards(IdpGuard)
   async getClientPublicInformation(
     @Param('id') id: string,
-    @GetUser() user: UserInfo,
+    @GetUser() user: User,
   ): Promise<ClientPublicResDto> {
-    return this.clientService.getClientPublicInformation(id, user);
+    return new ClientPublicResDto(
+      await this.clientService.getClientPublicInformation(id, user),
+    );
   }
 
   @ApiOperation({
@@ -94,9 +103,11 @@ export class ClientController {
   @UseGuards(IdpGuard)
   async registerClient(
     @Body() createClientDto: CreateClientDto,
-    @GetUser() user: UserInfo,
+    @GetUser() user: User,
   ): Promise<ClientCredentialResDto> {
-    return this.clientService.registerClient(createClientDto, user);
+    return new ClientCredentialResDto(
+      await this.clientService.registerClient(createClientDto, user),
+    );
   }
 
   @ApiOperation({
@@ -112,7 +123,7 @@ export class ClientController {
   @UseGuards(IdpGuard)
   async adminRequest(
     @Param('uuid', ParseUUIDPipe) uuid: string,
-    @GetUser() user: UserInfo,
+    @GetUser() user: User,
   ): Promise<void> {
     return this.clientService.adminRequest(uuid, user);
   }
@@ -130,9 +141,11 @@ export class ClientController {
   @UseGuards(IdpGuard)
   async resetClientSecret(
     @Param('uuid', ParseUUIDPipe) uuid: string,
-    @GetUser() user: UserInfo,
+    @GetUser() user: User,
   ): Promise<ClientCredentialResDto> {
-    return this.clientService.resetClientSecret(uuid, user);
+    return new ClientCredentialResDto(
+      await this.clientService.resetClientSecret(uuid, user),
+    );
   }
 
   @ApiOperation({
@@ -149,8 +162,10 @@ export class ClientController {
   async updateClient(
     @Param('uuid') uuid: string,
     @Body() body: UpdateClientDto,
-    @GetUser() user: UserInfo,
+    @GetUser() user: User,
   ): Promise<ClientResDto> {
-    return this.clientService.updateClient(uuid, body, user);
+    return new ClientResDto(
+      await this.clientService.updateClient(uuid, body, user),
+    );
   }
 }

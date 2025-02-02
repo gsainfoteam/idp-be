@@ -1,7 +1,17 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { AccessLevel, User } from '@prisma/client';
+import { Exclude } from 'class-transformer';
 
-export class UserResDto implements Omit<User, 'password'> {
+export class LoginResDto {
+  @ApiProperty({
+    example:
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpX9.eyJzdWIiOiJqb2huZG9lQGdtLmdpc3QuYWMua3IiLCJpYXQiOjE2MzIwNzIwMzYsImV4cCI6MTYzMjA3MjA5Nn0.',
+    description: '액세스 토큰',
+  })
+  accessToken: string;
+}
+
+export class UserResDto implements User {
   @ApiProperty({
     example: 'uuid',
     description: '유저 uuid',
@@ -50,4 +60,11 @@ export class UserResDto implements Omit<User, 'password'> {
     enum: AccessLevel,
   })
   accessLevel: AccessLevel;
+
+  @Exclude()
+  password: string;
+
+  constructor(user: User) {
+    Object.assign(this, user);
+  }
 }

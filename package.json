@@ -40,6 +40,7 @@
     "ioredis": "^5.4.2",
     "jsonwebtoken": "^9.0.2",
     "nodemailer": "^6.10.0",
+    "passport": "^0.7.0",
     "passport-anonymous": "^1.0.1",
     "passport-auth-token": "^1.0.1",
     "passport-jwt": "^4.0.1",
