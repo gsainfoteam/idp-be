@@ -1,10 +1,16 @@
-import { Module } from '@nestjs/common';
-import { HealthController } from './health.controller';
-import { TerminusModule } from '@nestjs/terminus';
 import { PrismaModule } from '@lib/prisma';
+import { RedisModule } from '@lib/redis';
+import { Module } from '@nestjs/common';
+import { TerminusModule } from '@nestjs/terminus';
+
+import { HealthController } from './health.controller';
 
 @Module({
-  imports: [PrismaModule, TerminusModule.forRoot({ errorLogStyle: 'json' })],
+  imports: [
+    RedisModule,
+    PrismaModule,
+    TerminusModule.forRoot({ errorLogStyle: 'json' }),
+  ],
   controllers: [HealthController],
 })
 export class HealthModule {}

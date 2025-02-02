@@ -1,7 +1,6 @@
-import { createKeyv } from '@keyv/redis';
 import { MailModule } from '@lib/mail';
 import { PrismaModule } from '@lib/prisma';
-import { CacheModule } from '@nestjs/cache-manager';
+import { RedisModule } from '@lib/redis';
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
@@ -15,15 +14,7 @@ import { UserService } from './user.service';
     ConfigModule,
     PrismaModule,
     MailModule,
-    CacheModule.registerAsync({
-      imports: [ConfigModule],
-      inject: [ConfigService],
-      useFactory: (configService: ConfigService) => {
-        return {
-          stores: [createKeyv(configService.getOrThrow<string>('REDIS_URL'))],
-        };
-      },
-    }),
+    RedisModule,
     JwtModule.registerAsync({
       imports: [ConfigModule],
       inject: [ConfigService],

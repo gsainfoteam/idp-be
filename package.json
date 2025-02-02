@@ -22,9 +22,7 @@
   "dependencies": {
     "@fastify/cookie": "^11.0.2",
     "@fastify/static": "^8.0.4",
-    "@keyv/redis": "^4.2.0",
     "@nestjs/axios": "^4.0.0",
-    "@nestjs/cache-manager": "^3.0.0",
     "@nestjs/common": "^11.0.1",
     "@nestjs/config": "^4.0.0",
     "@nestjs/core": "^11.0.1",
@@ -39,6 +37,7 @@
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.1",
     "fastify": "^5.2.1",
+    "ioredis": "^5.4.2",
     "jsonwebtoken": "^9.0.2",
     "nodemailer": "^6.10.0",
     "passport-anonymous": "^1.0.1",
@@ -110,7 +109,8 @@
       "^@lib/global(|/.*)$": "<rootDir>/libs/global/src/$1",
       "^@lib/logger(|/.*)$": "<rootDir>/libs/logger/src/$1",
       "^@lib/mail(|/.*)$": "<rootDir>/libs/mail/src/$1",
-      "^@lib/prisma(|/.*)$": "<rootDir>/libs/prisma/src/$1"
+      "^@lib/prisma(|/.*)$": "<rootDir>/libs/prisma/src/$1",
+      "^@lib/redis(|/.*)$": "<rootDir>/libs/redis/src/$1"
     }
   }
 }

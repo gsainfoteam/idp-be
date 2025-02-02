@@ -1,10 +1,9 @@
 import { Loggable } from '@lib/logger';
 import { MailService } from '@lib/mail';
-import { Cache, CACHE_MANAGER } from '@nestjs/cache-manager';
+import { CacheNotFoundException, RedisService } from '@lib/redis';
 import {
   ConflictException,
   ForbiddenException,
-  Inject,
   Injectable,
   InternalServerErrorException,
   Logger,
@@ -34,7 +33,7 @@ export class UserService {
     private readonly userRepository: UserRepository,
     private readonly mailService: MailService,
     private readonly jwtService: JwtService,
-    @Inject(CACHE_MANAGER) private readonly cacheService: Cache,
+    private readonly redisService: RedisService,
   ) {}
 
   /**
@@ -84,11 +83,10 @@ export class UserService {
       emailCertificationCode,
     );
 
-    await this.cacheService.set(
-      `${this.emailCertificationCodePrefix}:${email}`,
-      emailCertificationCode,
-      3 * 60 * 1000,
-    );
+    await this.redisService.set<string>(email, emailCertificationCode, {
+      ttl: 3 * 60,
+      prefix: this.emailCertificationCodePrefix,
+    });
   }
 
   /**
@@ -100,23 +98,26 @@ export class UserService {
     email,
     code,
   }: ValidationCertificationCodeDto): Promise<ValidateCertificationJwtResDto> {
-    const certificationCode: string = await this.cacheService
-      .get<string>(`${this.emailCertificationCodePrefix}:${email}`)
-      .then((value) => {
-        if (value === null) {
-          this.logger.debug(`Redis key not found, key: ${email}`);
+    const certificationCode: string = await this.redisService
+      .getOrThrow<string>(email, {
+        prefix: this.emailCertificationCodePrefix,
+      })
+      .catch((error) => {
+        if (error instanceof CacheNotFoundException) {
+          this.logger.debug(`Redis key not found with email: ${email}`);
           throw new ForbiddenException('certification code out-dated');
         }
-        return value;
+        this.logger.error(`validate certification code error: ${error}`);
+        throw new InternalServerErrorException();
       });
 
     if (certificationCode !== code) {
       this.logger.debug(`certification code not match: ${code}`);
       throw new ForbiddenException('certification code not match');
     }
-    await this.cacheService.del(
-      `${this.emailCertificationCodePrefix}:${email}`,
-    );
+    await this.redisService.del(email, {
+      prefix: this.emailCertificationCodePrefix,
+    });
     const payload: CertificationJwtPayload = { sub: email };
     return {
       certificationJwtToken: this.jwtService.sign(payload),

@@ -1,4 +1,5 @@
 import { PrismaService } from '@lib/prisma';
+import { RedisHealthIndicator } from '@lib/redis';
 import { Controller, Get } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import {
@@ -16,6 +17,7 @@ export class HealthController {
     private readonly prismaService: PrismaService,
     private readonly health: HealthCheckService,
     private readonly prisma: PrismaHealthIndicator,
+    private readonly redis: RedisHealthIndicator,
     private readonly memory: MemoryHealthIndicator,
   ) {}
 
@@ -24,6 +26,7 @@ export class HealthController {
   async check() {
     return await this.health.check([
       () => this.prisma.pingCheck('database', this.prismaService),
+      () => this.redis.pingCheck('redis'),
       () => this.memory.checkRSS('memory_rss', 1024 * 1024 * 150),
     ]);
   }

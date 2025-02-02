@@ -20,6 +20,8 @@
     "@lib/mail": "<rootDir>/../libs/mail/src",
     "@lib/mail/(.*)": "<rootDir>/../libs/mail/src/$1",
     "@lib/prisma": "<rootDir>/../libs/prisma/src",
-    "@lib/prisma/(.*)": "<rootDir>/../libs/prisma/src/$1"
+    "@lib/prisma/(.*)": "<rootDir>/../libs/prisma/src/$1",
+    "@lib/redis": "<rootDir>/../libs/redis/src",
+    "@lib/redis/(.*)": "<rootDir>/../libs/redis/src/$1"
   }
 }
