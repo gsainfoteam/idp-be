@@ -17,7 +17,7 @@ import { JwtModule } from '@nestjs/jwt';
     CacheModule.registerAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
-      useFactory: async (configService: ConfigService) => {
+      useFactory: (configService: ConfigService) => {
         return {
           stores: [createKeyv(configService.getOrThrow<string>('REDIS_URL'))],
         };
@@ -26,7 +26,7 @@ import { JwtModule } from '@nestjs/jwt';
     JwtModule.registerAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
-      useFactory: async (configService: ConfigService) => ({
+      useFactory: (configService: ConfigService) => ({
         secret: configService.getOrThrow<string>('CERTIFICATION_JWT_SECRET'),
         signOptions: {
           expiresIn: configService.get<string>('CERTIFICATION_JWT_EXPIRE'),
