@@ -1,3 +1,4 @@
+import { ConvertCaseInterceptor } from '@lib/global';
 import {
   Body,
   Controller,
@@ -10,7 +11,6 @@ import {
   UsePipes,
   ValidationPipe,
 } from '@nestjs/common';
-import { OauthService } from './oauth.service';
 import {
   ApiBasicAuth,
   ApiBearerAuth,
@@ -23,19 +23,16 @@ import {
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
-import { IdpGuard } from 'src/idp/guard/idp.guard';
-import { AuthorizeDto } from './dto/req/authorize.dto';
+import { User } from '@prisma/client';
 import { GetUser } from 'src/idp/decorator/getUser.decorator';
-import { UserInfo } from 'src/idp/types/userInfo.type';
-import { ClientOptionalGuard } from 'src/client/guard/clientOptional.guard';
-import { TokenDto } from './dto/req/token.dto';
-import { GetClient } from 'src/client/decorator/getClient.decorator';
-import { Client } from '@prisma/client';
-import { TokenResDto } from './dto/res/tokenRes.dto';
+import { IdpGuard } from 'src/idp/guard/idp.guard';
+
+import { AuthorizeDto } from './dto/req/authorize.dto';
 import { RevokeDto } from './dto/req/revoke.dto';
-import { Oauth2Guard } from './guard/oauth2.guard';
+import { TokenDto } from './dto/req/token.dto';
 import { AuthorizeResDto } from './dto/res/authorizeRes.dto';
-import { ConvertCaseInterceptor } from '@lib/global';
+import { TokenResDto } from './dto/res/tokenRes.dto';
+import { OauthService } from './oauth.service';
 
 @ApiTags('oauth')
 @Controller('oauth')
@@ -56,7 +53,7 @@ export class OauthController {
   @UsePipes(new ValidationPipe({ transform: true }))
   async authorize(
     @Body() authorizeDto: AuthorizeDto,
-    @GetUser() user: UserInfo,
+    @GetUser() user: User,
   ): Promise<AuthorizeResDto> {
     return this.oauthService.authorize(authorizeDto, user);
   }
@@ -71,12 +68,8 @@ export class OauthController {
   @ApiBasicAuth('client-auth')
   @HttpCode(HttpStatus.OK)
   @Post('token')
-  @UseGuards(ClientOptionalGuard)
-  async token(
-    @Body() body: TokenDto,
-    @GetClient() client: Client,
-  ): Promise<TokenResDto> {
-    return this.oauthService.token(body, client);
+  async token(@Body() body: TokenDto): Promise<TokenResDto> {
+    return this.oauthService.token(body);
   }
 
   @ApiOperation({
@@ -87,13 +80,9 @@ export class OauthController {
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   @ApiForbiddenResponse({ description: 'Forbidden' })
   @Post('revoke')
-  @UseGuards(ClientOptionalGuard)
   @UsePipes(new ValidationPipe({ transform: true }))
-  async revoke(
-    @Body() body: RevokeDto,
-    @GetClient() client: Client,
-  ): Promise<void> {
-    return this.oauthService.revoke(body, client);
+  async revoke(@Body() body: RevokeDto): Promise<void> {
+    return this.oauthService.revoke(body);
   }
 
   @ApiOperation({
@@ -106,16 +95,7 @@ export class OauthController {
     return this.oauthService.certs();
   }
 
-  @ApiOperation({
-    summary: 'userinfo',
-    description: 'returns userinfo',
-  })
-  @ApiOkResponse({ description: 'userinfo' })
-  @Get('userinfo')
-  @UseGuards(Oauth2Guard)
-  userinfo(@GetUser() user: UserInfo): UserInfo {
-    return user;
-  }
+  //TODO: Implement get user info
 }
 
 @ApiTags('OpenID Connect Discovery')

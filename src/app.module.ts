@@ -1,11 +1,13 @@
-import { Module } from '@nestjs/common';
-import { AppController } from './app.controller';
-import { ConfigModule } from '@nestjs/config';
 import { LoggerModule } from '@lib/logger';
-import { UserModule } from './user/user.module';
+import { Module } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
+
+import { AppController } from './app.controller';
 import { ClientModule } from './client/client.module';
 import { HealthModule } from './health/health.module';
 import { IdpModule } from './idp/idp.module';
+import { OauthModule } from './oauth/oauth.module';
+import { UserModule } from './user/user.module';
 
 @Module({
   imports: [
@@ -18,6 +20,7 @@ import { IdpModule } from './idp/idp.module';
     ClientModule,
     HealthModule,
     IdpModule,
+    OauthModule,
   ],
   controllers: [AppController],
 })

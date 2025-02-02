@@ -74,9 +74,6 @@ importers:
       passport-anonymous:
         specifier: ^1.0.1
         version: 1.0.1
-      passport-auth-token:
-        specifier: ^1.0.1
-        version: 1.0.1
       passport-jwt:
         specifier: ^4.0.1
         version: 4.0.1
@@ -129,9 +126,6 @@ importers:
       '@types/passport-anonymous':
         specifier: ^1.0.5
         version: 1.0.5
-      '@types/passport-auth-token':
-        specifier: ^1.0.4
-        version: 1.0.4
       '@types/passport-http':
         specifier: ^0.3.11
         version: 0.3.11
@@ -1279,9 +1273,6 @@ packages:
 
   '@types/passport-anonymous@1.0.5':
     resolution: {integrity: sha512-RCn+UFc13LKmABj+GGGCGRIA2m2UcdjWQamFllOhIWXJGzbC2rDhVRU6/y8wgRalbXlpt/OXI/EyVNQTRDIJ4A==}
-
-  '@types/passport-auth-token@1.0.4':
-    resolution: {integrity: sha512-7W0Nl0/IQeAj2Abp5NU8TxN/AdGWGQHgcj745I5glpnIJkL/Iv2qgTA87NS7m8wkrvK7rnXOccPVXBJ3ljtgpw==}
 
   '@types/passport-http@0.3.11':
     resolution: {integrity: sha512-FO0rDRYtuha9m2ZgRx5+jrgrrkAnUzgzdItFI0dwKBC6k9pArK677Gtan67u6+Qah2nXVP3M1uZ5p90SpBT5Zg==}
@@ -3441,10 +3432,6 @@ packages:
   passport-anonymous@1.0.1:
     resolution: {integrity: sha512-Mk2dls97nLTzHpsWCYQ54IVGucWaiWSHHr3+IhWYAebg4dRgRQIfyoeYrixoxB2z2z4+EM7p9yjC+a3yMB5z5A==}
     engines: {node: '>= 0.4.0'}
-
-  passport-auth-token@1.0.1:
-    resolution: {integrity: sha512-Dn0rq96wRaUqYs54D7wfuYicfwW5P10vEvvcMIOO4+EsZksB+i3S/qn35My+bvlw3xES74WNVfgeYaXr74/fSw==}
-    engines: {node: '>= 0.10.0'}
 
   passport-http@0.3.0:
     resolution: {integrity: sha512-OwK9DkqGVlJfO8oD0Bz1VDIo+ijD3c1ZbGGozIZw+joIP0U60pXY7goB+8wiDWtNqHpkTaQiJ9Ux1jE3Ykmpuw==}
@@ -5718,12 +5705,6 @@ snapshots:
   '@types/passport-anonymous@1.0.5':
     dependencies:
       '@types/passport': 1.0.17
-
-  '@types/passport-auth-token@1.0.4':
-    dependencies:
-      '@types/express': 5.0.0
-      '@types/passport': 1.0.17
-      '@types/passport-strategy': 0.2.38
 
   '@types/passport-http@0.3.11':
     dependencies:
@@ -8209,10 +8190,6 @@ snapshots:
     optional: true
 
   passport-anonymous@1.0.1:
-    dependencies:
-      passport-strategy: 1.0.0
-
-  passport-auth-token@1.0.1:
     dependencies:
       passport-strategy: 1.0.0
 

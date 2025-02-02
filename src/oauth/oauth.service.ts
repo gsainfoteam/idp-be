@@ -1,32 +1,31 @@
+import { Loggable } from '@lib/logger/decorator/loggable';
+import { RedisService } from '@lib/redis';
 import {
   BadRequestException,
   Injectable,
   Logger,
   UnauthorizedException,
 } from '@nestjs/common';
-import { OauthRepository } from './oauth.repository';
-import { JwtService } from '@nestjs/jwt';
-import * as crypto from 'crypto';
 import { ConfigService } from '@nestjs/config';
-import { AuthorizeDto } from './dto/req/authorize.dto';
+import { JwtService } from '@nestjs/jwt';
+import { Client, User } from '@prisma/client';
+import * as crypto from 'crypto';
 import { ClientService } from 'src/client/client.service';
-import {
-  Scope,
-  allowedScopes,
-  scopesRequireConsent,
-} from './types/Scopes.type';
+import { UserService } from 'src/user/user.service';
+
+import { AuthorizeDto } from './dto/req/authorize.dto';
+import { RevokeDto } from './dto/req/revoke.dto';
+import { TokenDto } from './dto/req/token.dto';
+import { OauthRepository } from './oauth.repository';
 import { AuthorizeResType } from './types/authorizeRes.type';
-import { UserInfo } from 'src/idp/types/userInfo.type';
 import { CodeCacheType } from './types/codeCache.type';
 import { CreateTokenType } from './types/createToken.type';
+import {
+  allowedScopes,
+  Scope,
+  scopesRequireConsent,
+} from './types/Scopes.type';
 import { TokenCacheType } from './types/tokenCache.type';
-import { UserService } from 'src/user/user.service';
-import { TokenDto } from './dto/req/token.dto';
-import { Client } from '@prisma/client';
-import { RevokeDto } from './dto/req/revoke.dto';
-import { JwtPayload } from 'jsonwebtoken';
-import { Loggable } from '@lib/logger/decorator/loggable';
-import { Cache } from '@nestjs/cache-manager';
 
 @Injectable()
 @Loggable()
@@ -39,8 +38,8 @@ export class OauthService {
     private readonly userService: UserService,
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
-    private readonly cacheService: Cache,
     private readonly clientService: ClientService,
+    private readonly redisService: RedisService,
   ) {}
 
   /**
@@ -61,7 +60,7 @@ export class OauthService {
    */
   async authorize(
     { clientId, redirectUri, nonce, scope, responseType }: AuthorizeDto,
-    userInfo: UserInfo,
+    userInfo: User,
   ): Promise<AuthorizeResType> {
     // if the client is not valid, it throws an error
     if (!(await this.clientService.validateUri(clientId, redirectUri))) {
@@ -72,8 +71,8 @@ export class OauthService {
     const code = responseType.includes('code')
       ? await (async () => {
           const code = this.generateOpaqueToken();
-          await this.cacheService.set<CodeCacheType>(
-            `${this.CodePrefix}${code}`,
+          await this.redisService.set<CodeCacheType>(
+            code,
             {
               userUuid: userInfo.uuid,
               clientId,
@@ -81,7 +80,7 @@ export class OauthService {
               redirectUri,
               scope,
             },
-            30 * 1000,
+            { prefix: this.CodePrefix, ttl: 30 },
           );
           return code;
         })()
@@ -190,23 +189,33 @@ export class OauthService {
    * @param token the token that will be validated
    * @returns return the user information
    */
-  async validateToken(
-    token: string,
-  ): Promise<Partial<Omit<UserInfo, 'accessLevel'>>> {
-    const tokenCache = await this.cacheService
-      .get<TokenCacheType>(`${this.TokenPrefix}${token}`)
-      .then((val) => {
-        if (val === null) return undefined;
-        return val;
-      });
+  async validateToken(token: string): Promise<Partial<User>> {
+    const tokenCache: TokenCacheType | null = await this.redisService.get(
+      token,
+      {
+        prefix: this.TokenPrefix,
+      },
+    );
     if (tokenCache) {
       const user = await this.userService.findUserByUuid({
         uuid: tokenCache.userUuid,
       });
       return this.filterUserInfo(user, tokenCache.scope);
     }
-    const jwt: JwtPayload = await this.jwtService
-      .verifyAsync(token)
+    const jwt: {
+      sub: string;
+      name: string;
+      email: string;
+      phone_number: string;
+      studentId: string;
+    } = await this.jwtService
+      .verifyAsync<{
+        sub: string;
+        name: string;
+        email: string;
+        phone_number: string;
+        studentId: string;
+      }>(token)
       .catch(() => {
         this.logger.error('invalid_token');
         throw new UnauthorizedException('invalid_token');
@@ -263,14 +272,14 @@ export class OauthService {
         : {
             accessToken: await (async () => {
               const token = this.generateOpaqueToken();
-              await this.cacheService.set<TokenCacheType>(
-                `${this.TokenPrefix}${token}`,
+              await this.redisService.set<TokenCacheType>(
+                token,
                 {
                   userUuid: user.uuid,
                   clientId,
                   scope,
                 },
-                60 * 60 * 1000,
+                { prefix: this.TokenPrefix, ttl: 3600 },
               );
               return token;
             })(),
@@ -323,11 +332,12 @@ export class OauthService {
     redirectUri: string,
     clientId: string,
   ): Promise<AuthorizeResType> {
-    const codeCache: CodeCacheType = await this.cacheService
-      .get<CodeCacheType>(`${this.CodePrefix}${code}`)
-      .then((val) => {
-        if (!val) throw new BadRequestException('invalid_grant');
-        return val;
+    const codeCache: CodeCacheType = await this.redisService
+      .getOrThrow<CodeCacheType>(code, {
+        prefix: this.CodePrefix,
+      })
+      .catch(() => {
+        throw new BadRequestException('invalid_grant');
       });
     if (
       redirectUri !== codeCache.redirectUri ||
@@ -354,17 +364,17 @@ export class OauthService {
     token: string,
     clientId: string,
   ): Promise<boolean> {
-    const tokenCache: TokenCacheType | undefined = await this.cacheService
-      .get<TokenCacheType>(`${this.TokenPrefix}${token}`)
-      .then((val) => {
-        if (!val) return undefined;
-        return val;
+    const tokenCache: TokenCacheType | null =
+      await this.redisService.get<TokenCacheType>(token, {
+        prefix: this.TokenPrefix,
       });
     if (!tokenCache) return false;
     if (clientId !== tokenCache.clientId) {
       return false;
     }
-    await this.cacheService.del(`${this.TokenPrefix}${token}`);
+    await this.redisService.del(token, {
+      prefix: this.TokenPrefix,
+    });
     return true;
   }
 
@@ -407,9 +417,9 @@ export class OauthService {
    * @returns filtered user information
    */
   private filterUserInfo(
-    user: UserInfo,
+    user: User,
     scopes: Readonly<Scope[]> = allowedScopes,
-  ): Partial<UserInfo> {
+  ): Partial<User> {
     return {
       uuid: user.uuid,
       email: scopes.includes('email') ? user.email : undefined,
