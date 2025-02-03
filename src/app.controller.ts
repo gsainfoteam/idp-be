@@ -17,10 +17,19 @@ export class AppController {
 
   @ApiOperation({
     summary: 'Get information about the service',
-    description: 'Returns the information about the service',
+    description: '현재 서버의 기본적인 정보를 확인할 수 있습니다.',
   })
-  @ApiOkResponse()
-  @ApiInternalServerErrorResponse()
+  @ApiOkResponse({
+    description: '성공',
+    example: {
+      name: 'infoteam-idp',
+      version: 'v2.0.0',
+      publishedAt: new Date().toISOString(),
+    },
+  })
+  @ApiInternalServerErrorResponse({
+    description: '서버에 문제가 생김',
+  })
   @Get()
   info() {
     return {
