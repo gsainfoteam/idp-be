@@ -4,8 +4,8 @@ import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
 import * as crypto from 'crypto';
+import { AuthModule } from 'src/auth/auth.module';
 import { ClientModule } from 'src/client/client.module';
-import { IdpModule } from 'src/idp/idp.module';
 import { UserModule } from 'src/user/user.module';
 
 import { OauthController, OpenIDDiscoveryController } from './oauth.controller';
@@ -18,7 +18,7 @@ import { OauthService } from './oauth.service';
     PrismaModule,
     RedisModule,
     ClientModule,
-    IdpModule,
+    AuthModule,
     UserModule,
     JwtModule.registerAsync({
       imports: [ConfigModule],

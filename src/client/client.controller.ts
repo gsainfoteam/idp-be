@@ -9,20 +9,23 @@ import {
   Post,
   UseGuards,
   UseInterceptors,
+  UsePipes,
+  ValidationPipe,
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
   ApiConflictResponse,
+  ApiCreatedResponse,
   ApiForbiddenResponse,
   ApiInternalServerErrorResponse,
+  ApiOkResponse,
   ApiOperation,
-  ApiResponse,
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { User } from '@prisma/client';
-import { GetUser } from 'src/idp/decorator/getUser.decorator';
-import { IdpGuard } from 'src/idp/guard/idp.guard';
+import { GetUser } from 'src/auth/decorator/getUser.decorator';
+import { UserGuard } from 'src/auth/guard/auth.guard';
 
 import { ClientService } from './client.service';
 import { CreateClientDto, UpdateClientDto } from './dto/req.dto';
@@ -34,6 +37,7 @@ import {
 
 @ApiTags('client')
 @Controller('client')
+@UsePipes(new ValidationPipe({ transform: true }))
 @UseInterceptors(ClassSerializerInterceptor)
 export class ClientController {
   constructor(private readonly clientService: ClientService) {}
@@ -42,12 +46,12 @@ export class ClientController {
     summary: 'Get client list',
     description: '유저가 멤버로 있는 client의 리스트를 알려준다.',
   })
-  @ApiBearerAuth('idp:jwt')
-  @ApiResponse({ status: 200, type: [ClientResDto] })
-  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
-  @ApiInternalServerErrorResponse({ description: 'Internal Server Error' })
+  @ApiBearerAuth('user:jwt')
+  @ApiOkResponse({ description: '성공', type: [ClientResDto] })
+  @ApiUnauthorizedResponse({ description: '인증 실패' })
+  @ApiInternalServerErrorResponse({ description: '서버 오류' })
   @Get()
-  @UseGuards(IdpGuard)
+  @UseGuards(UserGuard)
   async getClientList(@GetUser() user: User): Promise<ClientResDto[]> {
     return (await this.clientService.getClientList(user)).map((client) => {
       return new ClientResDto(client);
@@ -58,12 +62,12 @@ export class ClientController {
     summary: 'Get client',
     description: '유저가 멤버로 있는 client의 정보를 알려준다.',
   })
-  @ApiBearerAuth('idp:jwt')
-  @ApiResponse({ status: 200, type: ClientResDto })
-  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
-  @ApiInternalServerErrorResponse({ description: 'Internal Server Error' })
+  @ApiBearerAuth('user:jwt')
+  @ApiOkResponse({ description: '성공', type: ClientResDto })
+  @ApiUnauthorizedResponse({ description: '인증 실패' })
+  @ApiInternalServerErrorResponse({ description: '서버 오류' })
   @Get(':uuid')
-  @UseGuards(IdpGuard)
+  @UseGuards(UserGuard)
   async getClient(
     @Param('uuid', ParseUUIDPipe) uuid: string,
     @GetUser() user: User,
@@ -75,12 +79,12 @@ export class ClientController {
     summary: 'Get client public information',
     description: 'client의 공개 정보를 알려준다.',
   })
-  @ApiBearerAuth('idp:jwt')
-  @ApiResponse({ status: 200, type: ClientPublicResDto })
-  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
-  @ApiInternalServerErrorResponse({ description: 'Internal Server Error' })
+  @ApiBearerAuth('user:jwt')
+  @ApiOkResponse({ description: '성공', type: ClientPublicResDto })
+  @ApiUnauthorizedResponse({ description: '인증 실패' })
+  @ApiInternalServerErrorResponse({ description: '서버 오류' })
   @Get(':id/public')
-  @UseGuards(IdpGuard)
+  @UseGuards(UserGuard)
   async getClientPublicInformation(
     @Param('id') id: string,
     @GetUser() user: User,
@@ -94,13 +98,13 @@ export class ClientController {
     summary: 'Register client',
     description: '유저가 client를 등록한다.',
   })
-  @ApiBearerAuth('idp:jwt')
-  @ApiResponse({ status: 201, type: ClientCredentialResDto })
-  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
-  @ApiConflictResponse({ description: 'Conflict' })
-  @ApiInternalServerErrorResponse({ description: 'Internal Server Error' })
+  @ApiBearerAuth('user:jwt')
+  @ApiCreatedResponse({ description: '성공', type: ClientCredentialResDto })
+  @ApiUnauthorizedResponse({ description: '인증 실패' })
+  @ApiConflictResponse({ description: '이미 있는 데이터' })
+  @ApiInternalServerErrorResponse({ description: '서버 오류' })
   @Post()
-  @UseGuards(IdpGuard)
+  @UseGuards(UserGuard)
   async registerClient(
     @Body() createClientDto: CreateClientDto,
     @GetUser() user: User,
@@ -114,13 +118,13 @@ export class ClientController {
     summary: 'Reset client secret',
     description: '유저가 client의 secret을 재설정한다.',
   })
-  @ApiBearerAuth('idp:jwt')
-  @ApiResponse({ status: 200, type: ClientCredentialResDto })
-  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
-  @ApiForbiddenResponse({ description: 'Forbidden' })
-  @ApiInternalServerErrorResponse({ description: 'Internal Server Error' })
-  @Patch(':uuid/reset-secret')
-  @UseGuards(IdpGuard)
+  @ApiBearerAuth('user:jwt')
+  @ApiOkResponse({ description: '성공', type: ClientCredentialResDto })
+  @ApiUnauthorizedResponse({ description: '인증 실패' })
+  @ApiForbiddenResponse({ description: '접근 불가' })
+  @ApiInternalServerErrorResponse({ description: '서버 오류' })
+  @Patch(':uuid/secret')
+  @UseGuards(UserGuard)
   async resetClientSecret(
     @Param('uuid', ParseUUIDPipe) uuid: string,
     @GetUser() user: User,
@@ -134,13 +138,13 @@ export class ClientController {
     summary: 'Update client',
     description: '유저가 client의 정보를 수정한다.',
   })
-  @ApiBearerAuth('idp:jwt')
-  @ApiResponse({ status: 200, type: ClientResDto })
-  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
-  @ApiForbiddenResponse({ description: 'Forbidden' })
-  @ApiInternalServerErrorResponse({ description: 'Internal Server Error' })
+  @ApiBearerAuth('user:jwt')
+  @ApiOkResponse({ description: '성공', type: ClientResDto })
+  @ApiUnauthorizedResponse({ description: '인증 실패' })
+  @ApiForbiddenResponse({ description: '접근 불가' })
+  @ApiInternalServerErrorResponse({ description: '서버 오류' })
   @Patch(':uuid')
-  @UseGuards(IdpGuard)
+  @UseGuards(UserGuard)
   async updateClient(
     @Param('uuid') uuid: string,
     @Body() body: UpdateClientDto,

@@ -24,8 +24,8 @@ import {
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { User } from '@prisma/client';
-import { GetUser } from 'src/idp/decorator/getUser.decorator';
-import { IdpGuard } from 'src/idp/guard/idp.guard';
+import { GetUser } from 'src/auth/decorator/getUser.decorator';
+import { UserGuard } from 'src/auth/guard/auth.guard';
 
 import { AuthorizeDto } from './dto/req/authorize.dto';
 import { RevokeDto } from './dto/req/revoke.dto';
@@ -47,9 +47,9 @@ export class OauthController {
   @ApiCreatedResponse({ description: 'Authorize', type: AuthorizeResDto })
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   @ApiForbiddenResponse({ description: 'Forbidden' })
-  @ApiBearerAuth('idp:jwt')
+  @ApiBearerAuth('user:jwt')
   @Post('authorize')
-  @UseGuards(IdpGuard)
+  @UseGuards(UserGuard)
   @UsePipes(new ValidationPipe({ transform: true }))
   async authorize(
     @Body() authorizeDto: AuthorizeDto,

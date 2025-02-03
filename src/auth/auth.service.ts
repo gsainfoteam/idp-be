@@ -11,8 +11,8 @@ import { LoginResultType } from './types/loginResult.type';
 
 @Injectable()
 @Loggable()
-export class IdpService {
-  private readonly logger = new Logger(IdpService.name);
+export class AuthService {
+  private readonly logger = new Logger(AuthService.name);
   private readonly refreshTokenPrefix = 'refreshToken';
   constructor(
     private readonly redisService: RedisService,

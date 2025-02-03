@@ -52,7 +52,7 @@ async function bootstrap() {
         name: 'JWT',
         in: 'header',
       },
-      'idp:jwt',
+      'user:jwt',
     )
     .build();
   const document = SwaggerModule.createDocument(app, config);

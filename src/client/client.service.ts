@@ -1,5 +1,5 @@
 import { Loggable } from '@lib/logger/decorator/loggable';
-import { Injectable, Logger, UnauthorizedException } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { Client, User } from '@prisma/client';
 import * as bcrypt from 'bcryptjs';
 import * as crypto from 'crypto';
@@ -11,7 +11,6 @@ import { ClientWithConsent } from './types/clientWithConsent.type';
 @Injectable()
 @Loggable()
 export class ClientService {
-  private readonly logger = new Logger(ClientService.name);
   constructor(private readonly clientRepository: ClientRepository) {}
 
   /**
@@ -104,6 +103,11 @@ export class ClientService {
     updateClientDto: UpdateClientDto,
     user: User,
   ): Promise<Client> {
+    if (updateClientDto.optionalScopes && updateClientDto.scopes) {
+      updateClientDto.optionalScopes = updateClientDto.optionalScopes.filter(
+        (val) => !updateClientDto.scopes?.includes(val),
+      );
+    }
     return this.clientRepository.updateClient(
       { uuid, ...updateClientDto },
       user.uuid,

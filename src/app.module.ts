@@ -3,12 +3,12 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 
 import { AppController } from './app.controller';
+import { AuthModule } from './auth/auth.module';
 import { ClientModule } from './client/client.module';
 import { HealthModule } from './health/health.module';
-import { IdpModule } from './idp/idp.module';
 import { OauthModule } from './oauth/oauth.module';
-import { UserModule } from './user/user.module';
 import { ResourceModule } from './resource/resource.module';
+import { UserModule } from './user/user.module';
 
 @Module({
   imports: [
@@ -17,10 +17,10 @@ import { ResourceModule } from './resource/resource.module';
       isGlobal: true,
       envFilePath: '.env',
     }),
-    UserModule,
-    ClientModule,
     HealthModule,
-    IdpModule,
+    UserModule,
+    AuthModule,
+    ClientModule,
     OauthModule,
     ResourceModule,
   ],

@@ -1,15 +1,13 @@
 import { PrismaModule } from '@lib/prisma';
-import { HttpModule } from '@nestjs/axios';
 import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
-import { IdpModule } from 'src/idp/idp.module';
+import { AuthModule } from 'src/auth/auth.module';
 
 import { ClientController } from './client.controller';
 import { ClientRepository } from './client.repository';
 import { ClientService } from './client.service';
 
 @Module({
-  imports: [PrismaModule, HttpModule, ConfigModule, IdpModule],
+  imports: [PrismaModule, AuthModule],
   controllers: [ClientController],
   providers: [ClientService, ClientRepository],
   exports: [ClientService],
