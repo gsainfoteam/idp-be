@@ -7,52 +7,54 @@ Project "idp" {
   Note: ''
 }
 
-Table user_tb {
+Table user {
   uuid String [pk]
+  password String [not null]
   name String [not null]
   email String [unique, not null]
-  password String [not null]
   studentId String [unique, not null]
   phoneNumber String [unique, not null]
   createdAt DateTime [default: `now()`, not null]
   updatedAt DateTime [not null]
-  accessLevel AccessLevel [not null, default: 'USER']
-  clients client_tb [not null]
-  consent consent_tb [not null]
+  clients client [not null]
+  consent consent [not null]
 }
 
-Table client_tb {
+Table client {
   uuid String [pk]
   id String [unique, not null]
   password String [not null]
   name String [not null]
   urls String[] [not null]
-  role Role [not null, default: 'DISALLOW']
   createdAt DateTime [default: `now()`, not null]
   updatedAt DateTime [not null]
-  member user_tb [not null]
-  consent consent_tb [not null]
+  idTokenAllowed Boolean [not null, default: false]
+  implicitAllowed Boolean [not null, default: false]
+  scopes String[] [not null]
+  optionalScopes String[] [not null]
+  member user [not null]
+  consent consent [not null]
 }
 
-Table RefreshToken {
+Table refresh_token {
   token String [pk]
   scopes String[] [not null]
   createdAt DateTime [default: `now()`, not null]
   updatedAt DateTime [not null]
   clientUuid String [not null]
   userUuid String [not null]
-  consent consent_tb [not null]
+  consent consent [not null]
 }
 
-Table consent_tb {
+Table consent {
   clientUuid String [not null]
   userUuid String [not null]
   scopes String[] [not null]
   createdAt DateTime [default: `now()`, not null]
   updatedAt DateTime [not null]
-  client client_tb [not null]
-  user user_tb [not null]
-  refreshToken RefreshToken [not null]
+  client client [not null]
+  user user [not null]
+  refreshToken refresh_token [not null]
 
   indexes {
     (clientUuid, userUuid) [pk]
@@ -60,22 +62,12 @@ Table consent_tb {
 }
 
 Table ClientToUser {
-  clientsId String [ref: > client_tb.uuid]
-  memberId String [ref: > user_tb.uuid]
+  clientsId String [ref: > client.uuid]
+  memberId String [ref: > user.uuid]
 }
 
-Enum AccessLevel {
-  USER
-  ADMIN
-}
+Ref: refresh_token.(clientUuid, userUuid) > consent.(clientUuid, userUuid)
 
-Enum Role {
-  DISALLOW
-  ALLOW
-}
+Ref: consent.clientUuid > client.uuid
 
-Ref: RefreshToken.(clientUuid, userUuid) > consent_tb.(clientUuid, userUuid)
-
-Ref: consent_tb.clientUuid > client_tb.uuid
-
-Ref: consent_tb.userUuid > user_tb.uuid
+Ref: consent.userUuid > user.uuid

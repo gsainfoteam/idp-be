@@ -1,13 +1,14 @@
+import fastifyCookie from '@fastify/cookie';
+import { ExceptionLoggerFilter } from '@lib/logger';
+import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
-import { AppModule } from './app.module';
 import {
   FastifyAdapter,
   NestFastifyApplication,
 } from '@nestjs/platform-fastify';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import { ConfigService } from '@nestjs/config';
-import { ExceptionLoggerFilter } from '@lib/logger';
-import fastifyCookie from '@fastify/cookie';
+
+import { AppModule } from './app.module';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestFastifyApplication>(
@@ -51,14 +52,7 @@ async function bootstrap() {
         name: 'JWT',
         in: 'header',
       },
-      'access-token',
-    )
-    .addBasicAuth(
-      {
-        type: 'http',
-        scheme: 'basic',
-      },
-      'client-auth',
+      'idp:jwt',
     )
     .build();
   const document = SwaggerModule.createDocument(app, config);
@@ -72,4 +66,5 @@ async function bootstrap() {
   // Execute the application
   await app.listen(process.env.PORT ?? 3000, '0.0.0.0');
 }
+// eslint-disable-next-line @typescript-eslint/no-floating-promises
 bootstrap();

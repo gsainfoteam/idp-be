@@ -1,5 +1,14 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsArray, IsOptional, IsString, IsUrl } from 'class-validator';
+import {
+  IsArray,
+  IsBoolean,
+  IsIn,
+  IsOptional,
+  IsString,
+  IsUrl,
+} from 'class-validator';
+
+import { ClientScope, ClientScopes } from '../types/scopes.type';
 
 export class CreateClientDto {
   @ApiProperty({
@@ -45,4 +54,24 @@ export class UpdateClientDto {
   @IsUrl({ require_tld: false }, { each: true })
   @IsOptional()
   urls?: string[];
+
+  @IsArray()
+  @IsString({ each: true })
+  @IsIn(ClientScopes, { each: true })
+  @IsOptional()
+  scopes?: ClientScope[];
+
+  @IsArray()
+  @IsString({ each: true })
+  @IsIn(ClientScopes, { each: true })
+  @IsOptional()
+  optionalScopes?: ClientScope[];
+
+  @IsBoolean()
+  @IsOptional()
+  idTokenAllowed?: boolean;
+
+  @IsBoolean()
+  @IsOptional()
+  implicitAllowed?: boolean;
 }

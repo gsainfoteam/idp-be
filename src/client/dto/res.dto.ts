@@ -1,8 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { $Enums, Client, Role } from '@prisma/client';
+import { Client } from '@prisma/client';
 import { Exclude, Expose } from 'class-transformer';
 
-import { ClientWithConsent } from '../types/clientWithConsent';
+import { ClientWithConsent } from '../types/clientWithConsent.type';
 
 export class ClientResDto implements Client {
   @ApiProperty({
@@ -31,13 +31,6 @@ export class ClientResDto implements Client {
   urls: string[];
 
   @ApiProperty({
-    description: 'The role of the client',
-    example: 'admin',
-    enum: Role,
-  })
-  role: Role;
-
-  @ApiProperty({
     description: 'The date the client was created',
     example: '2021-07-01T00:00:00.000Z',
   })
@@ -48,6 +41,31 @@ export class ClientResDto implements Client {
     example: '2021-07-01T00:00:00.000Z',
   })
   updatedAt: Date;
+
+  @ApiProperty({
+    description: "the scope which need to use the client's service",
+    example: ['profile', 'email'],
+  })
+  scopes: string[];
+
+  @ApiProperty({
+    description: "the scope whether need or not in the client's service",
+    example: ['student_id'],
+  })
+  optionalScopes: string[];
+
+  @ApiProperty({
+    description: 'whether the client has authority to use id token or not',
+    example: true,
+  })
+  idTokenAllowed: boolean;
+
+  @ApiProperty({
+    description:
+      'whether the client has authority to use implicit method or not',
+    example: false,
+  })
+  implicitAllowed: boolean;
 
   @Exclude()
   password: string;
@@ -89,13 +107,22 @@ export class ClientCredentialResDto implements Client {
   urls: string[];
 
   @Exclude()
-  role: $Enums.Role;
-
-  @Exclude()
   createdAt: Date;
 
   @Exclude()
   updatedAt: Date;
+
+  @Exclude()
+  idTokenAllowed: boolean;
+
+  @Exclude()
+  implicitAllowed: boolean;
+
+  @Exclude()
+  scopes: string[];
+
+  @Exclude()
+  optionalScopes: string[];
 
   constructor(client: Client) {
     Object.assign(this, client);
@@ -122,6 +149,18 @@ export class ClientPublicResDto implements ClientWithConsent {
   name: string;
 
   @ApiProperty({
+    description: "the scope which need to use the client's service",
+    example: ['profile', 'email'],
+  })
+  scopes: string[];
+
+  @ApiProperty({
+    description: "the scope whether need or not in the client's service",
+    example: ['student_id'],
+  })
+  optionalScopes: string[];
+
+  @ApiProperty({
     description: 'Scopes that the user has recently consented to',
     example: ['openid', 'profile', 'email'],
   })
@@ -137,9 +176,6 @@ export class ClientPublicResDto implements ClientWithConsent {
   urls: string[];
 
   @Exclude()
-  role: $Enums.Role;
-
-  @Exclude()
   createdAt: Date;
 
   @Exclude()
@@ -147,6 +183,12 @@ export class ClientPublicResDto implements ClientWithConsent {
 
   @Exclude()
   consent: { scopes: string[] }[];
+
+  @Exclude()
+  idTokenAllowed: boolean;
+
+  @Exclude()
+  implicitAllowed: boolean;
 
   constructor(client: ClientWithConsent) {
     Object.assign(this, client);

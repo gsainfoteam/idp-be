@@ -47,7 +47,7 @@ export class OauthController {
   @ApiCreatedResponse({ description: 'Authorize', type: AuthorizeResDto })
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   @ApiForbiddenResponse({ description: 'Forbidden' })
-  @ApiBearerAuth('access-token')
+  @ApiBearerAuth('idp:jwt')
   @Post('authorize')
   @UseGuards(IdpGuard)
   @UsePipes(new ValidationPipe({ transform: true }))

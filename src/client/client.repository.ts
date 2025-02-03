@@ -10,7 +10,7 @@ import {
 import { Client } from '@prisma/client';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 
-import { ClientWithConsent } from './types/clientWithConsent';
+import { ClientWithConsent } from './types/clientWithConsent.type';
 
 @Injectable()
 @Loggable()
@@ -183,7 +183,22 @@ export class ClientRepository {
       uuid,
       name,
       urls,
-    }: Pick<Client, 'uuid'> & Partial<Pick<Client, 'name' | 'urls'>>,
+      scopes,
+      optionalScopes,
+      idTokenAllowed,
+      implicitAllowed,
+    }: Pick<Client, 'uuid'> &
+      Partial<
+        Pick<
+          Client,
+          | 'name'
+          | 'urls'
+          | 'scopes'
+          | 'optionalScopes'
+          | 'idTokenAllowed'
+          | 'implicitAllowed'
+        >
+      >,
     userUuid: string,
   ): Promise<Client> {
     return this.prismaService.client
@@ -199,6 +214,10 @@ export class ClientRepository {
         data: {
           name,
           urls,
+          scopes,
+          optionalScopes,
+          idTokenAllowed,
+          implicitAllowed,
         },
       })
       .catch((error) => {

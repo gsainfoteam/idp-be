@@ -14,17 +14,21 @@ datasource db {
 }
 
 model User {
-  uuid        String   @id @default(uuid()) @db.Uuid
+  uuid     String @id @default(uuid()) @db.Uuid
+  password String
+
   name        String
-  email       String   @unique
-  password    String
-  studentId   String   @unique @map("student_id")
-  phoneNumber String   @unique @map("phone_number") @db.VarChar(11)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  email       String @unique
+  studentId   String @unique @map("student_id")
+  phoneNumber String @unique @map("phone_number") @db.VarChar(11)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   clients Client[]  @relation("ClientToUser")
   consent Consent[]
+
+  @@map("user")
 }
 
 model Client {
@@ -36,12 +40,15 @@ model Client {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  idTokenAllowed Boolean  @default(false)
-  scopes         String[]
-  optionalScopes String[] @map("optional_scopes")
+  idTokenAllowed  Boolean  @default(false)
+  implicitAllowed Boolean  @default(false)
+  scopes          String[]
+  optionalScopes  String[] @map("optional_scopes")
 
   member  User[]    @relation("ClientToUser")
   consent Consent[]
+
+  @@map("client")
 }
 
 model RefreshToken {
@@ -53,6 +60,8 @@ model RefreshToken {
   clientUuid String  @db.Uuid
   userUuid   String  @db.Uuid
   consent    Consent @relation(fields: [clientUuid, userUuid], references: [clientUuid, userUuid])
+
+  @@map("refresh_token")
 }
 
 model Consent {
@@ -67,4 +76,5 @@ model Consent {
   refreshToken RefreshToken[]
 
   @@id([clientUuid, userUuid])
+  @@map("consent")
 }

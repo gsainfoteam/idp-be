@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { AccessLevel, User } from '@prisma/client';
+import { User } from '@prisma/client';
 import { Exclude } from 'class-transformer';
 
 export class LoginResDto {
@@ -53,13 +53,6 @@ export class UserResDto implements User {
     description: '수정일',
   })
   updatedAt: Date;
-
-  @ApiProperty({
-    example: 'accessLevel',
-    description: '접근 권한',
-    enum: AccessLevel,
-  })
-  accessLevel: AccessLevel;
 
   @Exclude()
   password: string;

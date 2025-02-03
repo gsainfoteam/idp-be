@@ -109,7 +109,7 @@ export class IdpController {
   @ApiResponse({ type: UserResDto })
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   @ApiInternalServerErrorResponse({ description: 'Internal Server Error' })
-  @ApiBearerAuth('access-token')
+  @ApiBearerAuth('idp:jwt')
   @Get('user')
   @UseGuards(IdpGuard)
   getUserInfo(@GetUser() user: User): UserResDto {

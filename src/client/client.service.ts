@@ -1,25 +1,18 @@
 import { Loggable } from '@lib/logger/decorator/loggable';
-import { HttpService } from '@nestjs/axios';
 import { Injectable, Logger, UnauthorizedException } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import { Client, User } from '@prisma/client';
 import * as bcrypt from 'bcryptjs';
 import * as crypto from 'crypto';
-import { firstValueFrom } from 'rxjs';
 
 import { ClientRepository } from './client.repository';
 import { CreateClientDto, UpdateClientDto } from './dto/req.dto';
-import { ClientWithConsent } from './types/clientWithConsent';
+import { ClientWithConsent } from './types/clientWithConsent.type';
 
 @Injectable()
 @Loggable()
 export class ClientService {
   private readonly logger = new Logger(ClientService.name);
-  constructor(
-    private readonly clientRepository: ClientRepository,
-    private readonly httpService: HttpService,
-    private readonly configService: ConfigService,
-  ) {}
+  constructor(private readonly clientRepository: ClientRepository) {}
 
   /**
    * Get client list
@@ -108,10 +101,13 @@ export class ClientService {
    */
   async updateClient(
     uuid: string,
-    { name, urls }: UpdateClientDto,
+    updateClientDto: UpdateClientDto,
     user: User,
   ): Promise<Client> {
-    return this.clientRepository.updateClient({ uuid, name, urls }, user.uuid);
+    return this.clientRepository.updateClient(
+      { uuid, ...updateClientDto },
+      user.uuid,
+    );
   }
 
   /**
@@ -124,37 +120,6 @@ export class ClientService {
     const client = await this.clientRepository.findById(id);
     if (client.urls.length === 0) return false;
     return client.urls.includes(url);
-  }
-
-  /**
-   * send a slack message to notify the permission request
-   * @param uuid client's uuid
-   * @param user user who sends the permission request
-   */
-  async adminRequest(uuid: string, user: User): Promise<void> {
-    const { name } = await this.clientRepository.findClientByUuidAndUserUuid(
-      uuid,
-      user.uuid,
-    );
-    await firstValueFrom(
-      this.httpService.post(
-        this.configService.getOrThrow<string>('SLACK_WEBHOOK_URL'),
-        {
-          text: `Service server sends permission request for client ${name}(${uuid})`,
-          attachments: [
-            {
-              color: '#36a64f',
-              title: 'Details',
-              fields: [
-                { title: 'client name', value: name },
-                { title: 'client uuid', value: uuid },
-                { title: 'user id', value: user.uuid },
-              ],
-            },
-          ],
-        },
-      ),
-    );
   }
 
   /**

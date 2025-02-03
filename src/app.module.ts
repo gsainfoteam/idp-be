@@ -8,6 +8,7 @@ import { HealthModule } from './health/health.module';
 import { IdpModule } from './idp/idp.module';
 import { OauthModule } from './oauth/oauth.module';
 import { UserModule } from './user/user.module';
+import { ResourceModule } from './resource/resource.module';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { UserModule } from './user/user.module';
     HealthModule,
     IdpModule,
     OauthModule,
+    ResourceModule,
   ],
   controllers: [AppController],
 })
