@@ -29,11 +29,7 @@ import { UserGuard } from 'src/auth/guard/auth.guard';
 
 import { ClientService } from './client.service';
 import { CreateClientDto, UpdateClientDto } from './dto/req.dto';
-import {
-  ClientCredentialResDto,
-  ClientPublicResDto,
-  ClientResDto,
-} from './dto/res.dto';
+import { ClientCredentialResDto, ClientResDto } from './dto/res.dto';
 
 @ApiTags('client')
 @Controller('client')
@@ -73,25 +69,6 @@ export class ClientController {
     @GetUser() user: User,
   ): Promise<ClientResDto> {
     return new ClientResDto(await this.clientService.getClient(uuid, user));
-  }
-
-  @ApiOperation({
-    summary: 'Get client public information',
-    description: 'client의 공개 정보를 알려준다.',
-  })
-  @ApiBearerAuth('user:jwt')
-  @ApiOkResponse({ description: '성공', type: ClientPublicResDto })
-  @ApiUnauthorizedResponse({ description: '인증 실패' })
-  @ApiInternalServerErrorResponse({ description: '서버 오류' })
-  @Get(':id/public')
-  @UseGuards(UserGuard)
-  async getClientPublicInformation(
-    @Param('id') id: string,
-    @GetUser() user: User,
-  ): Promise<ClientPublicResDto> {
-    return new ClientPublicResDto(
-      await this.clientService.getClientPublicInformation(id, user),
-    );
   }
 
   @ApiOperation({

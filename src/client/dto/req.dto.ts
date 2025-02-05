@@ -12,13 +12,6 @@ import { ClientScope, ClientScopes } from '../types/clientScopes.type';
 
 export class CreateClientDto {
   @ApiProperty({
-    description: 'The unique id of the client',
-    example: 'client-1',
-  })
-  @IsString()
-  id: string;
-
-  @ApiProperty({
     description: 'The name of the client',
     example: 'client-1',
   })
@@ -82,12 +75,4 @@ export class UpdateClientDto {
   @IsBoolean()
   @IsOptional()
   idTokenAllowed?: boolean;
-
-  @ApiProperty({
-    description: 'whether using implicit method or not',
-    example: true,
-  })
-  @IsBoolean()
-  @IsOptional()
-  implicitAllowed?: boolean;
 }

@@ -4,8 +4,10 @@ import {
   ApiInternalServerErrorResponse,
   ApiOkResponse,
   ApiOperation,
+  ApiTags,
 } from '@nestjs/swagger';
 
+@ApiTags('app')
 @Controller()
 export class AppController {
   private readonly apiVersion: string;

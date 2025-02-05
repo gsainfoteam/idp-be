@@ -10,8 +10,6 @@ import {
 import { Client } from '@prisma/client';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 
-import { ClientWithConsent } from './types/clientWithConsent.type';
-
 @Injectable()
 @Loggable()
 export class ClientRepository {
@@ -30,53 +28,22 @@ export class ClientRepository {
     });
   }
 
-  async findById(id: string): Promise<Client> {
+  async findClientByUuid(uuid: string): Promise<Client> {
     return this.prismaService.client
       .findUniqueOrThrow({
         where: {
-          id,
+          uuid,
         },
       })
       .catch((error) => {
         if (
           error instanceof PrismaClientKnownRequestError &&
-          error.code === 'P2025'
+          error.code == 'P2025'
         ) {
-          this.logger.debug(`findById error: ${error.stack}`);
+          this.logger.debug(`findClientByUuid error: ${error.stack}`);
           throw new ForbiddenException();
         }
-        this.logger.error(`findById error: ${error}`);
-        throw new InternalServerErrorException();
-      });
-  }
-
-  async findClientWithConsentByIdAndUserUuid(
-    id: string,
-    userUuid: string,
-  ): Promise<ClientWithConsent> {
-    return this.prismaService.client
-      .findUniqueOrThrow({
-        where: { id },
-        include: {
-          consent: {
-            where: { user: { uuid: userUuid } },
-            select: { scopes: true },
-          },
-        },
-      })
-      .catch((error) => {
-        if (
-          error instanceof PrismaClientKnownRequestError &&
-          error.code === 'P2025'
-        ) {
-          this.logger.debug(
-            `findClientWithConsentByIdAndUserUuid error: ${error.stack}`,
-          );
-          throw new ForbiddenException();
-        }
-        this.logger.error(
-          `findClientWithConsentByIdAndUserUuid error: ${error}`,
-        );
+        this.logger.error(`findClientByUuid error: ${error}`);
         throw new InternalServerErrorException();
       });
   }
@@ -113,20 +80,18 @@ export class ClientRepository {
 
   async createClient(
     {
-      id,
       name,
       urls,
-      password,
-    }: Pick<Client, 'id' | 'name' | 'password'> & Partial<Pick<Client, 'urls'>>,
+      secret,
+    }: Pick<Client, 'name' | 'secret'> & Partial<Pick<Client, 'urls'>>,
     userUuid: string,
   ): Promise<Client> {
     return this.prismaService.client
       .create({
         data: {
-          id,
           name,
           urls,
-          password,
+          secret,
           member: {
             connect: {
               uuid: userUuid,
@@ -147,8 +112,8 @@ export class ClientRepository {
       });
   }
 
-  async updateClientPassword(
-    { uuid, password }: Pick<Client, 'uuid' | 'password'>,
+  async updateClientSecret(
+    { uuid, secret }: Pick<Client, 'uuid' | 'secret'>,
     userUuid: string,
   ): Promise<Client> {
     return this.prismaService.client
@@ -162,7 +127,7 @@ export class ClientRepository {
           },
         },
         data: {
-          password,
+          secret,
         },
       })
       .catch((error) => {
@@ -186,17 +151,11 @@ export class ClientRepository {
       scopes,
       optionalScopes,
       idTokenAllowed,
-      implicitAllowed,
     }: Pick<Client, 'uuid'> &
       Partial<
         Pick<
           Client,
-          | 'name'
-          | 'urls'
-          | 'scopes'
-          | 'optionalScopes'
-          | 'idTokenAllowed'
-          | 'implicitAllowed'
+          'name' | 'urls' | 'scopes' | 'optionalScopes' | 'idTokenAllowed'
         >
       >,
     userUuid: string,
@@ -217,7 +176,6 @@ export class ClientRepository {
           scopes,
           optionalScopes,
           idTokenAllowed,
-          implicitAllowed,
         },
       })
       .catch((error) => {

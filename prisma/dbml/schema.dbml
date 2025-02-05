@@ -22,14 +22,12 @@ Table user {
 
 Table client {
   uuid String [pk]
-  id String [unique, not null]
-  password String [not null]
+  secret String [not null]
   name String [not null]
   urls String[] [not null]
   createdAt DateTime [default: `now()`, not null]
   updatedAt DateTime [not null]
   idTokenAllowed Boolean [not null, default: false]
-  implicitAllowed Boolean [not null, default: false]
   scopes String[] [not null]
   optionalScopes String[] [not null]
   member user [not null]

@@ -32,18 +32,17 @@ model User {
 }
 
 model Client {
-  uuid      String   @id @default(uuid()) @db.Uuid
-  id        String   @unique
-  password  String
+  uuid   String @id @default(uuid()) @db.Uuid
+  secret String
+
   name      String
   urls      String[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  idTokenAllowed  Boolean  @default(false)
-  implicitAllowed Boolean  @default(false)
-  scopes          String[]
-  optionalScopes  String[] @map("optional_scopes")
+  idTokenAllowed Boolean  @default(false)
+  scopes         String[]
+  optionalScopes String[] @map("optional_scopes")
 
   member  User[]    @relation("ClientToUser")
   consent Consent[]

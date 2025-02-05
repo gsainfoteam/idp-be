@@ -2,20 +2,15 @@ import { ApiProperty } from '@nestjs/swagger';
 import { Client } from '@prisma/client';
 import { Exclude, Expose } from 'class-transformer';
 
-import { ClientWithConsent } from '../types/clientWithConsent.type';
-
 export class ClientResDto implements Client {
   @ApiProperty({
     description: 'The UUID of the client',
     example: 'd290f1ee-6c54-4b01-90e6-d701748f0851',
   })
-  uuid: string;
-
-  @ApiProperty({
-    description: 'The name of the client',
-    example: 'client id',
-  })
-  id: string;
+  @Expose()
+  get client_id(): string {
+    return this.uuid;
+  }
 
   @ApiProperty({
     description: 'The name of the client',
@@ -60,15 +55,11 @@ export class ClientResDto implements Client {
   })
   idTokenAllowed: boolean;
 
-  @ApiProperty({
-    description:
-      'whether the client has authority to use implicit method or not',
-    example: false,
-  })
-  implicitAllowed: boolean;
+  @Exclude()
+  secret: string;
 
   @Exclude()
-  password: string;
+  uuid: string;
 
   constructor(client: Client) {
     Object.assign(this, client);
@@ -77,31 +68,31 @@ export class ClientResDto implements Client {
 
 export class ClientCredentialResDto implements Client {
   @ApiProperty({
-    description: 'Client UUID',
+    description: 'Client id',
     example: 'd290f1ee-6c54-4b01-90e6-d701748f0851',
   })
-  uuid: string;
-
-  @ApiProperty({
-    description: 'Client ID',
-    example: 'client-id',
-  })
-  id: string;
+  @Expose()
+  get client_id(): string {
+    return this.uuid;
+  }
 
   @ApiProperty({
     description: 'Client Secret',
     example: 'client-secret',
   })
   @Expose()
-  get clientSecret(): string {
-    return this.password;
+  get client_secret(): string {
+    return this.secret;
   }
 
   @Exclude()
   name: string;
 
   @Exclude()
-  password: string;
+  uuid: string;
+
+  @Exclude()
+  secret: string;
 
   @Exclude()
   urls: string[];
@@ -114,9 +105,6 @@ export class ClientCredentialResDto implements Client {
 
   @Exclude()
   idTokenAllowed: boolean;
-
-  @Exclude()
-  implicitAllowed: boolean;
 
   @Exclude()
   scopes: string[];
@@ -125,72 +113,6 @@ export class ClientCredentialResDto implements Client {
   optionalScopes: string[];
 
   constructor(client: Client) {
-    Object.assign(this, client);
-  }
-}
-
-export class ClientPublicResDto implements ClientWithConsent {
-  @ApiProperty({
-    description: 'The UUID of the client',
-    example: 'd290f1ee-6c54-4b01-90e6-d701748f0851',
-  })
-  uuid: string;
-
-  @ApiProperty({
-    description: 'The id of the client',
-    example: 'client id',
-  })
-  id: string;
-
-  @ApiProperty({
-    description: 'The name of the client',
-    example: 'client name',
-  })
-  name: string;
-
-  @ApiProperty({
-    description: "the scope which need to use the client's service",
-    example: ['profile', 'email'],
-  })
-  scopes: string[];
-
-  @ApiProperty({
-    description: "the scope whether need or not in the client's service",
-    example: ['student_id'],
-  })
-  optionalScopes: string[];
-
-  @ApiProperty({
-    description: 'Scopes that the user has recently consented to',
-    example: ['openid', 'profile', 'email'],
-  })
-  @Expose()
-  get recentConsent(): string[] {
-    return this.consent.flatMap((consent) => consent.scopes) ?? [];
-  }
-
-  @Exclude()
-  password: string;
-
-  @Exclude()
-  urls: string[];
-
-  @Exclude()
-  createdAt: Date;
-
-  @Exclude()
-  updatedAt: Date;
-
-  @Exclude()
-  consent: { scopes: string[] }[];
-
-  @Exclude()
-  idTokenAllowed: boolean;
-
-  @Exclude()
-  implicitAllowed: boolean;
-
-  constructor(client: ClientWithConsent) {
     Object.assign(this, client);
   }
 }
