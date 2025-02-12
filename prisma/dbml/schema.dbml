@@ -18,6 +18,7 @@ Table user {
   updatedAt DateTime [not null]
   clients client [not null]
   consent consent [not null]
+  RefreshToken refresh_token [not null]
 }
 
 Table client {
@@ -32,16 +33,18 @@ Table client {
   optionalScopes String[] [not null]
   member user [not null]
   consent consent [not null]
+  RefreshToken refresh_token [not null]
 }
 
 Table refresh_token {
   token String [pk]
-  scopes String[] [not null]
   createdAt DateTime [default: `now()`, not null]
-  updatedAt DateTime [not null]
+  expiresAt DateTime [not null]
+  scopes String[] [not null]
   clientUuid String [not null]
   userUuid String [not null]
-  consent consent [not null]
+  client client [not null]
+  user user [not null]
 }
 
 Table consent {
@@ -52,7 +55,6 @@ Table consent {
   updatedAt DateTime [not null]
   client client [not null]
   user user [not null]
-  refreshToken refresh_token [not null]
 
   indexes {
     (clientUuid, userUuid) [pk]
@@ -64,7 +66,9 @@ Table ClientToUser {
   memberId String [ref: > user.uuid]
 }
 
-Ref: refresh_token.(clientUuid, userUuid) > consent.(clientUuid, userUuid)
+Ref: refresh_token.clientUuid > client.uuid
+
+Ref: refresh_token.userUuid > user.uuid
 
 Ref: consent.clientUuid > client.uuid
 

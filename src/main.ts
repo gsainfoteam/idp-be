@@ -1,5 +1,4 @@
 import fastifyCookie from '@fastify/cookie';
-import { ExceptionLoggerFilter } from '@lib/logger';
 import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
 import {
@@ -61,8 +60,6 @@ async function bootstrap() {
       displayRequestDuration: true,
     },
   });
-  // Global filter
-  app.useGlobalFilters(new ExceptionLoggerFilter());
   // Execute the application
   await app.listen(process.env.PORT ?? 3000, '0.0.0.0');
 }

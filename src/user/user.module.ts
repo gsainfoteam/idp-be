@@ -1,3 +1,4 @@
+import { LoggerModule } from '@lib/logger';
 import { MailModule } from '@lib/mail';
 import { PrismaModule } from '@lib/prisma';
 import { RedisModule } from '@lib/redis';
@@ -13,6 +14,7 @@ import { UserService } from './user.service';
   imports: [
     ConfigModule,
     PrismaModule,
+    LoggerModule,
     MailModule,
     RedisModule,
     JwtModule.registerAsync({

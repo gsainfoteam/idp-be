@@ -32,6 +32,15 @@ export class ClientService {
   }
 
   /**
+   * Get client information only by uuid
+   * @param uuid Client's uuid
+   * @returns client information
+   */
+  async getClientByUuid(uuid: string): Promise<Client> {
+    return this.clientRepository.findClientByUuid(uuid);
+  }
+
+  /**
    * Register client
    * @param param0 client information
    * @param user user who wants to register the client

@@ -1,3 +1,4 @@
+import { ExceptionLoggerFilter } from '@lib/logger';
 import {
   Body,
   ClassSerializerInterceptor,
@@ -6,6 +7,7 @@ import {
   Post,
   Req,
   Res,
+  UseFilters,
   UseInterceptors,
   UsePipes,
   ValidationPipe,
@@ -28,6 +30,7 @@ import { LoginResDto } from './dto/res.dto';
 @Controller('auth')
 @UsePipes(ValidationPipe)
 @UseInterceptors(ClassSerializerInterceptor)
+@UseFilters(new ExceptionLoggerFilter())
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 

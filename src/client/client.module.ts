@@ -1,3 +1,4 @@
+import { LoggerModule } from '@lib/logger';
 import { PrismaModule } from '@lib/prisma';
 import { Module } from '@nestjs/common';
 import { AuthModule } from 'src/auth/auth.module';
@@ -7,7 +8,7 @@ import { ClientRepository } from './client.repository';
 import { ClientService } from './client.service';
 
 @Module({
-  imports: [PrismaModule, AuthModule],
+  imports: [LoggerModule, PrismaModule, AuthModule],
   controllers: [ClientController],
   providers: [ClientService, ClientRepository],
   exports: [ClientService],

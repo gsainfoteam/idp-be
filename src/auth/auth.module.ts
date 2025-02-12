@@ -1,3 +1,4 @@
+import { LoggerModule } from '@lib/logger';
 import { RedisModule } from '@lib/redis';
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
@@ -11,6 +12,7 @@ import { UserStrategy } from './guard/auth.strategy';
 
 @Module({
   imports: [
+    LoggerModule,
     UserModule,
     ConfigModule,
     RedisModule,

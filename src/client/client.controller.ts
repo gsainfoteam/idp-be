@@ -1,3 +1,4 @@
+import { ExceptionLoggerFilter } from '@lib/logger';
 import {
   Body,
   ClassSerializerInterceptor,
@@ -7,6 +8,7 @@ import {
   ParseUUIDPipe,
   Patch,
   Post,
+  UseFilters,
   UseGuards,
   UseInterceptors,
   UsePipes,
@@ -35,6 +37,7 @@ import { ClientCredentialResDto, ClientResDto } from './dto/res.dto';
 @Controller('client')
 @UsePipes(new ValidationPipe({ transform: true }))
 @UseInterceptors(ClassSerializerInterceptor)
+@UseFilters(new ExceptionLoggerFilter())
 export class ClientController {
   constructor(private readonly clientService: ClientService) {}
 

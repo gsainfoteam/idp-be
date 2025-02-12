@@ -1,9 +1,11 @@
+import { ExceptionLoggerFilter } from '@lib/logger';
 import {
   Body,
   Controller,
   Delete,
   Patch,
   Post,
+  UseFilters,
   UsePipes,
   ValidationPipe,
 } from '@nestjs/common';
@@ -29,6 +31,7 @@ import { UserService } from './user.service';
 @ApiTags('user')
 @Controller('user')
 @UsePipes(new ValidationPipe({ transform: true }))
+@UseFilters(new ExceptionLoggerFilter())
 export class UserController {
   constructor(private readonly userService: UserService) {}
 

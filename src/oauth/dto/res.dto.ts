@@ -1,11 +1,36 @@
-export class tokenResDto {
-  access_token: string;
-  token_type: string;
-  expires_in: number;
-  refresh_token: string;
-  scope: string;
-  id_token: string;
-}
+import { ApiProperty } from '@nestjs/swagger';
 
-// error response
-// error : invalid_request, invalid_client, invalid_grant, unauthorized_client, unsupported_grant_type, invalid_scope
+import { ScopeList, ScopeType } from '../types/scope.type';
+
+export class TokenResDto {
+  @ApiProperty({
+    example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXV9',
+    description: 'access token',
+  })
+  access_token: string;
+
+  @ApiProperty({
+    example: 'Bearer',
+    description: 'token type',
+  })
+  token_type: string;
+
+  @ApiProperty({
+    example: 3600,
+    description: 'expires in',
+  })
+  expires_in: number;
+
+  @ApiProperty({
+    example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXV9',
+    description: 'refresh token',
+  })
+  refresh_token: string;
+
+  @ApiProperty({
+    example: 'openid profile email',
+    description: 'scope',
+    enum: ScopeList,
+  })
+  scope: ScopeType[];
+}

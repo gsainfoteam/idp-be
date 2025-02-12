@@ -8,7 +8,7 @@ import {
   IsUrl,
 } from 'class-validator';
 
-import { ClientScope, ClientScopes } from '../types/clientScopes.type';
+import { ClientScopeList, ClientScopeType } from '../types/clientScopes.type';
 
 export class CreateClientDto {
   @ApiProperty({
@@ -54,9 +54,9 @@ export class UpdateClientDto {
   })
   @IsArray()
   @IsString({ each: true })
-  @IsIn(ClientScopes, { each: true })
+  @IsIn(ClientScopeList, { each: true })
   @IsOptional()
-  scopes?: ClientScope[];
+  scopes?: ClientScopeType[];
 
   @ApiProperty({
     description: 'The scopes which the client might uses',
@@ -64,9 +64,9 @@ export class UpdateClientDto {
   })
   @IsArray()
   @IsString({ each: true })
-  @IsIn(ClientScopes, { each: true })
+  @IsIn(ClientScopeList, { each: true })
   @IsOptional()
-  optionalScopes?: ClientScope[];
+  optionalScopes?: ClientScopeType[];
 
   @ApiProperty({
     description: 'whether using id token or not',
