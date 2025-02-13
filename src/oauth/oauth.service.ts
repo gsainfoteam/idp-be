@@ -1,5 +1,9 @@
 import { RedisService } from '@lib/redis';
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { User } from '@prisma/client';
@@ -205,7 +209,8 @@ export class OauthService {
     await this.redisService.set<TokenCacheType>(
       accessToken,
       {
-        sub: 'user',
+        to: 'user',
+        sub: cache.UserUuid,
         clientId: client_id,
         scope: cache.scope,
       },
@@ -289,7 +294,8 @@ export class OauthService {
     await this.redisService.set<TokenCacheType>(
       accessToken,
       {
-        sub: 'user',
+        to: 'user',
+        sub: refreshTokenData.userUuid,
         clientId: client_id,
         scope: refreshTokenData.scopes,
       },
@@ -374,7 +380,7 @@ export class OauthService {
     await this.redisService.set<TokenCacheType>(
       accessToken,
       {
-        sub: 'client',
+        to: 'client',
         clientId: client_id,
         scope,
       },
@@ -410,7 +416,54 @@ export class OauthService {
     }
   }
 
-  async userinfo() {}
+  async userinfo(token: string, userUuid?: string) {
+    const tokenData = await this.redisService.getOrThrow<TokenCacheType>(
+      token,
+      {
+        prefix: this.TokenPrefix,
+      },
+    );
+
+    let user: User;
+    if (tokenData.to === 'client') {
+      if (!userUuid) {
+        throw new UnauthorizedException();
+      }
+      const consent = await this.oauthRepository.findConsent(
+        userUuid,
+        tokenData.clientId,
+      );
+      if (!consent) {
+        throw new UnauthorizedException();
+      }
+      consent.scopes.forEach((v) => {
+        if (!tokenData.scope.includes(v)) {
+          throw new UnauthorizedException();
+        }
+      });
+      user = await this.userService.findUserByUuid({
+        uuid: userUuid,
+      });
+    } else {
+      if (!tokenData.sub) {
+        throw new UnauthorizedException();
+      }
+      user = await this.userService.findUserByUuid({
+        uuid: tokenData.sub,
+      });
+    }
+
+    return {
+      sub: user.uuid,
+      name: tokenData.scope.includes('name') ? user.name : undefined,
+      email: tokenData.scope.includes('email') ? user.email : undefined,
+      student_id: tokenData.scope.includes('student_id')
+        ? user.studentId
+        : undefined,
+      phone_number: tokenData.scope.includes('phone_number'),
+    };
+  }
+
   /**
    * generate opaque token that does not have any meaning
    * @returns opaque token

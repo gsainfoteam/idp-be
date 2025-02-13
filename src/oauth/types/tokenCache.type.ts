@@ -1,10 +1,11 @@
 import { ScopeType } from './scope.type';
 
-export const TokenSubList = ['user', 'client'];
-export type TokenSubType = (typeof TokenSubList)[number];
+export const TokenToList = ['user', 'client'];
+export type TokenToType = (typeof TokenToList)[number];
 
 export type TokenCacheType = {
-  sub: TokenSubType;
+  to: TokenToType;
+  sub?: string;
   clientId: string;
   scope: ScopeType[];
 };
