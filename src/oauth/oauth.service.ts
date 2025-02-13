@@ -77,10 +77,7 @@ export class OauthService {
    * @param param0 consent request dto
    * @param user user from the request
    */
-  async consent(
-    { scope, client_id }: ConsentReqDto,
-    user: User,
-  ): Promise<void> {
+  async consent({ scope, clientId }: ConsentReqDto, user: User): Promise<void> {
     // check if the scopes are valid
     scope.forEach((s) => {
       if (!TokenScopeList.includes(s)) {
@@ -88,7 +85,7 @@ export class OauthService {
       }
     });
     // upsert the consent
-    await this.oauthRepository.upsertConsent(user.uuid, client_id, scope);
+    await this.oauthRepository.upsertConsent(user.uuid, clientId, scope);
   }
 
   /**
@@ -99,10 +96,10 @@ export class OauthService {
    */
   async authorize(
     {
-      client_id,
-      code_challenge,
-      code_challenge_method,
-      redirect_uri,
+      clientId,
+      codeChallenge,
+      codeChallengeMethod,
+      redirectUri,
       scope,
       state,
     }: AuthorizationReqDto,
@@ -110,14 +107,11 @@ export class OauthService {
   ): Promise<string> {
     // recommend: integrate the query below two lines.
     const client = await this.clientService
-      .getClientByUuid(client_id)
+      .getClientByUuid(clientId)
       .catch(() => {
         throw new OauthAuthorizeException('unauthorized_client');
       });
-    const consent = await this.oauthRepository.findConsent(
-      user.uuid,
-      client_id,
-    );
+    const consent = await this.oauthRepository.findConsent(user.uuid, clientId);
 
     // check if the client has the scope
     scope.forEach((s) => {
@@ -126,7 +120,7 @@ export class OauthService {
       }
     });
     // check if the redirect_uri is in the client's urls
-    if (!client.urls.includes(redirect_uri)) {
+    if (!client.urls.includes(redirectUri)) {
       throw new OauthAuthorizeException('access_denied');
     }
     // check if the id token is supported
@@ -140,11 +134,11 @@ export class OauthService {
     await this.redisService.set<AuthorizeCacheType>(
       code,
       {
-        clientId: client_id,
+        clientId,
         UserUuid: user.uuid,
-        codeChallenge: code_challenge,
-        codeChallengeMethod: code_challenge_method,
-        redirectUri: redirect_uri,
+        codeChallenge,
+        codeChallengeMethod,
+        redirectUri,
         scope,
       },
       {
@@ -153,7 +147,7 @@ export class OauthService {
       },
     );
 
-    return `${redirect_uri}?code=${code}&state=${state}&iss=${this.configService.getOrThrow<string>('JWT_ISSUER')}`;
+    return `${redirectUri}?code=${code}&state=${state}&iss=${this.configService.getOrThrow<string>('JWT_ISSUER')}`;
   }
 
   /**

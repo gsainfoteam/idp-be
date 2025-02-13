@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Transform } from 'class-transformer';
+import { Expose, Transform } from 'class-transformer';
 import { IsArray, IsIn, IsOptional, IsString, IsUrl } from 'class-validator';
 import { ClientScopeList } from 'src/client/types/clientScopes.type';
 
@@ -31,33 +31,45 @@ export class ConsentReqDto {
   @ApiProperty({
     description: 'id of the client',
   })
+  @Expose({
+    name: 'client_id',
+  })
   @IsString()
-  client_id: string;
+  clientId: string;
 }
 export class AuthorizationReqDto {
   @ApiProperty({
     description:
       'response type of authorization since we use oauth2.1, only "code" is supported',
   })
+  @Expose({
+    name: 'response_type',
+  })
   @IsString()
   @Transform(({ value }) => {
     if (value === 'code') return value as string;
     throw new OauthAuthorizeException('unsupported_response_type');
   })
-  response_type: string;
+  responseType: string;
 
   @ApiProperty({
     description: 'client_id of the client',
   })
+  @Expose({
+    name: 'client_id',
+  })
   @IsString()
-  client_id: string;
+  clientId: string;
 
   @ApiProperty({
     description:
       'code_challenge, since we use PKCE, you should provide this pair',
   })
+  @Expose({
+    name: 'code_challenge',
+  })
   @IsString()
-  code_challenge: string;
+  codeChallenge: string;
 
   @ApiProperty({
     description:
@@ -65,16 +77,22 @@ export class AuthorizationReqDto {
     type: 'string',
     enum: CodeChallengeMethodList,
   })
+  @Expose({
+    name: 'code_challenge_method',
+  })
   @IsString()
   @IsIn(CodeChallengeMethodList)
-  code_challenge_method: CodeChallengeMethod;
+  codeChallengeMethod: CodeChallengeMethod;
 
   @ApiProperty({
     description: 'redirect_uri of the client',
   })
+  @Expose({
+    name: 'redirect_uri',
+  })
   @IsString()
   @IsUrl()
-  redirect_uri: string;
+  redirectUri: string;
 
   @ApiProperty({
     description: 'scope of the client',
