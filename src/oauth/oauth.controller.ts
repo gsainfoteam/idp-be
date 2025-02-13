@@ -16,6 +16,7 @@ import {
   ApiCreatedResponse,
   ApiOperation,
   ApiPermanentRedirectResponse,
+  ApiTags,
 } from '@nestjs/swagger';
 import { User } from '@prisma/client';
 import { GetUser } from 'src/auth/decorator/getUser.decorator';
@@ -32,15 +33,29 @@ import { BasicAuthGuard } from './guards/basicAuth.guard';
 import { OauthService } from './oauth.service';
 import { GrantContentType } from './types/grant.type';
 
+@ApiTags('oauth')
 @Controller('oauth')
 @UsePipes(new ValidationPipe({ transform: true }))
 export class OauthController {
   constructor(private readonly oauthService: OauthService) {}
 
-  @ApiCreatedResponse({
+  @ApiOperation({
+    summary: 'get the certs',
     description:
-      'make the user consent to the client. through this endpoint, the user can agree to use the client.',
+      'get the public key to verify the jwt token. through this endpoint, the client can get the public key to verify the jwt token.',
   })
+  @Get('certs')
+  certs() {
+    return this.oauthService.certs();
+  }
+
+  @ApiOperation({
+    summary: 'consent to the client',
+    description:
+      'make the user consent to the client. through this endpoint, the user can agree to use the client. if not agreed, the client cannot get the user information.',
+  })
+  @ApiConsumes('application/x-www-form-urlencoded', 'application/json')
+  @ApiCreatedResponse({ description: 'consent success' })
   @Post('consent')
   @UseGuards(UserGuard)
   async consent(
@@ -50,6 +65,11 @@ export class OauthController {
     return this.oauthService.consent(body, user);
   }
 
+  @ApiOperation({
+    summary: 'authorize the client',
+    description:
+      'authorize the client to get the code. through this endpoint, the user can authorize the client to get the code.',
+  })
   @ApiPermanentRedirectResponse({
     description:
       'it move to client uri with certain query parameters, ex) https://client.com/callback?code=123&state=123&iss=https://auth-server.com',
@@ -67,7 +87,11 @@ export class OauthController {
     };
   }
 
-  @ApiOperation({})
+  @ApiOperation({
+    summary: 'get the token',
+    description:
+      'get the token from the authorization code. through this endpoint, the client can get the token from the authorization code, refresh token. or client credential.',
+  })
   @ApiConsumes('application/x-www-form-urlencoded', 'application/json')
   @UseGuards(BasicAuthGuard)
   @Post('token')
@@ -75,9 +99,18 @@ export class OauthController {
     return this.oauthService.token(body as GrantContentType);
   }
 
-  @ApiOperation({})
+  @ApiOperation({
+    summary: 'revoke the token',
+    description:
+      'revoke the token from the client. through this endpoint, the client can revoke the token.',
+  })
   @Delete('token')
   async revoke(@Body() body: RevokeReqDto): Promise<void> {
     return this.oauthService.revoke(body);
+  }
+
+  @Get('userinfo')
+  userinfo() {
+    return 'userinfo';
   }
 }

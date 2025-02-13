@@ -4,7 +4,7 @@ import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { User } from '@prisma/client';
 import * as bcrypt from 'bcryptjs';
-import crypto from 'crypto';
+import * as crypto from 'crypto';
 import { ClientService } from 'src/client/client.service';
 import { UserService } from 'src/user/user.service';
 
@@ -39,6 +39,34 @@ export class OauthService {
     private readonly userService: UserService,
     private readonly jwtService: JwtService,
   ) {}
+
+  /**
+   * the endpoint that returns the public key for the client to verify the jwt token
+   * @returns the object that contains the public key for
+   */
+  certs(): object {
+    const sk = crypto.createPrivateKey(
+      this.configService
+        .getOrThrow<string>('JWT_PRIVATE_KEY')
+        .replace(/\\n/g, '\n'),
+    );
+    const pk = crypto.createPublicKey(sk);
+    const kid = (() => {
+      const shasum = crypto.createHash('sha1');
+      shasum.update(pk.export({ format: 'der', type: 'spki' }));
+      return shasum.digest('hex');
+    })();
+    return {
+      keys: [
+        {
+          ...pk.export({ format: 'jwk' }),
+          kid,
+          use: 'sig',
+          alg: 'ES256',
+        },
+      ],
+    };
+  }
 
   /**
    * make the user consent to the client. through this endpoint, the user can agree to use the client.
@@ -382,6 +410,7 @@ export class OauthService {
     }
   }
 
+  async userinfo() {}
   /**
    * generate opaque token that does not have any meaning
    * @returns opaque token

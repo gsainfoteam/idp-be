@@ -8,7 +8,7 @@ import { ClientModule } from './client/client.module';
 import { HealthModule } from './health/health.module';
 import { OauthModule } from './oauth/oauth.module';
 import { UserModule } from './user/user.module';
-import { UserinfoModule } from './userinfo/userinfo.module';
+import { WellKnownModule } from './well-known/well-known.module';
 
 @Module({
   imports: [
@@ -23,7 +23,7 @@ import { UserinfoModule } from './userinfo/userinfo.module';
     AuthModule,
     ClientModule,
     OauthModule,
-    UserinfoModule,
+    WellKnownModule,
   ],
   controllers: [AppController],
 })
