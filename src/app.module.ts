@@ -8,6 +8,7 @@ import { ClientModule } from './client/client.module';
 import { HealthModule } from './health/health.module';
 import { OauthModule } from './oauth/oauth.module';
 import { UserModule } from './user/user.module';
+import { UserinfoModule } from './userinfo/userinfo.module';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { UserModule } from './user/user.module';
     AuthModule,
     ClientModule,
     OauthModule,
+    UserinfoModule,
   ],
   controllers: [AppController],
 })

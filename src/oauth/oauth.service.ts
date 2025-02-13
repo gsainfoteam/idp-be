@@ -1,10 +1,12 @@
 import { RedisService } from '@lib/redis';
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { JwtService } from '@nestjs/jwt';
 import { User } from '@prisma/client';
 import * as bcrypt from 'bcryptjs';
 import crypto from 'crypto';
 import { ClientService } from 'src/client/client.service';
+import { UserService } from 'src/user/user.service';
 
 import {
   AuthorizationReqDto,
@@ -34,6 +36,8 @@ export class OauthService {
     private readonly redisService: RedisService,
     private readonly configService: ConfigService,
     private readonly clientService: ClientService,
+    private readonly userService: UserService,
+    private readonly jwtService: JwtService,
   ) {}
 
   /**
@@ -194,13 +198,44 @@ export class OauthService {
       );
     }
 
+    let idToken = undefined;
+    if (cache.scope.includes('openid')) {
+      const user = await this.userService.findUserByUuid({
+        uuid: cache.UserUuid,
+      });
+
+      idToken = this.jwtService.sign(
+        {
+          sub: cache.UserUuid,
+          iss: this.configService.getOrThrow<string>('JWT_ISSUER'),
+          aud: cache.clientId,
+          exp: Math.floor(Date.now() / 1000) + 60 * 60, // 1 hour
+          iat: Math.floor(Date.now() / 1000),
+          scope: cache.scope.join(' '),
+          name: cache.scope.includes('name') ? user.name : undefined,
+          email: cache.scope.includes('email') ? user.email : undefined,
+          student_id: cache.scope.includes('student_id')
+            ? user.studentId
+            : undefined,
+          phone_number: cache.scope.includes('phone_number')
+            ? user.phoneNumber
+            : undefined,
+        },
+        {
+          keyid: this.configService.getOrThrow<string>('JWT_KEYID'),
+        },
+      );
+    }
+
     return {
       access_token: accessToken,
       token_type: 'Bearer',
       expires_in: 3 * 60 * 60, // 3 hours
       refresh_token: refreshToken,
+      refresh_token_expires_in: 3 * 30 * 24 * 60 * 60, // 3 months
+      id_token: idToken,
       scope: cache.scope,
-    } as TokenResDto;
+    };
   }
 
   /**
@@ -247,31 +282,48 @@ export class OauthService {
       );
     }
 
+    let idToken = undefined;
+    if (refreshTokenData.scopes.includes('openid')) {
+      const user = await this.userService.findUserByUuid({
+        uuid: refreshTokenData.userUuid,
+      });
+
+      idToken = this.jwtService.sign(
+        {
+          sub: refreshTokenData.userUuid,
+          iss: this.configService.getOrThrow<string>('JWT_ISSUER'),
+          aud: refreshTokenData.clientUuid,
+          exp: Math.floor(Date.now() / 1000) + 60 * 60, // 1 hour
+          iat: Math.floor(Date.now() / 1000),
+          scope: refreshTokenData.scopes.join(' '),
+          name: refreshTokenData.scopes.includes('name')
+            ? user.name
+            : undefined,
+          email: refreshTokenData.scopes.includes('email')
+            ? user.email
+            : undefined,
+          student_id: refreshTokenData.scopes.includes('student_id')
+            ? user.studentId
+            : undefined,
+          phone_number: refreshTokenData.scopes.includes('phone_number')
+            ? user.phoneNumber
+            : undefined,
+        },
+        {
+          keyid: this.configService.getOrThrow<string>('JWT_KEYID'),
+        },
+      );
+    }
+
     return {
       access_token: accessToken,
       token_type: 'Bearer',
       expires_in: 3 * 60 * 60, // 3 hours
       refresh_token: refreshToken,
+      refresh_token_expires_in: 3 * 30 * 24 * 60 * 60, // 3 months
+      id_token: idToken,
       scope: refreshTokenData.scopes,
-    } as TokenResDto;
-  }
-
-  /**
-   * revoke the token by the token type hint
-   * @param param0 tokens and token type hint
-   */
-  async revoke({ token, token_type_hint }: RevokeReqDto): Promise<void> {
-    if (token_type_hint === 'access_token') {
-      await this.redisService.del(token, {
-        prefix: this.TokenPrefix,
-      });
-    } else if (token_type_hint === 'refresh_token') {
-      await this.oauthRepository.deleteRefreshTokenByToken(token);
-    } else {
-      throw new BadRequestException({
-        error: 'invalid_request',
-      });
-    }
+    };
   }
 
   /**
@@ -310,6 +362,24 @@ export class OauthService {
       expires_in: 3 * 30 * 24 * 60 * 60, // 3 months
       scope,
     } as TokenResDto;
+  }
+
+  /**
+   * revoke the token by the token type hint
+   * @param param0 tokens and token type hint
+   */
+  async revoke({ token, token_type_hint }: RevokeReqDto): Promise<void> {
+    if (token_type_hint === 'access_token') {
+      await this.redisService.del(token, {
+        prefix: this.TokenPrefix,
+      });
+    } else if (token_type_hint === 'refresh_token') {
+      await this.oauthRepository.deleteRefreshTokenByToken(token);
+    } else {
+      throw new BadRequestException({
+        error: 'invalid_request',
+      });
+    }
   }
 
   /**

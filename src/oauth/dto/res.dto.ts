@@ -25,7 +25,19 @@ export class TokenResDto {
     example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXV9',
     description: 'refresh token',
   })
-  refresh_token: string;
+  refresh_token?: string;
+
+  @ApiProperty({
+    example: '84000',
+    description: 'refresh token expires in',
+  })
+  refresh_token_expires_in?: number;
+
+  @ApiProperty({
+    example: 'ey...',
+    description: 'id token',
+  })
+  id_token?: string;
 
   @ApiProperty({
     example: 'openid profile email',

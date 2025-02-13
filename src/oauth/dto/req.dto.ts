@@ -95,6 +95,13 @@ export class AuthorizationReqDto {
   @IsString()
   @IsOptional()
   state?: string;
+
+  @ApiProperty({
+    description: 'nonce of the client',
+  })
+  @IsString()
+  @IsOptional()
+  nonce?: string;
 }
 
 export class TokenReqDto {
