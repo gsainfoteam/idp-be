@@ -19,6 +19,14 @@ GIST 학생들의 계정을 한 곳에서 관리하여 GIST구성원들이 사�
 본 서비스는 Oauth2.1 프로토콜을 이용해서 구현을 하였습니다. 따라서 본 서비스 로직의 더 자세한 정보를 알고 싶다면, 해당 문서를 참고하시기 바랍니다.  
 [DOCS](https://www.ietf.org/archive/id/draft-ietf-oauth-v2-1-12.html)
 
+### 명칭 정리
+
+본 서비스를 사용하는 주체는 크게 두 가지가 있습니다. 하나는 user, 다른 하나는 client입니다.  
+  
+user는 infoteam-idp에서 gist mail을 인증하고, 관련된 정보를 제공하여 infoteam-idp를 사용하는 다른 서비스를 사용하려는 사람입니다.  
+  
+client는 infoteam-idp를 사용하여, user의 정보를 받고, 그에 맞추어서 서비스를 제공하는 어플리케이션입니다.
+
 ### 로그인 과정
 
 ```mermaid

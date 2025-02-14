@@ -38,12 +38,12 @@ export class UserController {
   @ApiOperation({
     summary: 'send email certification code',
     description:
-      '이메일 코드를 전송하는 api이다. gist이메일이여야지 작동한다는 사실을 주의해야 한다.',
+      'send the email certification code to the email address. The code is valid for 5 minutes.',
   })
-  @ApiResponse({ status: 201, description: '성공' })
-  @ApiConflictResponse({ description: '이미 존재하는 유저' })
-  @ApiInternalServerErrorResponse({ description: '서버 에러' })
-  @Post('/register/code')
+  @ApiResponse({ status: 201, description: 'success' })
+  @ApiConflictResponse({ description: 'user already exists' })
+  @ApiInternalServerErrorResponse({ description: 'server error' })
+  @Post('/cert/code')
   async sendEmailCertificationCode(
     @Body() body: SendCertificationCodeDto,
   ): Promise<void> {
@@ -53,16 +53,18 @@ export class UserController {
   @ApiOperation({
     summary: 'verify email certification code',
     description:
-      '이메일 코드를 검증하는 api이다. 이메일과 코드가 일치해야지 jwt토큰을 반환한다.',
+      'verify the email certification code. If the code is valid, return the jwt token',
   })
   @ApiResponse({
     status: 200,
-    description: '성공',
+    description: 'success',
     type: ValidateCertificationJwtResDto,
   })
-  @ApiForbiddenResponse({ description: '인증 코드가 일치하지 않거나 시간초과' })
-  @ApiInternalServerErrorResponse({ description: '서버 에러' })
-  @Post('/register/validate')
+  @ApiForbiddenResponse({
+    description: 'certification code is not valid or timeout',
+  })
+  @ApiInternalServerErrorResponse({ description: 'server error' })
+  @Post('/cert/validate')
   async validateCertificationCode(
     @Body() body: ValidationCertificationCodeDto,
   ): Promise<ValidateCertificationJwtResDto> {
@@ -71,12 +73,12 @@ export class UserController {
 
   @ApiOperation({
     summary: 'sign up',
-    description: '회원가입하는 api이다.',
+    description: 'api for the sign up',
   })
-  @ApiResponse({ status: 201, description: '성공' })
-  @ApiConflictResponse({ description: '이미 존재하는 유저' })
-  @ApiForbiddenResponse({ description: '인증 토큰이 일치하지 않음' })
-  @ApiInternalServerErrorResponse({ description: '서버 에러' })
+  @ApiResponse({ status: 201, description: 'success' })
+  @ApiConflictResponse({ description: 'user already exists' })
+  @ApiForbiddenResponse({ description: 'certification token is not valid' })
+  @ApiInternalServerErrorResponse({ description: 'server error' })
   @Post('/register')
   async register(@Body() body: RegisterDto): Promise<void> {
     return this.userService.register(body);
@@ -84,11 +86,11 @@ export class UserController {
 
   @ApiOperation({
     summary: 'change password',
-    description: '비밀번호를 변경하는 api이다.',
+    description: 'api for changing password',
   })
-  @ApiResponse({ status: 200, description: '성공' })
-  @ApiForbiddenResponse({ description: '유효하지 않은 토큰' })
-  @ApiInternalServerErrorResponse({ description: '서버 에러' })
+  @ApiResponse({ status: 200, description: 'success' })
+  @ApiForbiddenResponse({ description: 'token not valid' })
+  @ApiInternalServerErrorResponse({ description: 'server error' })
   @Patch('/password')
   async changePassword(@Body() body: ChangePasswordDto): Promise<void> {
     return this.userService.changePassword(body);
@@ -96,12 +98,12 @@ export class UserController {
 
   @ApiOperation({
     summary: 'delete user',
-    description: '회원탈퇴하는 api이다.',
+    description: 'api for deleting user',
   })
-  @ApiResponse({ status: 200, description: '성공' })
-  @ApiForbiddenResponse({ description: '비밀번호가 일치하지 않음' })
-  @ApiInternalServerErrorResponse({ description: '서버 에러' })
-  @Delete('')
+  @ApiResponse({ status: 200, description: 'success' })
+  @ApiForbiddenResponse({ description: 'password is not valid' })
+  @ApiInternalServerErrorResponse({ description: 'server error' })
+  @Delete()
   async DeleteUserDto(@Body() body: DeleteUserDto): Promise<void> {
     return this.userService.deleteUser(body);
   }

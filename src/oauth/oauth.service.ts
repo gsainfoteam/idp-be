@@ -17,7 +17,7 @@ import {
   ConsentReqDto,
   RevokeReqDto,
 } from './dto/req.dto';
-import { TokenResDto } from './dto/res.dto';
+import { TokenResDto, UserInfoResDto } from './dto/res.dto';
 import { OauthAuthorizeException } from './exceptions/oauth.authorize.exception';
 import { OauthTokenException } from './exceptions/oauth.token.exception';
 import { OauthRepository } from './oauth.repository';
@@ -156,7 +156,7 @@ export class OauthService {
    * @returns the token response dto
    */
   async token(grantType: GrantContentType): Promise<TokenResDto> {
-    switch (grantType.grant_type) {
+    switch (grantType.grantType) {
       case 'authorization_code':
         return this.codeGrant(grantType);
       case 'refresh_token':
@@ -174,9 +174,9 @@ export class OauthService {
    * @returns tokens
    */
   async codeGrant({
-    client_id,
+    clientId,
     code,
-    code_verifier,
+    codeVerifier,
   }: CodeGrantContentType): Promise<TokenResDto> {
     const cache = await this.redisService
       .getOrThrow<AuthorizeCacheType>(code, {
@@ -186,16 +186,16 @@ export class OauthService {
         throw new OauthTokenException('invalid_grant');
       });
 
-    if (cache.clientId !== client_id) {
+    if (cache.clientId !== clientId) {
       throw new OauthTokenException('invalid_client');
     }
     if (cache.codeChallengeMethod === 'S256') {
       cache.codeChallenge = crypto
         .createHash('sha256')
-        .update(code_verifier)
+        .update(codeVerifier)
         .digest('base64url');
     }
-    if (cache.codeChallenge !== code_verifier) {
+    if (cache.codeChallenge !== codeVerifier) {
       throw new OauthTokenException('invalid_request');
     }
 
@@ -205,7 +205,7 @@ export class OauthService {
       {
         to: 'user',
         sub: cache.UserUuid,
-        clientId: client_id,
+        clientId,
         scope: cache.scope,
       },
       {
@@ -255,12 +255,12 @@ export class OauthService {
     }
 
     return {
-      access_token: accessToken,
-      token_type: 'Bearer',
-      expires_in: 3 * 60 * 60, // 3 hours
-      refresh_token: refreshToken,
-      refresh_token_expires_in: 3 * 30 * 24 * 60 * 60, // 3 months
-      id_token: idToken,
+      accessToken,
+      tokenType: 'Bearer',
+      expiresIn: 3 * 60 * 60, // 3 hours
+      refreshToken: refreshToken,
+      refreshTokenExpiresIn: 3 * 30 * 24 * 60 * 60, // 3 months
+      idToken,
       scope: cache.scope,
     };
   }
@@ -271,16 +271,16 @@ export class OauthService {
    * @returns tokens
    */
   async refreshTokenGrant({
-    client_id,
-    refresh_token,
+    clientId,
+    refreshToken,
   }: RefreshTokenGrantContentType): Promise<TokenResDto> {
-    if (!refresh_token) {
+    if (!refreshToken) {
       throw new OauthTokenException('invalid_request');
     }
     const refreshTokenData =
-      await this.oauthRepository.findRefreshTokenByToken(refresh_token);
+      await this.oauthRepository.findRefreshTokenByToken(refreshToken);
 
-    if (refreshTokenData.clientUuid !== client_id) {
+    if (refreshTokenData.clientUuid !== clientId) {
       throw new OauthTokenException('invalid_grant');
     }
 
@@ -290,7 +290,7 @@ export class OauthService {
       {
         to: 'user',
         sub: refreshTokenData.userUuid,
-        clientId: client_id,
+        clientId,
         scope: refreshTokenData.scopes,
       },
       {
@@ -299,11 +299,11 @@ export class OauthService {
       },
     );
 
-    let refreshToken = undefined;
+    let newRefreshToken = undefined;
     if (refreshTokenData.scopes.includes('offline_access')) {
-      refreshToken = this.generateOpaqueToken();
+      newRefreshToken = this.generateOpaqueToken();
       await this.oauthRepository.createRefreshToken(
-        refreshToken,
+        newRefreshToken,
         refreshTokenData.scopes,
         refreshTokenData.userUuid,
         refreshTokenData.clientUuid,
@@ -344,12 +344,12 @@ export class OauthService {
     }
 
     return {
-      access_token: accessToken,
-      token_type: 'Bearer',
-      expires_in: 3 * 60 * 60, // 3 hours
-      refresh_token: refreshToken,
-      refresh_token_expires_in: 3 * 30 * 24 * 60 * 60, // 3 months
-      id_token: idToken,
+      accessToken,
+      tokenType: 'Bearer',
+      expiresIn: 3 * 60 * 60, // 3 hours
+      refreshToken: newRefreshToken,
+      refreshTokenExpiresIn: 3 * 30 * 24 * 60 * 60, // 3 months
+      idToken,
       scope: refreshTokenData.scopes,
     };
   }
@@ -360,13 +360,13 @@ export class OauthService {
    * @returns tokens
    */
   async clientCredentialsGrant({
-    client_id,
-    client_secret,
+    clientId,
+    clientSecret,
     scope,
   }: ClientCredentialsGrantContentType): Promise<TokenResDto> {
-    const client = await this.clientService.getClientByUuid(client_id);
+    const client = await this.clientService.getClientByUuid(clientId);
 
-    if (bcrypt.compareSync(client_secret, client.secret)) {
+    if (bcrypt.compareSync(clientSecret, client.secret)) {
       throw new OauthTokenException('invalid_client');
     }
 
@@ -375,7 +375,7 @@ export class OauthService {
       accessToken,
       {
         to: 'client',
-        clientId: client_id,
+        clientId,
         scope,
       },
       {
@@ -385,23 +385,23 @@ export class OauthService {
     );
 
     return {
-      access_token: accessToken,
-      token_type: 'Bearer',
-      expires_in: 3 * 30 * 24 * 60 * 60, // 3 months
+      accessToken,
+      tokenType: 'Bearer',
+      expiresIn: 3 * 30 * 24 * 60 * 60, // 3 months
       scope,
-    } as TokenResDto;
+    };
   }
 
   /**
    * revoke the token by the token type hint
    * @param param0 tokens and token type hint
    */
-  async revoke({ token, token_type_hint }: RevokeReqDto): Promise<void> {
-    if (token_type_hint === 'access_token') {
+  async revoke({ token, tokenTypeHint }: RevokeReqDto): Promise<void> {
+    if (tokenTypeHint === 'access_token') {
       await this.redisService.del(token, {
         prefix: this.TokenPrefix,
       });
-    } else if (token_type_hint === 'refresh_token') {
+    } else if (tokenTypeHint === 'refresh_token') {
       await this.oauthRepository.deleteRefreshTokenByToken(token);
     } else {
       throw new BadRequestException({
@@ -410,7 +410,13 @@ export class OauthService {
     }
   }
 
-  async userinfo(token: string, userUuid?: string) {
+  /**
+   * return the user info by the access token
+   * @param token the access token
+   * @param userUuid the user uuid if use client credential, it is required
+   * @returns the user info
+   */
+  async userinfo(token: string, userUuid?: string): Promise<UserInfoResDto> {
     const tokenData = await this.redisService.getOrThrow<TokenCacheType>(
       token,
       {
@@ -451,10 +457,12 @@ export class OauthService {
       sub: user.uuid,
       name: tokenData.scope.includes('name') ? user.name : undefined,
       email: tokenData.scope.includes('email') ? user.email : undefined,
-      student_id: tokenData.scope.includes('student_id')
+      studentId: tokenData.scope.includes('student_id')
         ? user.studentId
         : undefined,
-      phone_number: tokenData.scope.includes('phone_number'),
+      phoneNumber: tokenData.scope.includes('phone_number')
+        ? user.phoneNumber
+        : undefined,
     };
   }
 

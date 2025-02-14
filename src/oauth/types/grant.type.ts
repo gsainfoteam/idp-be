@@ -12,25 +12,25 @@ export type GrantContentType =
   | ClientCredentialsGrantContentType;
 
 export type CodeGrantContentType = {
-  grant_type: 'authorization_code';
-  client_id: string;
+  grantType: 'authorization_code';
+  clientId: string;
 
   code: string;
-  code_verifier: string;
+  codeVerifier: string;
 };
 
 // Basic Auth in headers or use the client_id
 export type RefreshTokenGrantContentType = {
-  grant_type: 'refresh_token';
-  client_id?: string;
+  grantType: 'refresh_token';
+  clientId?: string;
 
-  refresh_token: string;
+  refreshToken: string;
 };
 
 export type ClientCredentialsGrantContentType = {
-  grant_type: 'client_credentials';
-  client_id: string;
+  grantType: 'client_credentials';
+  clientId: string;
 
-  client_secret: string;
+  clientSecret: string;
   scope: string[];
 };

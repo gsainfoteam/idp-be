@@ -1,13 +1,17 @@
 import {
+  BadRequestException,
   Body,
+  ClassSerializerInterceptor,
   Controller,
   Delete,
   Get,
+  Headers,
   HttpRedirectResponse,
   Post,
   Query,
   Redirect,
   UseGuards,
+  UseInterceptors,
   UsePipes,
   ValidationPipe,
 } from '@nestjs/common';
@@ -28,7 +32,7 @@ import {
   RevokeReqDto,
   TokenReqDto,
 } from './dto/req.dto';
-import { TokenResDto } from './dto/res.dto';
+import { TokenResDto, UserInfoResDto } from './dto/res.dto';
 import { BasicAuthGuard } from './guards/basicAuth.guard';
 import { OauthService } from './oauth.service';
 import { GrantContentType } from './types/grant.type';
@@ -36,6 +40,7 @@ import { GrantContentType } from './types/grant.type';
 @ApiTags('oauth')
 @Controller('oauth')
 @UsePipes(new ValidationPipe({ transform: true }))
+@UseInterceptors(ClassSerializerInterceptor)
 export class OauthController {
   constructor(private readonly oauthService: OauthService) {}
 
@@ -109,8 +114,20 @@ export class OauthController {
     return this.oauthService.revoke(body);
   }
 
+  @ApiOperation({
+    summary: 'get the userinfo',
+    description:
+      'get the user information from the token. through this endpoint, the client can get the user information from the token.',
+  })
   @Get('userinfo')
-  userinfo() {
-    return 'userinfo';
+  async userinfo(
+    @Headers('Authorization') authorizationHeader: string,
+    @Query('sub') sub?: string,
+  ): Promise<UserInfoResDto> {
+    const [type, token] = authorizationHeader.split(' ')[1];
+    if (type !== 'Bearer') {
+      throw new BadRequestException('invalid token type');
+    }
+    return this.oauthService.userinfo(token, sub);
   }
 }

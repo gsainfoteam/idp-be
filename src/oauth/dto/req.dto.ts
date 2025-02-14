@@ -30,6 +30,7 @@ export class ConsentReqDto {
 
   @ApiProperty({
     description: 'id of the client',
+    name: 'client_id',
   })
   @Expose({
     name: 'client_id',
@@ -41,6 +42,7 @@ export class AuthorizationReqDto {
   @ApiProperty({
     description:
       'response type of authorization since we use oauth2.1, only "code" is supported',
+    name: 'response_type',
   })
   @Expose({
     name: 'response_type',
@@ -54,6 +56,7 @@ export class AuthorizationReqDto {
 
   @ApiProperty({
     description: 'client_id of the client',
+    name: 'client_id',
   })
   @Expose({
     name: 'client_id',
@@ -64,6 +67,7 @@ export class AuthorizationReqDto {
   @ApiProperty({
     description:
       'code_challenge, since we use PKCE, you should provide this pair',
+    name: 'code_challenge',
   })
   @Expose({
     name: 'code_challenge',
@@ -75,6 +79,7 @@ export class AuthorizationReqDto {
     description:
       'code_challenge_method, only support "plain" or "S256" for PKCE',
     type: 'string',
+    name: 'code_challenge_method',
     enum: CodeChallengeMethodList,
   })
   @Expose({
@@ -86,6 +91,7 @@ export class AuthorizationReqDto {
 
   @ApiProperty({
     description: 'redirect_uri of the client',
+    name: 'redirect_uri',
   })
   @Expose({
     name: 'redirect_uri',
@@ -128,27 +134,39 @@ export class TokenReqDto {
   @ApiProperty({
     description:
       'grant type of the client, only support "authorization_code", ""client_credentials", "refresh_token"',
+    name: 'grant_type',
+  })
+  @Expose({
+    name: 'grant_type',
   })
   @IsString()
   @Transform(({ value }) => {
     if (GrantTypeList.includes(value as string)) return value as GrantType;
     throw new OauthTokenException('unsupported_grant_type');
   })
-  grant_type: GrantType;
+  grantType: GrantType;
 
   @ApiProperty({
     description: 'client_id of the client',
+    name: 'client_id',
+  })
+  @Expose({
+    name: 'client_id',
   })
   @IsString()
   @IsOptional()
-  client_id?: string;
+  clientId?: string;
 
   @ApiProperty({
     description: 'client_secret of the client',
+    name: 'client_secret',
+  })
+  @Expose({
+    name: 'client_secret',
   })
   @IsString()
   @IsOptional()
-  client_secret?: string;
+  clientSecret?: string;
 
   @ApiProperty({
     description: 'code of the client',
@@ -160,17 +178,25 @@ export class TokenReqDto {
   @ApiProperty({
     description:
       'code_verifier of the client, this is required when using PKCE, you should make it when you provide code_challenge',
+    name: 'code_verifier',
+  })
+  @Expose({
+    name: 'code_verifier',
   })
   @IsString()
   @IsOptional()
-  code_verifier?: string;
+  codeVerifier?: string;
 
   @ApiProperty({
     description: 'refresh_token of the client',
+    name: 'refresh_token',
+  })
+  @Expose({
+    name: 'refresh_token',
   })
   @IsString()
   @IsOptional()
-  refresh_token?: string;
+  refreshToken?: string;
 
   @ApiProperty({
     description: 'scope of the client',
@@ -198,9 +224,13 @@ export class RevokeReqDto {
 
   @ApiProperty({
     description: 'token type hint',
+    name: 'token_type_hint',
+  })
+  @Expose({
+    name: 'token_type_hint',
   })
   @IsString()
   @IsIn(['access_token', 'refresh_token'])
   @IsOptional()
-  token_type_hint?: 'access_token' | 'refresh_token';
+  tokenTypeHint?: 'access_token' | 'refresh_token';
 }
