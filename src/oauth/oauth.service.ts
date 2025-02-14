@@ -351,6 +351,7 @@ export class OauthService {
         },
       );
     }
+    await this.oauthRepository.deleteRefreshTokenByToken(refreshToken);
 
     return {
       accessToken,
