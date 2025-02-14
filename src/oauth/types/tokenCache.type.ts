@@ -7,5 +7,5 @@ export type TokenCacheType = {
   to: TokenToType;
   sub?: string;
   clientId: string;
-  scope: ScopeType[];
+  scope: readonly ScopeType[];
 };

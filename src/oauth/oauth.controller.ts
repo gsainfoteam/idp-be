@@ -124,7 +124,7 @@ export class OauthController {
     @Headers('Authorization') authorizationHeader: string,
     @Query('sub') sub?: string,
   ): Promise<UserInfoResDto> {
-    const [type, token] = authorizationHeader.split(' ')[1];
+    const [type, token] = authorizationHeader.split(' ');
     if (type !== 'Bearer') {
       throw new BadRequestException('invalid token type');
     }

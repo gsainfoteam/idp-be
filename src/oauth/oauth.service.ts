@@ -366,7 +366,7 @@ export class OauthService {
   }: ClientCredentialsGrantContentType): Promise<TokenResDto> {
     const client = await this.clientService.getClientByUuid(clientId);
 
-    if (bcrypt.compareSync(clientSecret, client.secret)) {
+    if (!bcrypt.compareSync(clientSecret, client.secret)) {
       throw new OauthTokenException('invalid_client');
     }
 

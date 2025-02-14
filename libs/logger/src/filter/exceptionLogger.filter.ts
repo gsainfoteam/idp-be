@@ -16,13 +16,7 @@ export class ExceptionLoggerFilter implements ExceptionFilter {
     const request = ctx.getRequest<FastifyRequest>();
     const status = exception.getStatus();
 
-    this.logger.debug(
-      exception.message +
-        '\nwhere ' +
-        request.url +
-        '\ncaused by ' +
-        exception.stack,
-    );
+    this.logger.debug(exception.message + '\nwhere ' + request.url);
 
     response.status(status).send({
       statusCode: status,

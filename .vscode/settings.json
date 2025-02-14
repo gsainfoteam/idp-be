@@ -9,13 +9,17 @@
     "gsainfoteam",
     "infoteam",
     "keyid",
+    "libheif",
+    "linuxmusl",
+    "localtime",
     "loggable",
     "mjml",
     "nestjs",
     "noreply",
     "PKCE",
     "signup",
-    "userinfo"
+    "userinfo",
+    "zoneinfo"
   ],
   "git.branchProtection": ["main"],
   "markdownlint.config": {

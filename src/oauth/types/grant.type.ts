@@ -1,3 +1,5 @@
+import { ScopeType } from './scope.type';
+
 export const GrantTypeList = [
   'authorization_code',
   'client_credentials',
@@ -32,5 +34,5 @@ export type ClientCredentialsGrantContentType = {
   clientId: string;
 
   clientSecret: string;
-  scope: string[];
+  scope: ScopeType[];
 };
