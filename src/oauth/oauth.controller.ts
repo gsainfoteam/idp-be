@@ -16,6 +16,7 @@ import {
   ValidationPipe,
 } from '@nestjs/common';
 import {
+  ApiBadRequestResponse,
   ApiConsumes,
   ApiCreatedResponse,
   ApiOperation,
@@ -79,6 +80,7 @@ export class OauthController {
     description:
       'it move to client uri with certain query parameters, ex) https://client.com/callback?code=123&state=123&iss=https://auth-server.com',
   })
+  @ApiBadRequestResponse({ description: 'invalid request' })
   @Redirect()
   @Get('authorize')
   @UseGuards(UserGuard)
@@ -98,6 +100,7 @@ export class OauthController {
       'get the token from the authorization code. through this endpoint, the client can get the token from the authorization code, refresh token. or client credential.',
   })
   @ApiConsumes('application/x-www-form-urlencoded', 'application/json')
+  @ApiBadRequestResponse({ description: 'invalid request' })
   @UseGuards(BasicAuthGuard)
   @Post('token')
   token(@Body() body: TokenReqDto): Promise<TokenResDto> {

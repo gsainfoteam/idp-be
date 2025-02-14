@@ -190,13 +190,17 @@ export class OauthService {
       throw new OauthTokenException('invalid_client');
     }
     if (cache.codeChallengeMethod === 'S256') {
-      cache.codeChallenge = crypto
+      const hash = crypto
         .createHash('sha256')
         .update(codeVerifier)
         .digest('base64url');
-    }
-    if (cache.codeChallenge !== codeVerifier) {
-      throw new OauthTokenException('invalid_request');
+      if (hash !== cache.codeChallenge) {
+        throw new OauthTokenException('invalid_grant');
+      }
+    } else if (cache.codeChallengeMethod === 'plain') {
+      if (codeVerifier !== cache.codeChallenge) {
+        throw new OauthTokenException('invalid_grant');
+      }
     }
 
     const accessToken = this.generateOpaqueToken();
@@ -279,6 +283,11 @@ export class OauthService {
     }
     const refreshTokenData =
       await this.oauthRepository.findRefreshTokenByToken(refreshToken);
+
+    if (refreshTokenData.expiresAt < new Date()) {
+      await this.oauthRepository.deleteRefreshTokenByToken(refreshToken);
+      throw new OauthTokenException('invalid_grant');
+    }
 
     if (refreshTokenData.clientUuid !== clientId) {
       throw new OauthTokenException('invalid_grant');
@@ -369,6 +378,12 @@ export class OauthService {
     if (!bcrypt.compareSync(clientSecret, client.secret)) {
       throw new OauthTokenException('invalid_client');
     }
+
+    scope.forEach((s) => {
+      if (!client.scopes.includes(s) || !client.optionalScopes.includes(s)) {
+        throw new OauthTokenException('invalid_scope');
+      }
+    });
 
     const accessToken = this.generateOpaqueToken();
     await this.redisService.set<TokenCacheType>(
