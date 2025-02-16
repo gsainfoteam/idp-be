@@ -147,7 +147,10 @@ export class OauthService {
       },
     );
 
-    return `${redirectUri}?code=${code}&state=${state}&iss=${this.configService.getOrThrow<string>('JWT_ISSUER')}`;
+    return (
+      `${redirectUri}?code=${code}&iss=${this.configService.getOrThrow<string>('JWT_ISSUER')}` +
+      (state ? `&state=${state}` : '')
+    );
   }
 
   /**
@@ -185,6 +188,11 @@ export class OauthService {
       .catch(() => {
         throw new OauthTokenException('invalid_grant');
       });
+
+    // delete the code after the first use
+    await this.redisService.del(code, {
+      prefix: this.CodePrefix,
+    });
 
     if (cache.clientId !== clientId) {
       throw new OauthTokenException('invalid_client');
