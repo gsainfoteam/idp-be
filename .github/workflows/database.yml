@@ -11,18 +11,18 @@ jobs:
   deploy:
     name: Migrate Database
     runs-on: ubuntu-latest
-    env:
-      DATABASE_URL: ${{ secrets.DATABASE_URL }}
 
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Install Prisma
         run: npm install @prisma/cli
 
       - name: Migrate Database
         run: npx prisma deploy
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
 
   build:
     name: Generate and Build ERD
@@ -30,7 +30,7 @@ jobs:
 
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Install prisma-dbml-generator and dbdocs
         run: sudo npm install -g prisma-dbml-generator dbdocs
