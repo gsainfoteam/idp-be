@@ -1,27 +1,16 @@
+import { LoggerModule } from '@lib/logger';
+import { PrismaModule } from '@lib/prisma';
 import { Module } from '@nestjs/common';
+import { AuthModule } from 'src/auth/auth.module';
+
 import { ClientController } from './client.controller';
-import { ClientService } from './client.service';
 import { ClientRepository } from './client.repository';
-import { PrismaModule } from 'src/prisma/prisma.module';
-import { HttpModule } from '@nestjs/axios';
-import { ConfigModule } from '@nestjs/config';
-import { IdpModule } from 'src/idp/idp.module';
-import { ClientStrategy } from './guard/client.strategy';
-import { AnonymousStrategy } from './guard/anonymous.strategy';
-import { ClientGuard } from './guard/client.guard';
-import { ClientOptionalGuard } from './guard/clientOptional.guard';
+import { ClientService } from './client.service';
 
 @Module({
-  imports: [PrismaModule, HttpModule, ConfigModule, IdpModule],
+  imports: [LoggerModule, PrismaModule, AuthModule],
   controllers: [ClientController],
-  providers: [
-    ClientService,
-    ClientRepository,
-    ClientStrategy,
-    AnonymousStrategy,
-    ClientGuard,
-    ClientOptionalGuard,
-  ],
-  exports: [ClientService, ClientGuard, ClientOptionalGuard],
+  providers: [ClientService, ClientRepository],
+  exports: [ClientService],
 })
 export class ClientModule {}

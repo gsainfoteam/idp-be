@@ -1,27 +1,26 @@
+import fastifyCookie from '@fastify/cookie';
+import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
-import { AppModule } from './app.module';
-import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import {
   FastifyAdapter,
   NestFastifyApplication,
 } from '@nestjs/platform-fastify';
-import { ConfigService } from '@nestjs/config';
-import { ExceptionLogFilter } from './global/filter/exceptionLog.filter';
-import { fastifyCookie } from '@fastify/cookie';
-import cors from '@fastify/cors';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+
+import { AppModule } from './app.module';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestFastifyApplication>(
     AppModule,
     new FastifyAdapter(),
   );
-  // CORS 설정
+  // CORS setup
   const whitelist = [
     /^https:\/\/.*\.idp-fe\.pages\.dev$/, // for idp fe preview pages
     /^https:\/\/.*idp\.gistory\.me$/, // for idp fe production pages
     /^http:\/\/localhost:3000$/, // for local development
   ];
-  await app.register(cors, {
+  app.enableCors({
     origin: function (origin, callback) {
       if (origin && whitelist.some((regex) => regex.test(origin))) {
         callback(null, origin);
@@ -36,14 +35,14 @@ async function bootstrap() {
     preflightContinue: false,
     credentials: true,
   });
-  // cookie 설정
+  // cookie parser setup
   await app.register(fastifyCookie);
-  // ConfigService 주입
+  // inject the ConfigService
   const configService = app.get(ConfigService);
-  // Swagger 설정
+  // Swagger setup
   const config = new DocumentBuilder()
-    .setTitle('Infoteam-Idp API Docs')
-    .setDescription('infoteam-idp의 API 문서입니다.')
+    .setTitle('Infoteam-IdP API docs')
+    .setDescription('The Infoteam-IdP API documentation')
     .setVersion(configService.getOrThrow<string>('API_VERSION'))
     .addBearerAuth(
       {
@@ -52,14 +51,7 @@ async function bootstrap() {
         name: 'JWT',
         in: 'header',
       },
-      'access-token',
-    )
-    .addBasicAuth(
-      {
-        type: 'http',
-        scheme: 'basic',
-      },
-      'client-auth',
+      'user:jwt',
     )
     .build();
   const document = SwaggerModule.createDocument(app, config);
@@ -68,9 +60,8 @@ async function bootstrap() {
       displayRequestDuration: true,
     },
   });
-  // 글로벌 예외처리
-  app.useGlobalFilters(new ExceptionLogFilter());
-  // 서버 실행
-  await app.listen(3000, '0.0.0.0');
+  // Execute the application
+  await app.listen(process.env.PORT ?? 3000, '0.0.0.0');
 }
+// eslint-disable-next-line @typescript-eslint/no-floating-promises
 bootstrap();

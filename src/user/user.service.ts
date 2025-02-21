@@ -1,3 +1,6 @@
+import { Loggable } from '@lib/logger';
+import { MailService } from '@lib/mail';
+import { CacheNotFoundException, RedisService } from '@lib/redis';
 import {
   ConflictException,
   ForbiddenException,
@@ -5,34 +8,42 @@ import {
   InternalServerErrorException,
   Logger,
 } from '@nestjs/common';
-import { EmailService } from 'src/email/email.service';
-import { SendCertificationCodeDto } from './dto/req/sendCertificationCode.dto';
-import { ValidateCertificationJwtResDto } from './dto/res/validateCertificationJwtRes.dto';
 import { JwtService } from '@nestjs/jwt';
+import { User } from '@prisma/client';
 import * as bcrypt from 'bcryptjs';
-import { RegisterDto } from './dto/req/register.dto';
+
+import {
+  ChangePasswordDto,
+  DeleteUserDto,
+  RegisterDto,
+  SendCertificationCodeDto,
+  ValidationCertificationCodeDto,
+} from './dto/req.dto';
+import { ValidateCertificationJwtResDto } from './dto/res.dto';
+import { CertificationCodeEnum } from './types/certificationCode.type';
 import { CertificationJwtPayload } from './types/certificationJwtPayload.type';
 import { UserRepository } from './user.repository';
-import { User } from '@prisma/client';
-import { DeleteUserDto } from './dto/req/deleteUser.dto';
-import { ChangePasswordDto } from './dto/req/changePassword.dto';
-import { CacheService } from 'src/cache/cache.service';
-import { ValidationCertificationCodeDto } from './dto/req/validateCertificationCode.dto';
-import { CacheNotFoundException } from 'src/cache/exceptions/cacheNotFound.exception';
-import { CertificationCodeEnum } from './types/certificationCode.type';
-import { Loggable } from '@lib/logger/decorator/loggable';
 
-@Injectable()
 @Loggable()
+@Injectable()
 export class UserService {
-  private readonly EmailCertificationCodePrefix = 'email_certification_code_';
+  private readonly emailCertificationCodePrefix = 'EmailCertificationCode';
   private readonly logger = new Logger(UserService.name);
   constructor(
-    private readonly emailService: EmailService,
-    private readonly cacheService: CacheService,
-    private readonly jwtService: JwtService,
     private readonly userRepository: UserRepository,
+    private readonly mailService: MailService,
+    private readonly jwtService: JwtService,
+    private readonly redisService: RedisService,
   ) {}
+
+  /**
+   * find the user by email
+   * @param param0 it contains email
+   * @returns user if the user exists
+   */
+  async findUserByUuid({ uuid }: Pick<User, 'uuid'>): Promise<User> {
+    return this.userRepository.findUserByUuid(uuid);
+  }
 
   /**
    * send the email certification code to the email address (using node mailer)
@@ -44,40 +55,38 @@ export class UserService {
     email,
     type,
   }: SendCertificationCodeDto): Promise<void> {
-    const user = await this.userRepository
+    const user: User | null = await this.userRepository
       .findUserByEmail(email)
       .catch((error) => {
         if (error instanceof ForbiddenException) {
-          return;
+          return null;
         }
         this.logger.error(`send email Certification code error: ${error}`);
         throw new InternalServerErrorException();
       });
 
     if (user && type === CertificationCodeEnum.REGISTER) {
-      this.logger.debug(`user already exists: ${email}`);
-      throw new ConflictException('이미 존재하는 유저입니다.');
+      this.logger.debug(`user already exists with email: ${email}`);
+      throw new ConflictException('user already exists');
     }
     if (!user && type === CertificationCodeEnum.PASSWORD) {
       this.logger.debug(`user not found: ${email}`);
-      throw new ForbiddenException('존재하지 않는 유저입니다.');
+      throw new ForbiddenException('user not found');
     }
 
     const emailCertificationCode: string = Math.random()
       .toString(36)
       .substring(2, 12);
 
-    await this.emailService.sendCertificationEmail(
+    await this.mailService.sendCertificationEmail(
       email,
       emailCertificationCode,
     );
 
-    await this.cacheService.set<string>(email, emailCertificationCode, {
+    await this.redisService.set<string>(email, emailCertificationCode, {
       ttl: 3 * 60,
-      prefix: this.EmailCertificationCodePrefix,
+      prefix: this.emailCertificationCodePrefix,
     });
-
-    return;
   }
 
   /**
@@ -89,14 +98,14 @@ export class UserService {
     email,
     code,
   }: ValidationCertificationCodeDto): Promise<ValidateCertificationJwtResDto> {
-    const certificationCode: string = await this.cacheService
+    const certificationCode: string = await this.redisService
       .getOrThrow<string>(email, {
-        prefix: this.EmailCertificationCodePrefix,
+        prefix: this.emailCertificationCodePrefix,
       })
       .catch((error) => {
         if (error instanceof CacheNotFoundException) {
-          this.logger.debug(`Redis key not found: ${email}`);
-          throw new ForbiddenException('인증 코드가 만료되었습니다.');
+          this.logger.debug(`Redis key not found with email: ${email}`);
+          throw new ForbiddenException('certification code out-dated');
         }
         this.logger.error(`validate certification code error: ${error}`);
         throw new InternalServerErrorException();
@@ -104,10 +113,10 @@ export class UserService {
 
     if (certificationCode !== code) {
       this.logger.debug(`certification code not match: ${code}`);
-      throw new ForbiddenException('인증 코드가 일치하지 않습니다.');
+      throw new ForbiddenException('certification code not match');
     }
-    await this.cacheService.del(email, {
-      prefix: this.EmailCertificationCodePrefix,
+    await this.redisService.del(email, {
+      prefix: this.emailCertificationCodePrefix,
     });
     const payload: CertificationJwtPayload = { sub: email };
     return {
@@ -132,20 +141,18 @@ export class UserService {
         subject: email,
       })
       .catch(() => {
-        this.logger.debug(
-          `certification jwt token out-dated: ${certificationJwtToken}`,
-        );
-        throw new ForbiddenException('인증 토큰이 만료되었습니다.');
+        this.logger.debug(`certification jwt token out-dated, email: ${email}`);
+        throw new ForbiddenException('certification jwt token out-dated');
       });
 
     if (payload.sub !== email) {
       this.logger.debug(
         `certification jwt token not valid: ${certificationJwtToken}`,
       );
-      throw new ForbiddenException('인증 토큰이 유효하지 않습니다.');
+      throw new ForbiddenException('certification jwt token not valid');
     }
 
-    const hashedPassword: string = await bcrypt.hashSync(
+    const hashedPassword: string = bcrypt.hashSync(
       password,
       bcrypt.genSaltSync(10),
     );
@@ -175,15 +182,17 @@ export class UserService {
         this.logger.debug(
           `certification jwt token out-dated: ${certificationJwtToken}`,
         );
-        throw new ForbiddenException('인증 토큰이 만료되었습니다.');
+        throw new ForbiddenException('certification jwt token out-dated');
       });
+
     if (payload.sub !== email) {
       this.logger.debug(
         `certification jwt token not valid: ${certificationJwtToken}`,
       );
-      throw new ForbiddenException('인증 토큰이 만료되었습니다.');
+      throw new ForbiddenException('certification jwt token not valid');
     }
-    const hashedPassword: string = await bcrypt.hashSync(
+
+    const hashedPassword: string = bcrypt.hashSync(
       password,
       bcrypt.genSaltSync(10),
     );
@@ -209,20 +218,10 @@ export class UserService {
     password,
   }: Pick<User, 'email' | 'password'>): Promise<User> {
     const user: User = await this.userRepository.findUserByEmail(email);
-    if (!(await bcrypt.compare(password, user.password))) {
-      throw new ForbiddenException('비밀번호가 일치하지 않습니다.');
+    if (!bcrypt.compareSync(password, user.password)) {
+      this.logger.debug(`password not match, email: ${email}`);
+      throw new ForbiddenException('password not match');
     }
     return user;
-  }
-
-  /**
-   * find the user by email
-   * @param param0 it contains email
-   * @returns user if the user exists
-   */
-  async findUserByUuid({
-    uuid,
-  }: Pick<User, 'uuid'>): Promise<Omit<User, 'password'>> {
-    return this.userRepository.findUserByUuid(uuid);
   }
 }

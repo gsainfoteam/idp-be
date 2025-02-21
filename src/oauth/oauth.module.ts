@@ -1,26 +1,24 @@
+import { LoggerModule } from '@lib/logger';
+import { PrismaModule } from '@lib/prisma';
+import { RedisModule } from '@lib/redis';
 import { Module } from '@nestjs/common';
-import { OauthService } from './oauth.service';
-import { OauthController, OpenIDDiscoveryController } from './oauth.controller';
-import { OauthRepository } from './oauth.repository';
-import { PrismaModule } from 'src/prisma/prisma.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { ClientModule } from 'src/client/client.module';
-import { IdpModule } from 'src/idp/idp.module';
-import * as crypto from 'crypto';
-import { UserModule } from 'src/user/user.module';
 import { JwtModule } from '@nestjs/jwt';
-import { Oauth2Strategy } from './guard/oauth2.strategy';
-import { Oauth2Guard } from './guard/oauth2.guard';
-import { CacheModule } from 'src/cache/cache.module';
+import * as crypto from 'crypto';
+import { ClientModule } from 'src/client/client.module';
+import { UserModule } from 'src/user/user.module';
+
+import { BasicAuthGuard } from './guards/basicAuth.guard';
+import { OauthController } from './oauth.controller';
+import { OauthRepository } from './oauth.repository';
+import { OauthService } from './oauth.service';
 
 @Module({
   imports: [
-    PrismaModule,
-    CacheModule,
+    LoggerModule,
     ConfigModule,
-    ClientModule,
-    IdpModule,
-    UserModule,
+    RedisModule,
+    PrismaModule,
     JwtModule.registerAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
@@ -48,8 +46,10 @@ import { CacheModule } from 'src/cache/cache.module';
         };
       },
     }),
+    ClientModule,
+    UserModule,
   ],
-  providers: [OauthService, OauthRepository, Oauth2Strategy, Oauth2Guard],
-  controllers: [OauthController, OpenIDDiscoveryController],
+  controllers: [OauthController],
+  providers: [OauthService, OauthRepository, BasicAuthGuard],
 })
 export class OauthModule {}
