@@ -17,10 +17,11 @@ model User {
   uuid     String @id @default(uuid()) @db.Uuid
   password String
 
+  profile     String?
   name        String
-  email       String @unique
-  studentId   String @unique @map("student_id")
-  phoneNumber String @unique @map("phone_number") @db.VarChar(11)
+  email       String  @unique
+  studentId   String  @unique @map("student_id")
+  phoneNumber String  @unique @map("phone_number") @db.VarChar(11)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

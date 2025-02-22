@@ -19,6 +19,8 @@
     "@lib/logger/(.*)": "<rootDir>/../libs/logger/src/$1",
     "@lib/mail": "<rootDir>/../libs/mail/src",
     "@lib/mail/(.*)": "<rootDir>/../libs/mail/src/$1",
+    "@lib/object": "<rootDir>/../libs/object/src",
+    "@lib/object/(.*)": "<rootDir>/../libs/object/src/$1",
     "@lib/prisma": "<rootDir>/../libs/prisma/src",
     "@lib/prisma/(.*)": "<rootDir>/../libs/prisma/src/$1",
     "@lib/redis": "<rootDir>/../libs/redis/src",

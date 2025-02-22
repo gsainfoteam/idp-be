@@ -74,6 +74,7 @@ export class UserRepository {
     email,
     password,
     name,
+    profile,
     studentId,
     phoneNumber,
   }: Omit<
@@ -85,6 +86,7 @@ export class UserRepository {
         data: {
           email,
           password,
+          profile,
           name,
           studentId,
           phoneNumber,
@@ -132,15 +134,39 @@ export class UserRepository {
       });
   }
 
+  async updateUserProfile(profile: string, uuid: string): Promise<void> {
+    await this.prismaService.user
+      .update({
+        where: {
+          uuid,
+        },
+        data: {
+          profile,
+        },
+      })
+      .catch((error) => {
+        if (error instanceof PrismaClientKnownRequestError) {
+          if (error.code === 'P2025' || error.code === 'P2002') {
+            this.logger.debug(`user not found with uuid: ${uuid}`);
+            throw new ForbiddenException('user not found');
+          }
+          this.logger.debug(`prisma error occurred: ${error.code}`);
+          throw new InternalServerErrorException();
+        }
+        this.logger.error(`update user profile error: ${error}`);
+        throw new InternalServerErrorException();
+      });
+  }
+
   /**
    * delete user
-   * @param email email of user to delete
+   * @param uuid uuid of user to delete
    */
-  async deleteUser(email: string): Promise<void> {
+  async deleteUser(uuid: string): Promise<void> {
     await this.prismaService.user
       .delete({
         where: {
-          email,
+          uuid,
         },
       })
       .catch((error) => {
@@ -148,7 +174,7 @@ export class UserRepository {
           error instanceof PrismaClientKnownRequestError &&
           error.code === 'P2025'
         ) {
-          this.logger.debug(`user not found with email: ${email}`);
+          this.logger.debug(`user not found with uuid: ${uuid}`);
           throw new ForbiddenException('user not found');
         }
         this.logger.error(`delete user error: ${error}`);

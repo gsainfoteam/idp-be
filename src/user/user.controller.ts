@@ -1,81 +1,62 @@
 import { ExceptionLoggerFilter } from '@lib/logger';
 import {
   Body,
+  ClassSerializerInterceptor,
   Controller,
   Delete,
+  Get,
   Patch,
   Post,
   UseFilters,
+  UseGuards,
+  UseInterceptors,
   UsePipes,
   ValidationPipe,
 } from '@nestjs/common';
 import {
   ApiConflictResponse,
+  ApiCreatedResponse,
   ApiForbiddenResponse,
   ApiInternalServerErrorResponse,
+  ApiOkResponse,
   ApiOperation,
-  ApiResponse,
   ApiTags,
+  ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
+import { User } from '@prisma/client';
+import { GetUser } from 'src/auth/decorator/getUser.decorator';
+import { UserGuard } from 'src/auth/guard/auth.guard';
 
-import {
-  ChangePasswordDto,
-  DeleteUserDto,
-  RegisterDto,
-  SendCertificationCodeDto,
-  ValidationCertificationCodeDto,
-} from './dto/req.dto';
-import { ValidateCertificationJwtResDto } from './dto/res.dto';
+import { ChangePasswordDto, RegisterDto } from './dto/req.dto';
+import { UpdateUserProfileResDto, UserResDto } from './dto/res.dto';
 import { UserService } from './user.service';
 
 @ApiTags('user')
 @Controller('user')
 @UsePipes(new ValidationPipe({ transform: true }))
+@UseInterceptors(ClassSerializerInterceptor)
 @UseFilters(new ExceptionLoggerFilter())
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @ApiOperation({
-    summary: 'send email certification code',
-    description:
-      'send the email certification code to the email address. The code is valid for 5 minutes.',
+    summary: 'get user',
+    description: 'api for getting user',
   })
-  @ApiResponse({ status: 201, description: 'success' })
-  @ApiConflictResponse({ description: 'user already exists' })
+  @ApiOkResponse({ description: 'success', type: UserResDto })
+  @ApiUnauthorizedResponse({ description: 'token not valid' })
   @ApiInternalServerErrorResponse({ description: 'server error' })
-  @Post('/cert/code')
-  async sendEmailCertificationCode(
-    @Body() body: SendCertificationCodeDto,
-  ): Promise<void> {
-    return this.userService.sendEmailCertificationCode(body);
-  }
-
-  @ApiOperation({
-    summary: 'verify email certification code',
-    description:
-      'verify the email certification code. If the code is valid, return the jwt token',
-  })
-  @ApiResponse({
-    status: 200,
-    description: 'success',
-    type: ValidateCertificationJwtResDto,
-  })
-  @ApiForbiddenResponse({
-    description: 'certification code is not valid or timeout',
-  })
-  @ApiInternalServerErrorResponse({ description: 'server error' })
-  @Post('/cert/validate')
-  async validateCertificationCode(
-    @Body() body: ValidationCertificationCodeDto,
-  ): Promise<ValidateCertificationJwtResDto> {
-    return this.userService.validateCertificationCode(body);
+  @UseGuards(UserGuard)
+  @Get()
+  getUser(@GetUser() user: User): UserResDto {
+    return new UserResDto(user);
   }
 
   @ApiOperation({
     summary: 'sign up',
     description: 'api for the sign up',
   })
-  @ApiResponse({ status: 201, description: 'success' })
+  @ApiCreatedResponse({ description: 'success' })
   @ApiConflictResponse({ description: 'user already exists' })
   @ApiForbiddenResponse({ description: 'certification token is not valid' })
   @ApiInternalServerErrorResponse({ description: 'server error' })
@@ -88,7 +69,7 @@ export class UserController {
     summary: 'change password',
     description: 'api for changing password',
   })
-  @ApiResponse({ status: 200, description: 'success' })
+  @ApiOkResponse({ description: 'success' })
   @ApiForbiddenResponse({ description: 'token not valid' })
   @ApiInternalServerErrorResponse({ description: 'server error' })
   @Patch('/password')
@@ -97,14 +78,29 @@ export class UserController {
   }
 
   @ApiOperation({
+    summary: 'update profile',
+    description:
+      'api for updating profile image. it will return updated profile presigned url. image format must be webp',
+  })
+  @ApiOkResponse({ description: 'success' })
+  @ApiUnauthorizedResponse({ description: 'token not valid' })
+  @ApiInternalServerErrorResponse({ description: 'server error' })
+  @UseGuards(UserGuard)
+  @Patch('/profile')
+  async updateProfile(@GetUser() user: User): Promise<UpdateUserProfileResDto> {
+    return this.userService.updateUserProfile(user.uuid);
+  }
+
+  @ApiOperation({
     summary: 'delete user',
     description: 'api for deleting user',
   })
-  @ApiResponse({ status: 200, description: 'success' })
+  @ApiOkResponse({ description: 'success' })
   @ApiForbiddenResponse({ description: 'password is not valid' })
   @ApiInternalServerErrorResponse({ description: 'server error' })
+  @UseGuards(UserGuard)
   @Delete()
-  async DeleteUserDto(@Body() body: DeleteUserDto): Promise<void> {
-    return this.userService.deleteUser(body);
+  async DeleteUserDto(@GetUser() user: User): Promise<void> {
+    return this.userService.deleteUser(user.uuid);
   }
 }

@@ -36,6 +36,12 @@
       "@lib/mail/*": [
         "libs/mail/src/*"
       ],
+      "@lib/object": [
+        "libs/object/src"
+      ],
+      "@lib/object/*": [
+        "libs/object/src/*"
+      ],
       "@lib/prisma": [
         "libs/prisma/src"
       ],

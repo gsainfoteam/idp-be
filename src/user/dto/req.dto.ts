@@ -1,8 +1,6 @@
 import { IsGistEmail } from '@lib/global';
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEmail, IsEnum, IsJWT, IsString } from 'class-validator';
-
-import { CertificationCodeEnum } from '../types/certificationCode.type';
+import { IsEmail, IsJWT, IsString } from 'class-validator';
 
 export class ChangePasswordDto {
   @ApiProperty({
@@ -26,24 +24,7 @@ export class ChangePasswordDto {
     description: '이메일 인증 jwt 토큰',
   })
   @IsJWT()
-  certificationJwtToken: string;
-}
-
-export class DeleteUserDto {
-  @ApiProperty({
-    example: 'JohnDoe@gm.gist.ac.kr',
-    description: 'GIST 이메일',
-  })
-  @IsEmail()
-  @IsGistEmail()
-  email: string;
-
-  @ApiProperty({
-    example: 'password1234',
-    description: '비밀번호',
-  })
-  @IsString()
-  password: string;
+  verificationJwtToken: string;
 }
 
 export class RegisterDto {
@@ -89,43 +70,5 @@ export class RegisterDto {
     description: '이메일 인증 jwt 토큰',
   })
   @IsJWT()
-  certificationJwtToken: string;
-}
-
-export class SendCertificationCodeDto {
-  @ApiProperty({
-    example: 'JohnDoe@gm.gist.ac.kr',
-    description: 'GIST 이메일',
-    required: true,
-  })
-  @IsEmail()
-  @IsGistEmail({ message: 'GIST 이메일을 입력해주세요.' })
-  email: string;
-
-  @ApiProperty({
-    example: 'register or password',
-    description: '인증 코드 타입',
-    required: true,
-  })
-  @IsEnum(CertificationCodeEnum)
-  type: CertificationCodeEnum;
-}
-
-export class ValidationCertificationCodeDto {
-  @ApiProperty({
-    example: 'JohnDoe@gm.gist.ac.kr',
-    description: 'GIST 이메일',
-    required: true,
-  })
-  @IsEmail()
-  @IsGistEmail({ message: 'GIST 이메일을 입력해주세요.' })
-  email: string;
-
-  @ApiProperty({
-    example: '123456',
-    description: '이메일 인증 코드',
-    required: true,
-  })
-  @IsString()
-  code: string;
+  verificationJwtToken: string;
 }

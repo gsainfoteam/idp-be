@@ -1,10 +1,68 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { User } from '@prisma/client';
+import { Exclude } from 'class-transformer';
 
-export class ValidateCertificationJwtResDto {
+export class UserResDto implements User {
   @ApiProperty({
-    example:
-      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImpvaG5AZ21haWwuY29tIiwiaWF0IjoxNjI2NzQwMjY5LCJleHAiOjE2MjY3NDAyNzZ9.4RZq0Xq2vHf6VQ5o4GtG6tKv4oL9a8kF8y0JW7w5ZlY',
-    description: 'jwt 토큰',
+    example: '홍길동',
+    description: '사용자 이름',
   })
-  certificationJwtToken: string;
+  name: string;
+
+  @ApiProperty({
+    example: 'uuid',
+    description: '사용자 uuid',
+  })
+  uuid: string;
+
+  @ApiProperty({
+    example: 'https://bucket.s3.ap-northeast-2.amazonaws.com/1626740269.webp',
+    description: '프로필 이미지 url',
+  })
+  profile: string | null;
+
+  @ApiProperty({
+    example: 'johndoe@gm.gist.ac.kr',
+    description: '사용자 이메일',
+  })
+  email: string;
+
+  @ApiProperty({
+    example: '20180000',
+    description: '사용자 학번',
+  })
+  studentId: string;
+
+  @ApiProperty({
+    example: '01012345678',
+    description: '사용자 전화번호',
+  })
+  phoneNumber: string;
+
+  @ApiProperty({
+    example: '2021-07-20T14:31:09.000Z',
+    description: '가입일',
+  })
+  createdAt: Date;
+
+  @ApiProperty({
+    example: '2021-07-20T14:31:09.000Z',
+    description: '최근 수정일',
+  })
+  updatedAt: Date;
+
+  @Exclude()
+  password: string;
+
+  constructor(user: User) {
+    Object.assign(this, user);
+  }
+}
+
+export class UpdateUserProfileResDto {
+  @ApiProperty({
+    example: 'https://bucket.s3.ap-northeast-2.amazonaws.com/1626740269.jpeg',
+    description: '프로필 이미지 presigned url',
+  })
+  presignedUrl: string;
 }

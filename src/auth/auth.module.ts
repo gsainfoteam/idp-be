@@ -1,11 +1,12 @@
 import { LoggerModule } from '@lib/logger';
+import { PrismaModule } from '@lib/prisma';
 import { RedisModule } from '@lib/redis';
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
-import { UserModule } from 'src/user/user.module';
 
 import { AuthController } from './auth.controller';
+import { AuthRepository } from './auth.repository';
 import { AuthService } from './auth.service';
 import { UserGuard } from './guard/auth.guard';
 import { UserStrategy } from './guard/auth.strategy';
@@ -13,9 +14,9 @@ import { UserStrategy } from './guard/auth.strategy';
 @Module({
   imports: [
     LoggerModule,
-    UserModule,
     ConfigModule,
     RedisModule,
+    PrismaModule,
     JwtModule.registerAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
@@ -31,7 +32,7 @@ import { UserStrategy } from './guard/auth.strategy';
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, UserStrategy, UserGuard],
+  providers: [AuthService, AuthRepository, UserStrategy, UserGuard],
   exports: [UserGuard],
 })
 export class AuthModule {}

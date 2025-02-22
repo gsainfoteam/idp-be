@@ -1,39 +1,23 @@
 import { Loggable } from '@lib/logger';
-import { MailService } from '@lib/mail';
-import { CacheNotFoundException, RedisService } from '@lib/redis';
-import {
-  ConflictException,
-  ForbiddenException,
-  Injectable,
-  InternalServerErrorException,
-  Logger,
-} from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
+import { ObjectService } from '@lib/object';
+import { ForbiddenException, Injectable, Logger } from '@nestjs/common';
 import { User } from '@prisma/client';
 import * as bcrypt from 'bcryptjs';
+import { VerificationJwtPayloadType } from 'src/verify/types/verificationJwtPayload.type';
+import { VerifyService } from 'src/verify/verify.service';
 
-import {
-  ChangePasswordDto,
-  DeleteUserDto,
-  RegisterDto,
-  SendCertificationCodeDto,
-  ValidationCertificationCodeDto,
-} from './dto/req.dto';
-import { ValidateCertificationJwtResDto } from './dto/res.dto';
-import { CertificationCodeEnum } from './types/certificationCode.type';
-import { CertificationJwtPayload } from './types/certificationJwtPayload.type';
+import { ChangePasswordDto, RegisterDto } from './dto/req.dto';
+import { UpdateUserProfileResDto } from './dto/res.dto';
 import { UserRepository } from './user.repository';
 
 @Loggable()
 @Injectable()
 export class UserService {
-  private readonly emailCertificationCodePrefix = 'EmailCertificationCode';
   private readonly logger = new Logger(UserService.name);
   constructor(
     private readonly userRepository: UserRepository,
-    private readonly mailService: MailService,
-    private readonly jwtService: JwtService,
-    private readonly redisService: RedisService,
+    private readonly verifyService: VerifyService,
+    private readonly objectService: ObjectService,
   ) {}
 
   /**
@@ -46,87 +30,8 @@ export class UserService {
   }
 
   /**
-   * send the email certification code to the email address (using node mailer)
-   * and save the certification code to the redis
-   * @param param0 it contains email
-   * @returns void, but it sends email to the email address
-   */
-  async sendEmailCertificationCode({
-    email,
-    type,
-  }: SendCertificationCodeDto): Promise<void> {
-    const user: User | null = await this.userRepository
-      .findUserByEmail(email)
-      .catch((error) => {
-        if (error instanceof ForbiddenException) {
-          return null;
-        }
-        this.logger.error(`send email Certification code error: ${error}`);
-        throw new InternalServerErrorException();
-      });
-
-    if (user && type === CertificationCodeEnum.REGISTER) {
-      this.logger.debug(`user already exists with email: ${email}`);
-      throw new ConflictException('user already exists');
-    }
-    if (!user && type === CertificationCodeEnum.PASSWORD) {
-      this.logger.debug(`user not found: ${email}`);
-      throw new ForbiddenException('user not found');
-    }
-
-    const emailCertificationCode: string = Math.random()
-      .toString(36)
-      .substring(2, 12);
-
-    await this.mailService.sendCertificationEmail(
-      email,
-      emailCertificationCode,
-    );
-
-    await this.redisService.set<string>(email, emailCertificationCode, {
-      ttl: 3 * 60,
-      prefix: this.emailCertificationCodePrefix,
-    });
-  }
-
-  /**
-   * validate the certification code (compare user and redis) and return jwt token
-   * @param param0 it contains email and code
-   * @returns jwt token if the certification code is valid
-   */
-  async validateCertificationCode({
-    email,
-    code,
-  }: ValidationCertificationCodeDto): Promise<ValidateCertificationJwtResDto> {
-    const certificationCode: string = await this.redisService
-      .getOrThrow<string>(email, {
-        prefix: this.emailCertificationCodePrefix,
-      })
-      .catch((error) => {
-        if (error instanceof CacheNotFoundException) {
-          this.logger.debug(`Redis key not found with email: ${email}`);
-          throw new ForbiddenException('certification code out-dated');
-        }
-        this.logger.error(`validate certification code error: ${error}`);
-        throw new InternalServerErrorException();
-      });
-
-    if (certificationCode !== code) {
-      this.logger.debug(`certification code not match: ${code}`);
-      throw new ForbiddenException('certification code not match');
-    }
-    await this.redisService.del(email, {
-      prefix: this.emailCertificationCodePrefix,
-    });
-    const payload: CertificationJwtPayload = { sub: email };
-    return {
-      certificationJwtToken: this.jwtService.sign(payload),
-    };
-  }
-
-  /**
    * register the user to the database
-   * @param param0 it contains email, password, name, studentId, phoneNumber, certificationJwtToken
+   * @param param0 it contains email, password, name, studentId, phoneNumber, verificationJwtToken
    */
   async register({
     email,
@@ -134,20 +39,21 @@ export class UserService {
     name,
     studentId,
     phoneNumber,
-    certificationJwtToken,
+    verificationJwtToken,
   }: RegisterDto): Promise<void> {
-    const payload: CertificationJwtPayload = await this.jwtService
-      .verifyAsync<CertificationJwtPayload>(certificationJwtToken, {
-        subject: email,
-      })
-      .catch(() => {
-        this.logger.debug(`certification jwt token out-dated, email: ${email}`);
-        throw new ForbiddenException('certification jwt token out-dated');
-      });
+    const payload: VerificationJwtPayloadType =
+      await this.verifyService.validateJwtToken(verificationJwtToken);
+
+    if (payload.hint !== 'email') {
+      this.logger.debug(
+        `verification hint is not email: ${verificationJwtToken}`,
+      );
+      throw new ForbiddenException('verification hint is not email');
+    }
 
     if (payload.sub !== email) {
       this.logger.debug(
-        `certification jwt token not valid: ${certificationJwtToken}`,
+        `certification jwt token not valid: ${verificationJwtToken}`,
       );
       throw new ForbiddenException('certification jwt token not valid');
     }
@@ -160,6 +66,7 @@ export class UserService {
       email,
       password: hashedPassword,
       name,
+      profile: null,
       studentId,
       phoneNumber,
     });
@@ -167,27 +74,19 @@ export class UserService {
 
   /**
    * change the user password (validate the user from the jwt token that comes from the email)
-   * @param param0 it contains email, password, certificationJwtToken
+   * @param param0 it contains email, password, verificationJwtToken
    */
   async changePassword({
     email,
     password,
-    certificationJwtToken,
+    verificationJwtToken,
   }: ChangePasswordDto): Promise<void> {
-    const payload: CertificationJwtPayload = await this.jwtService
-      .verifyAsync<CertificationJwtPayload>(certificationJwtToken, {
-        subject: email,
-      })
-      .catch(() => {
-        this.logger.debug(
-          `certification jwt token out-dated: ${certificationJwtToken}`,
-        );
-        throw new ForbiddenException('certification jwt token out-dated');
-      });
+    const payload: VerificationJwtPayloadType =
+      await this.verifyService.validateJwtToken(verificationJwtToken);
 
     if (payload.sub !== email) {
       this.logger.debug(
-        `certification jwt token not valid: ${certificationJwtToken}`,
+        `certification jwt token not valid: ${verificationJwtToken}`,
       );
       throw new ForbiddenException('certification jwt token not valid');
     }
@@ -200,28 +99,21 @@ export class UserService {
   }
 
   /**
-   * delete the user from the database
-   * @param param0 it contains email, password
+   * create presignedUrl for the user profile image and store it to the database
+   * @param userUuid user uuid
+   * @returns updateUserProfileResDto that contains presignedUrl
    */
-  async deleteUser({ email, password }: DeleteUserDto): Promise<void> {
-    await this.validateUserPassword({ email, password });
-    await this.userRepository.deleteUser(email);
+  async updateUserProfile(userUuid: string): Promise<UpdateUserProfileResDto> {
+    const presignedUrl = await this.objectService.createPresignedUrl(
+      `${userUuid}/profile.webp`,
+    );
+    await this.userRepository.updateUserProfile(presignedUrl, userUuid);
+    return {
+      presignedUrl,
+    };
   }
 
-  /**
-   * validate the user password
-   * @param param0 it contains email, password
-   * @returns user if the password is correct
-   */
-  async validateUserPassword({
-    email,
-    password,
-  }: Pick<User, 'email' | 'password'>): Promise<User> {
-    const user: User = await this.userRepository.findUserByEmail(email);
-    if (!bcrypt.compareSync(password, user.password)) {
-      this.logger.debug(`password not match, email: ${email}`);
-      throw new ForbiddenException('password not match');
-    }
-    return user;
+  async deleteUser(userUuid: string): Promise<void> {
+    await this.userRepository.deleteUser(userUuid);
   }
 }

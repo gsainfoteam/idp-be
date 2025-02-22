@@ -31,6 +31,12 @@ export class UserResDto implements User {
   name: string;
 
   @ApiProperty({
+    example: 'profile',
+    description: '프로필 사진',
+  })
+  profile: string | null;
+
+  @ApiProperty({
     example: 'studentId',
     description: '학번',
   })

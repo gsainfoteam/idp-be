@@ -10,6 +10,7 @@ Project "idp" {
 Table user {
   uuid String [pk]
   password String [not null]
+  profile String
   name String [not null]
   email String [unique, not null]
   studentId String [unique, not null]

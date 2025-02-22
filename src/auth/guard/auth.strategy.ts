@@ -4,13 +4,14 @@ import { PassportStrategy } from '@nestjs/passport';
 import { User } from '@prisma/client';
 import { JwtPayload } from 'jsonwebtoken';
 import { ExtractJwt, Strategy } from 'passport-jwt';
-import { UserService } from 'src/user/user.service';
+
+import { AuthService } from '../auth.service';
 
 @Injectable()
 export class UserStrategy extends PassportStrategy(Strategy, 'user:jwt') {
   constructor(
+    readonly authService: AuthService,
     readonly configService: ConfigService,
-    private readonly userService: UserService,
   ) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
@@ -22,12 +23,6 @@ export class UserStrategy extends PassportStrategy(Strategy, 'user:jwt') {
 
   async validate({ sub }: JwtPayload): Promise<User> {
     if (!sub) throw new UnauthorizedException('invalid token');
-    return this.userService
-      .findUserByUuid({
-        uuid: sub,
-      })
-      .catch(() => {
-        throw new UnauthorizedException('invalid token');
-      });
+    return this.authService.findUserByUuid(sub);
   }
 }

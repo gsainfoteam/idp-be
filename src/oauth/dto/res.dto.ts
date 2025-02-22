@@ -80,6 +80,13 @@ export class UserInfoResDto {
   sub: string;
 
   @ApiProperty({
+    example: 'https://example.com/profile',
+    description: 'profile image url',
+    required: false,
+  })
+  profile?: string | null;
+
+  @ApiProperty({
     example: 'johnDoe',
     description: 'name',
     required: false,

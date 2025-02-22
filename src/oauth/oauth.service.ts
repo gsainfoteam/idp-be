@@ -251,6 +251,7 @@ export class OauthService {
           exp: Math.floor(Date.now() / 1000) + 60 * 60, // 1 hour
           iat: Math.floor(Date.now() / 1000),
           scope: cache.scope.join(' '),
+          profile: cache.scope.includes('profile') ? user.profile : undefined,
           name: cache.scope.includes('name') ? user.name : undefined,
           email: cache.scope.includes('email') ? user.email : undefined,
           student_id: cache.scope.includes('student_id')
@@ -341,6 +342,9 @@ export class OauthService {
           exp: Math.floor(Date.now() / 1000) + 60 * 60, // 1 hour
           iat: Math.floor(Date.now() / 1000),
           scope: refreshTokenData.scopes.join(' '),
+          profile: refreshTokenData.scopes.includes('profile')
+            ? user.profile
+            : undefined,
           name: refreshTokenData.scopes.includes('name')
             ? user.name
             : undefined,
@@ -479,6 +483,7 @@ export class OauthService {
 
     return {
       sub: user.uuid,
+      profile: tokenData.scope.includes('profile') ? user.profile : undefined,
       name: tokenData.scope.includes('name') ? user.name : undefined,
       email: tokenData.scope.includes('email') ? user.email : undefined,
       studentId: tokenData.scope.includes('student_id')

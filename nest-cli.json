@@ -34,6 +34,15 @@
         "tsConfigPath": "libs/mail/tsconfig.lib.json"
       }
     },
+    "object": {
+      "type": "library",
+      "root": "libs/object",
+      "entryFile": "index",
+      "sourceRoot": "libs/object/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/object/tsconfig.lib.json"
+      }
+    },
     "prisma": {
       "type": "library",
       "root": "libs/prisma",
