@@ -1,2 +1,1 @@
-export const responseType = ['code', 'token', 'id_token'] as const;
-export type ResponseType = (typeof responseType)[number];
+export type ResponseType = 'code'; // since we use oauth2.1, we only support code grant flow.

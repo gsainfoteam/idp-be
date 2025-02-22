@@ -7,6 +7,15 @@
     "webpack": true
   },
   "projects": {
+    "global": {
+      "type": "library",
+      "root": "libs/global",
+      "entryFile": "index",
+      "sourceRoot": "libs/global/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/global/tsconfig.lib.json"
+      }
+    },
     "logger": {
       "type": "library",
       "root": "libs/logger",
@@ -14,6 +23,42 @@
       "sourceRoot": "libs/logger/src",
       "compilerOptions": {
         "tsConfigPath": "libs/logger/tsconfig.lib.json"
+      }
+    },
+    "mail": {
+      "type": "library",
+      "root": "libs/mail",
+      "entryFile": "index",
+      "sourceRoot": "libs/mail/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/mail/tsconfig.lib.json"
+      }
+    },
+    "object": {
+      "type": "library",
+      "root": "libs/object",
+      "entryFile": "index",
+      "sourceRoot": "libs/object/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/object/tsconfig.lib.json"
+      }
+    },
+    "prisma": {
+      "type": "library",
+      "root": "libs/prisma",
+      "entryFile": "index",
+      "sourceRoot": "libs/prisma/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/prisma/tsconfig.lib.json"
+      }
+    },
+    "redis": {
+      "type": "library",
+      "root": "libs/redis",
+      "entryFile": "index",
+      "sourceRoot": "libs/redis/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/redis/tsconfig.lib.json"
       }
     }
   }
