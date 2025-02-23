@@ -17,6 +17,7 @@ import {
 } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
+  ApiBearerAuth,
   ApiConsumes,
   ApiCreatedResponse,
   ApiOperation,
@@ -60,6 +61,7 @@ export class OauthController {
     description:
       'make the user consent to the client. through this endpoint, the user can agree to use the client. if not agreed, the client cannot get the user information.',
   })
+  @ApiBearerAuth('user:jwt')
   @ApiConsumes('application/x-www-form-urlencoded', 'application/json')
   @ApiCreatedResponse({ description: 'consent success' })
   @Post('consent')
@@ -76,6 +78,7 @@ export class OauthController {
     description:
       'authorize the client to get the code. through this endpoint, the user can authorize the client to get the code.',
   })
+  @ApiBearerAuth('user:jwt')
   @ApiPermanentRedirectResponse({
     description:
       'it move to client uri with certain query parameters, ex) https://client.com/callback?code=123&state=123&iss=https://auth-server.com',

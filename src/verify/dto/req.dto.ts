@@ -17,6 +17,13 @@ export class SendEmailCodeDto {
 
 export class VerifyCodeDto {
   @ApiProperty({
+    example: 'JohnDoe@gm.gist.ac.kr',
+    description: 'GIST 이메일 혹은 다른 인증 대상의 대푯값',
+    required: true,
+  })
+  subject: string;
+
+  @ApiProperty({
     example: '123456',
     description: '인증 코드',
     required: true,

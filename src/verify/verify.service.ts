@@ -13,7 +13,6 @@ import * as crypto from 'crypto';
 
 import { SendEmailCodeDto, VerifyCodeDto } from './dto/req.dto';
 import { VerificationJwtResDto } from './dto/res.dto';
-import { EmailVerificationCache } from './types/emailVerificationCache.type';
 import { VerificationJwtPayloadType } from './types/verificationJwtPayload.type';
 
 @Loggable()
@@ -35,7 +34,7 @@ export class VerifyService {
    * @returns void, but it sends email to the email address
    */
   async sendEmailCode({ email }: SendEmailCodeDto): Promise<void> {
-    const emailVerificationCode: string = crypto.randomBytes(6).toString('hex');
+    const emailVerificationCode: string = crypto.randomBytes(6).toString('hex'); // 12 digit hex string.
 
     await this.mailService.sendEmail(
       email,
@@ -46,25 +45,19 @@ export class VerifyService {
       `verification code is <b>${emailVerificationCode}</b>`,
     );
 
-    await this.redisService.set<EmailVerificationCache>(
-      email,
-      {
-        email,
-        code: emailVerificationCode,
-      },
-      {
-        ttl: 3 * 60,
-        prefix: this.emailVerificationCodePrefix,
-      },
-    );
+    await this.redisService.set<string>(email, emailVerificationCode, {
+      ttl: 3 * 60,
+      prefix: this.emailVerificationCodePrefix,
+    });
   }
 
   /**
-   * validate the code and return the jwt token, to obtain the extendability, it requires hint
-   * @param param0 it contains code and hint
+   * validate the code and return the jwt token, to obtain the extendability, it requires hint, depends on hint, 'subject' can be email, phone number, etc.
+   * @param param0 it contains code, hint and subject
    * @returns jwt token if the code is valid
    */
   async validateCode({
+    subject,
     code,
     hint,
   }: VerifyCodeDto): Promise<VerificationJwtResDto> {
@@ -72,26 +65,20 @@ export class VerifyService {
       throw new BadRequestException('only email supported');
     }
 
-    const emailVerificationCache: EmailVerificationCache =
-      await this.redisService
-        .getOrThrow<EmailVerificationCache>(code, {
-          prefix: this.emailVerificationCodePrefix,
-        })
-        .catch((error) => {
-          if (error instanceof CacheNotFoundException) {
-            this.logger.debug(`Redis cache not found with code: ${code}`);
-            throw new BadRequestException('invalid code');
-          }
-          this.logger.error(`Redis get error: ${error}`);
-          throw new InternalServerErrorException();
-        });
+    const CachedCode = await this.redisService
+      .getOrThrow<string>(subject, {
+        prefix: this.emailVerificationCodePrefix,
+      })
+      .catch((error) => {
+        if (error instanceof CacheNotFoundException) {
+          this.logger.debug(`Redis cache not found with code: ${code}`);
+          throw new BadRequestException('invalid code');
+        }
+        this.logger.error(`Redis get error: ${error}`);
+        throw new InternalServerErrorException();
+      });
 
-    if (
-      !crypto.timingSafeEqual(
-        Buffer.from(code),
-        Buffer.from(emailVerificationCache.code),
-      )
-    ) {
+    if (!crypto.timingSafeEqual(Buffer.from(code), Buffer.from(CachedCode))) {
       this.logger.debug(`code not matched: ${code}`);
       throw new BadRequestException('invalid code');
     }
@@ -102,7 +89,7 @@ export class VerifyService {
 
     const payload: VerificationJwtPayloadType = {
       iss: this.configService.getOrThrow<string>('JWT_ISSUER'),
-      sub: emailVerificationCache.email,
+      sub: subject,
       hint: 'email',
     };
     return {

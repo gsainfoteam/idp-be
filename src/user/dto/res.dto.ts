@@ -61,7 +61,8 @@ export class UserResDto implements User {
 
 export class UpdateUserProfileResDto {
   @ApiProperty({
-    example: 'https://bucket.s3.ap-northeast-2.amazonaws.com/1626740269.jpeg',
+    example:
+      'https://bucket.s3.ap-northeast-2.amazonaws.com/1626740269/profile.webp',
     description: '프로필 이미지 presigned url',
   })
   presignedUrl: string;

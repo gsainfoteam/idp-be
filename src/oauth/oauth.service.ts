@@ -78,9 +78,16 @@ export class OauthService {
    * @param user user from the request
    */
   async consent({ scope, clientId }: ConsentReqDto, user: User): Promise<void> {
+    const client = await this.clientService.getClientByUuid(clientId);
+    const allowedScopes = client.scopes.concat(client.optionalScopes);
     // check if the scopes are valid
     scope.forEach((s) => {
-      if (!TokenScopeList.includes(s)) {
+      if (!allowedScopes.includes(s)) {
+        throw new OauthAuthorizeException('invalid_scope');
+      }
+    });
+    client.scopes.forEach((s) => {
+      if (!scope.includes(s)) {
         throw new OauthAuthorizeException('invalid_scope');
       }
     });

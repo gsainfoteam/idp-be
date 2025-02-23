@@ -65,10 +65,10 @@ export class ClientController {
   @ApiOkResponse({ description: '성공', type: ClientResDto })
   @ApiUnauthorizedResponse({ description: '인증 실패' })
   @ApiInternalServerErrorResponse({ description: '서버 오류' })
-  @Get(':uuid')
+  @Get(':clientId')
   @UseGuards(UserGuard)
   async getClient(
-    @Param('uuid', ParseUUIDPipe) uuid: string,
+    @Param('clientId', ParseUUIDPipe) uuid: string,
     @GetUser() user: User,
   ): Promise<ClientResDto> {
     return new ClientResDto(await this.clientService.getClient(uuid, user));
@@ -103,10 +103,10 @@ export class ClientController {
   @ApiUnauthorizedResponse({ description: '인증 실패' })
   @ApiForbiddenResponse({ description: '접근 불가' })
   @ApiInternalServerErrorResponse({ description: '서버 오류' })
-  @Patch(':uuid/secret')
+  @Patch(':clientId/secret')
   @UseGuards(UserGuard)
   async resetClientSecret(
-    @Param('uuid', ParseUUIDPipe) uuid: string,
+    @Param('clientId', ParseUUIDPipe) uuid: string,
     @GetUser() user: User,
   ): Promise<ClientCredentialResDto> {
     return new ClientCredentialResDto(
@@ -123,10 +123,10 @@ export class ClientController {
   @ApiUnauthorizedResponse({ description: '인증 실패' })
   @ApiForbiddenResponse({ description: '접근 불가' })
   @ApiInternalServerErrorResponse({ description: '서버 오류' })
-  @Patch(':uuid')
+  @Patch(':clientId')
   @UseGuards(UserGuard)
   async updateClient(
-    @Param('uuid') uuid: string,
+    @Param('clientId') uuid: string,
     @Body() body: UpdateClientDto,
     @GetUser() user: User,
   ): Promise<ClientResDto> {

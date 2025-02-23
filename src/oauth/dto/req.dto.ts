@@ -15,6 +15,7 @@ import { ScopeList, ScopeType } from '../types/scope.type';
 export class ConsentReqDto {
   @ApiProperty({
     description: 'scope that the user agrees to use',
+    type: String,
   })
   @Transform(({ value }) => {
     if (typeof value === 'string')

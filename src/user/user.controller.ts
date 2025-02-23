@@ -14,6 +14,7 @@ import {
   ValidationPipe,
 } from '@nestjs/common';
 import {
+  ApiBearerAuth,
   ApiConflictResponse,
   ApiCreatedResponse,
   ApiForbiddenResponse,
@@ -43,6 +44,7 @@ export class UserController {
     summary: 'get user',
     description: 'api for getting user',
   })
+  @ApiBearerAuth('user:jwt')
   @ApiOkResponse({ description: 'success', type: UserResDto })
   @ApiUnauthorizedResponse({ description: 'token not valid' })
   @ApiInternalServerErrorResponse({ description: 'server error' })
@@ -60,7 +62,7 @@ export class UserController {
   @ApiConflictResponse({ description: 'user already exists' })
   @ApiForbiddenResponse({ description: 'certification token is not valid' })
   @ApiInternalServerErrorResponse({ description: 'server error' })
-  @Post('/register')
+  @Post()
   async register(@Body() body: RegisterDto): Promise<void> {
     return this.userService.register(body);
   }
@@ -82,7 +84,8 @@ export class UserController {
     description:
       'api for updating profile image. it will return updated profile presigned url. image format must be webp',
   })
-  @ApiOkResponse({ description: 'success' })
+  @ApiBearerAuth('user:jwt')
+  @ApiOkResponse({ description: 'success', type: UpdateUserProfileResDto })
   @ApiUnauthorizedResponse({ description: 'token not valid' })
   @ApiInternalServerErrorResponse({ description: 'server error' })
   @UseGuards(UserGuard)
@@ -95,6 +98,7 @@ export class UserController {
     summary: 'delete user',
     description: 'api for deleting user',
   })
+  @ApiBearerAuth('user:jwt')
   @ApiOkResponse({ description: 'success' })
   @ApiForbiddenResponse({ description: 'password is not valid' })
   @ApiInternalServerErrorResponse({ description: 'server error' })

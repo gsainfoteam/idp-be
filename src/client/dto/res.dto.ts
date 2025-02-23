@@ -8,7 +8,7 @@ export class ClientResDto implements Client {
     example: 'd290f1ee-6c54-4b01-90e6-d701748f0851',
   })
   @Expose()
-  get client_id(): string {
+  get clientId(): string {
     return this.uuid;
   }
 
@@ -72,7 +72,7 @@ export class ClientCredentialResDto implements Client {
     example: 'd290f1ee-6c54-4b01-90e6-d701748f0851',
   })
   @Expose()
-  get client_id(): string {
+  get clientId(): string {
     return this.uuid;
   }
 
