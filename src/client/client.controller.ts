@@ -126,7 +126,7 @@ export class ClientController {
   @Patch(':clientId')
   @UseGuards(UserGuard)
   async updateClient(
-    @Param('clientId') uuid: string,
+    @Param('clientId', ParseUUIDPipe) uuid: string,
     @Body() body: UpdateClientDto,
     @GetUser() user: User,
   ): Promise<ClientResDto> {

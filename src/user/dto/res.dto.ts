@@ -2,6 +2,8 @@ import { ApiProperty } from '@nestjs/swagger';
 import { User } from '@prisma/client';
 import { Exclude } from 'class-transformer';
 
+import { UserConsentType } from '../types/userConsent.type';
+
 export class UserResDto implements User {
   @ApiProperty({
     example: '홍길동',
@@ -66,4 +68,79 @@ export class UpdateUserProfileResDto {
     description: '프로필 이미지 presigned url',
   })
   presignedUrl: string;
+}
+
+export class UserConsentClientResDto {
+  @ApiProperty({
+    example: 'client name',
+    description: 'client 이름',
+  })
+  name: string;
+
+  @ApiProperty({
+    example: 'uuid',
+    description: 'client uuid',
+  })
+  uuid: string;
+
+  @ApiProperty({
+    example: ['scope1', 'scope2'],
+    description: 'client scope',
+  })
+  scopes: string[];
+
+  @ApiProperty({
+    example: ['optionalScope1', 'optionalScope2'],
+    description: 'optional scope',
+  })
+  optionalScopes: string[];
+}
+
+export class UserConsentResDto implements UserConsentType {
+  @ApiProperty({
+    example: UserConsentClientResDto,
+    description: 'client information',
+    type: UserConsentClientResDto,
+  })
+  client: UserConsentClientResDto;
+
+  @ApiProperty({
+    example: 'uuid',
+    description: 'client Uuid',
+  })
+  clientUuid: string;
+
+  @ApiProperty({
+    example: ['scope1', 'scope2'],
+    description: 'consent scope',
+  })
+  scopes: string[];
+
+  @ApiProperty({
+    example: '2021-07-20T14:31:09.000Z',
+    description: 'the time when the consent was created',
+  })
+  createdAt: Date;
+
+  @ApiProperty({
+    example: '2021-07-20T14:31:09.000Z',
+    description: 'the time when the consent was updated',
+  })
+  updatedAt: Date;
+
+  @Exclude()
+  userUuid: string;
+
+  constructor(consent: UserConsentType) {
+    Object.assign(this, consent);
+  }
+}
+
+export class UserConsentListResDto {
+  @ApiProperty({
+    example: [UserConsentResDto],
+    description: 'consent list',
+    type: [UserConsentResDto],
+  })
+  list: UserConsentResDto[];
 }

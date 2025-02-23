@@ -8,6 +8,7 @@ import { VerifyService } from 'src/verify/verify.service';
 
 import { ChangePasswordDto, RegisterDto } from './dto/req.dto';
 import { UpdateUserProfileResDto } from './dto/res.dto';
+import { UserConsentType } from './types/userConsent.type';
 import { UserRepository } from './user.repository';
 
 @Loggable()
@@ -27,6 +28,12 @@ export class UserService {
    */
   async findUserByUuid({ uuid }: Pick<User, 'uuid'>): Promise<User> {
     return this.userRepository.findUserByUuid(uuid);
+  }
+
+  async findUserConsentByUuid({
+    uuid,
+  }: Pick<User, 'uuid'>): Promise<UserConsentType[]> {
+    return this.userRepository.findUserConsentByUuid(uuid);
   }
 
   /**

@@ -29,7 +29,12 @@ import { GetUser } from 'src/auth/decorator/getUser.decorator';
 import { UserGuard } from 'src/auth/guard/auth.guard';
 
 import { ChangePasswordDto, RegisterDto } from './dto/req.dto';
-import { UpdateUserProfileResDto, UserResDto } from './dto/res.dto';
+import {
+  UpdateUserProfileResDto,
+  UserConsentListResDto,
+  UserConsentResDto,
+  UserResDto,
+} from './dto/res.dto';
 import { UserService } from './user.service';
 
 @ApiTags('user')
@@ -52,6 +57,26 @@ export class UserController {
   @Get()
   getUser(@GetUser() user: User): UserResDto {
     return new UserResDto(user);
+  }
+
+  @ApiOperation({
+    summary: 'get user consent',
+    description: 'api for getting user consent',
+  })
+  @ApiBearerAuth('user:jwt')
+  @ApiOkResponse({ description: 'success', type: UserConsentListResDto })
+  @ApiUnauthorizedResponse({ description: 'token not valid' })
+  @ApiInternalServerErrorResponse({ description: 'server error' })
+  @UseGuards(UserGuard)
+  @Get('/consent')
+  async getUserConsent(@GetUser() user: User): Promise<UserConsentListResDto> {
+    return {
+      list: (await this.userService.findUserConsentByUuid(user)).map(
+        (userConsent) => {
+          return new UserConsentResDto(userConsent);
+        },
+      ),
+    };
   }
 
   @ApiOperation({

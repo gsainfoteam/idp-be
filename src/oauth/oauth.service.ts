@@ -507,6 +507,6 @@ export class OauthService {
    * @returns opaque token
    */
   private generateOpaqueToken(): string {
-    return crypto.randomBytes(32).toString('base64').replace(/[+/=]/g, '');
+    return crypto.randomBytes(32).toString('base64url');
   }
 }

@@ -10,6 +10,8 @@ import {
 import { User } from '@prisma/client';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 
+import { UserConsentType } from './types/userConsent.type';
+
 @Loggable()
 @Injectable()
 export class UserRepository {
@@ -64,6 +66,24 @@ export class UserRepository {
         this.logger.error(`find user by uuid error: ${error}`);
         throw new InternalServerErrorException();
       });
+  }
+
+  async findUserConsentByUuid(uuid: string): Promise<UserConsentType[]> {
+    return this.prismaService.consent.findMany({
+      where: {
+        userUuid: uuid,
+      },
+      include: {
+        client: {
+          select: {
+            name: true,
+            uuid: true,
+            scopes: true,
+            optionalScopes: true,
+          },
+        },
+      },
+    });
   }
 
   /**

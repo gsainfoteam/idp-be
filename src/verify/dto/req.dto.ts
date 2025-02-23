@@ -24,7 +24,7 @@ export class VerifyCodeDto {
   subject: string;
 
   @ApiProperty({
-    example: '123456',
+    example: 'verification-code',
     description: '인증 코드',
     required: true,
   })
