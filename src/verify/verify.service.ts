@@ -86,7 +86,12 @@ export class VerifyService {
           throw new InternalServerErrorException();
         });
 
-    if (emailVerificationCache.code !== code) {
+    if (
+      !crypto.timingSafeEqual(
+        Buffer.from(code),
+        Buffer.from(emailVerificationCache.code),
+      )
+    ) {
       this.logger.debug(`code not matched: ${code}`);
       throw new BadRequestException('invalid code');
     }
