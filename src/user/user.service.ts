@@ -6,7 +6,11 @@ import * as bcrypt from 'bcryptjs';
 import { VerificationJwtPayloadType } from 'src/verify/types/verificationJwtPayload.type';
 import { VerifyService } from 'src/verify/verify.service';
 
-import { ChangePasswordDto, RegisterDto } from './dto/req.dto';
+import {
+  ChangePasswordDto,
+  DeleteUserReqDto,
+  RegisterDto,
+} from './dto/req.dto';
 import { UpdateUserProfileResDto } from './dto/res.dto';
 import { UserConsentType } from './types/userConsent.type';
 import { UserRepository } from './user.repository';
@@ -120,7 +124,19 @@ export class UserService {
     };
   }
 
-  async deleteUser(userUuid: string): Promise<void> {
+  /**
+   * validate user's password and delete user
+   * @param userUuid user's uuid
+   * @param param1 object that contains password
+   */
+  async deleteUser(
+    userUuid: string,
+    { password }: DeleteUserReqDto,
+  ): Promise<void> {
+    const user = await this.userRepository.findUserByUuid(userUuid);
+    if (!bcrypt.compareSync(password, user.password)) {
+      throw new ForbiddenException('password is not valid');
+    }
     await this.userRepository.deleteUser(userUuid);
   }
 }

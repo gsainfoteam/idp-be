@@ -72,3 +72,12 @@ export class RegisterDto {
   @IsJWT()
   verificationJwtToken: string;
 }
+
+export class DeleteUserReqDto {
+  @ApiProperty({
+    example: 'password',
+    description: '비밀번호',
+  })
+  @IsString()
+  password: string;
+}

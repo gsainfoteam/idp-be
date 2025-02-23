@@ -28,7 +28,11 @@ import { User } from '@prisma/client';
 import { GetUser } from 'src/auth/decorator/getUser.decorator';
 import { UserGuard } from 'src/auth/guard/auth.guard';
 
-import { ChangePasswordDto, RegisterDto } from './dto/req.dto';
+import {
+  ChangePasswordDto,
+  DeleteUserReqDto,
+  RegisterDto,
+} from './dto/req.dto';
 import {
   UpdateUserProfileResDto,
   UserConsentListResDto,
@@ -129,7 +133,10 @@ export class UserController {
   @ApiInternalServerErrorResponse({ description: 'server error' })
   @UseGuards(UserGuard)
   @Delete()
-  async deleteUser(@GetUser() user: User): Promise<void> {
-    return this.userService.deleteUser(user.uuid);
+  async deleteUser(
+    @GetUser() user: User,
+    @Body() body: DeleteUserReqDto,
+  ): Promise<void> {
+    return this.userService.deleteUser(user.uuid, body);
   }
 }
