@@ -35,7 +35,9 @@ export class ObjectService {
       Bucket: this.configService.getOrThrow<string>('AWS_S3_BUCKET'),
       Key: key,
     });
-    return getSignedUrl(this.s3Client, command, { expiresIn: 15 * 60 });
+    const expiresIn =
+      this.configService.get<number>('AWS_PRESIGNED_URL_EXPIRES_IN') || 15 * 60; // 15 minutes default
+    return getSignedUrl(this.s3Client, command, { expiresIn });
   }
 
   /**

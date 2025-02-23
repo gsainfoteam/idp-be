@@ -100,7 +100,7 @@ export class UserController {
   @ApiInternalServerErrorResponse({ description: 'server error' })
   @UseGuards(UserGuard)
   @Delete()
-  async DeleteUserDto(@GetUser() user: User): Promise<void> {
+  async deleteUser(@GetUser() user: User): Promise<void> {
     return this.userService.deleteUser(user.uuid);
   }
 }

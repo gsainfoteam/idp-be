@@ -9,6 +9,7 @@ import {
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
+import * as crypto from 'crypto';
 
 import { SendEmailCodeDto, VerifyCodeDto } from './dto/req.dto';
 import { VerificationJwtResDto } from './dto/res.dto';
@@ -34,9 +35,7 @@ export class VerifyService {
    * @returns void, but it sends email to the email address
    */
   async sendEmailCode({ email }: SendEmailCodeDto): Promise<void> {
-    const emailVerificationCode: string = Math.random()
-      .toString(36)
-      .substring(2, 12);
+    const emailVerificationCode: string = crypto.randomBytes(6).toString('hex');
 
     await this.mailService.sendEmail(
       email,
@@ -98,7 +97,7 @@ export class VerifyService {
       hint: 'email',
     };
     return {
-      VerificationJwtToken: this.jwtService.sign(payload),
+      verificationJwtToken: this.jwtService.sign(payload),
     };
   }
 

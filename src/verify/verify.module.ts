@@ -18,9 +18,11 @@ import { VerifyService } from './verify.service';
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => ({
-        secret: configService.get<string>('VERIFICATION_JWT_SECRET'),
+        secret: configService.getOrThrow<string>('VERIFICATION_JWT_SECRET'),
         signOptions: {
-          expiresIn: configService.get<string>('VERIFICATION_JWT_EXPIRE'),
+          expiresIn: configService.getOrThrow<string>(
+            'VERIFICATION_JWT_EXPIRE',
+          ),
           algorithm: 'HS256',
         },
       }),
