@@ -96,6 +96,10 @@ export class VerifyService {
       throw new BadRequestException('invalid code');
     }
 
+    await this.redisService.del(code, {
+      prefix: this.emailVerificationCodePrefix,
+    });
+
     const payload: VerificationJwtPayloadType = {
       iss: this.configService.getOrThrow<string>('JWT_ISSUER'),
       sub: emailVerificationCache.email,
