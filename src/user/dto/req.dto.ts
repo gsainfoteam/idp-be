@@ -1,12 +1,7 @@
 import { IsGistEmail } from '@lib/global';
+import { IsStudentId } from '@lib/global/validator/studentId.validator';
 import { ApiProperty } from '@nestjs/swagger';
-import {
-  IsEmail,
-  IsJWT,
-  IsNumberString,
-  IsString,
-  Length,
-} from 'class-validator';
+import { IsEmail, IsJWT, IsString } from 'class-validator';
 
 export class ChangePasswordDto {
   @ApiProperty({
@@ -60,8 +55,7 @@ export class RegisterDto {
     example: '20180000',
     description: '학번',
   })
-  @Length(8, 8)
-  @IsNumberString()
+  @IsStudentId()
   studentId: string;
 
   @ApiProperty({

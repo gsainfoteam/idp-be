@@ -5,21 +5,21 @@ import {
   ValidatorConstraintInterface,
 } from 'class-validator';
 
-export function IsGistEmail(validationOptions?: ValidationOptions) {
+export function IsStudentId(validationOptions?: ValidationOptions) {
   return function (object: object, propertyName: string) {
     registerDecorator({
       target: object.constructor,
-      propertyName: propertyName,
+      propertyName,
       options: validationOptions,
-      validator: GistEmailValidator,
+      validator: StudentIdValidator,
     });
   };
 }
 
 @ValidatorConstraint()
-export class GistEmailValidator implements ValidatorConstraintInterface {
+export class StudentIdValidator implements ValidatorConstraintInterface {
   validate(value: string): boolean {
     if (!value) return false;
-    return value.includes('@gm.gist.ac.kr') || value.includes('@gist.ac.kr');
+    return /^[0-9]{8}$/.test(value) || /^[0-9]{6}$/.test(value);
   }
 }
