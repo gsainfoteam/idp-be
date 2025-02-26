@@ -20,6 +20,6 @@ export function IsStudentId(validationOptions?: ValidationOptions) {
 export class StudentIdValidator implements ValidatorConstraintInterface {
   validate(value: string): boolean {
     if (!value) return false;
-    return /^[0-9]{8}$/.test(value) || /^[0-9]{6}$/.test(value);
+    return /^[0-9]{8}$/.test(value) || /^[0-9]{5}$/.test(value);
   }
 }
