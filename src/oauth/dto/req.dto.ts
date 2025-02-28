@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Expose, Transform } from 'class-transformer';
-import { IsArray, IsIn, IsOptional, IsString, IsUrl } from 'class-validator';
+import { IsArray, IsIn, IsOptional, IsString } from 'class-validator';
 import { ClientScopeList } from 'src/client/types/clientScopes.type';
 
 import { OauthAuthorizeException } from '../exceptions/oauth.authorize.exception';
@@ -98,7 +98,6 @@ export class AuthorizationReqDto {
     name: 'redirect_uri',
   })
   @IsString()
-  @IsUrl()
   redirectUri: string;
 
   @ApiProperty({
@@ -150,6 +149,7 @@ export class TokenReqDto {
   @ApiProperty({
     description: 'client_id of the client',
     name: 'client_id',
+    required: false,
   })
   @Expose({
     name: 'client_id',
@@ -161,6 +161,7 @@ export class TokenReqDto {
   @ApiProperty({
     description: 'client_secret of the client',
     name: 'client_secret',
+    required: false,
   })
   @Expose({
     name: 'client_secret',
@@ -171,6 +172,7 @@ export class TokenReqDto {
 
   @ApiProperty({
     description: 'code of the client',
+    required: false,
   })
   @IsString()
   @IsOptional()
@@ -180,6 +182,7 @@ export class TokenReqDto {
     description:
       'code_verifier of the client, this is required when using PKCE, you should make it when you provide code_challenge',
     name: 'code_verifier',
+    required: false,
   })
   @Expose({
     name: 'code_verifier',
@@ -191,6 +194,7 @@ export class TokenReqDto {
   @ApiProperty({
     description: 'refresh_token of the client',
     name: 'refresh_token',
+    required: false,
   })
   @Expose({
     name: 'refresh_token',

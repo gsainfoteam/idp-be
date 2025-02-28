@@ -122,7 +122,7 @@ export class OauthService {
 
     // check if the client has the scope
     scope.forEach((s) => {
-      if (!consent.scopes.includes(s) || !TokenScopeList.includes(s)) {
+      if (!consent.scopes.includes(s) && !TokenScopeList.includes(s)) {
         throw new OauthAuthorizeException('invalid_scope');
       }
     });
