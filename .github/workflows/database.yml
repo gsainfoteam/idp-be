@@ -6,6 +6,7 @@ on:
       - 'prisma/schema.prisma'
     branches:
       - main
+  workflow_dispatch:
 
 jobs:
   deploy:
@@ -17,12 +18,12 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Install Prisma
-        run: npm install @prisma/cli
+        run: npm install prisma
 
       - name: Migrate Database
         run: npx prisma migrate deploy
         env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          DATABASE_URL: ${{ secrets.STG_DATABASE_URL }}
 
   build:
     name: Generate and Build ERD
@@ -34,8 +35,8 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Install prisma-dbml-generator and dbdocs
-        run: sudo npm install -g prisma-dbml-generator dbdocs
+      - name: Install prisma-dbml-generator, dbdocs and prisma
+        run: sudo npm install -g prisma-dbml-generator dbdocs prisma
 
       - name: Check dbdocs
         run: dbdocs --version
