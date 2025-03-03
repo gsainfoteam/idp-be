@@ -42,7 +42,7 @@ jobs:
         run: dbdocs --version
 
       - name: Generate dbml
-        run: npx prisma generate
+        run: pnpm prisma generate --generator dbml
 
       - name: Build and Update ERD
         run: dbdocs build ./prisma/dbml/schema.dbml
