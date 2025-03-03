@@ -29,11 +29,12 @@ export class ObjectService {
    * @param key the key of the object to create a presigned URL for (usually the filename or path)
    * @returns presigned URL
    */
-  async createPresignedUrl(key: string): Promise<string> {
+  async createPresignedUrl(key: string, length: number): Promise<string> {
     this.logger.debug(`Creating presigned URL for ${key}`);
     const command = new PutObjectCommand({
       Bucket: this.configService.getOrThrow<string>('AWS_S3_BUCKET'),
       Key: key,
+      ContentLength: length,
     });
     const expiresIn =
       this.configService.get<number>('AWS_PRESIGNED_URL_EXPIRES_IN') || 15 * 60; // 15 minutes default

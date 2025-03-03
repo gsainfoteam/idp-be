@@ -110,9 +110,13 @@ export class UserService {
    * @param userUuid user uuid
    * @returns updateUserProfileResDto that contains presignedUrl
    */
-  async updateUserProfile(userUuid: string): Promise<UpdateUserProfileResDto> {
+  async updateUserProfile(
+    length: number,
+    userUuid: string,
+  ): Promise<UpdateUserProfileResDto> {
     const presignedUrl = await this.objectService.createPresignedUrl(
       `${userUuid}/profile.webp`,
+      length,
     );
     await this.userRepository.updateUserProfile(presignedUrl, userUuid);
     return {

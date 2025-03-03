@@ -5,8 +5,10 @@ import {
   Controller,
   Delete,
   Get,
+  ParseIntPipe,
   Patch,
   Post,
+  Query,
   UseFilters,
   UseGuards,
   UseInterceptors,
@@ -119,8 +121,11 @@ export class UserController {
   @ApiInternalServerErrorResponse({ description: 'server error' })
   @UseGuards(UserGuard)
   @Patch('/profile')
-  async updateProfile(@GetUser() user: User): Promise<UpdateUserProfileResDto> {
-    return this.userService.updateUserProfile(user.uuid);
+  async updateProfile(
+    @Query('length', ParseIntPipe) length: number,
+    @GetUser() user: User,
+  ): Promise<UpdateUserProfileResDto> {
+    return this.userService.updateUserProfile(length, user.uuid);
   }
 
   @ApiOperation({

@@ -20,13 +20,15 @@ jobs:
         run: npm install @prisma/cli
 
       - name: Migrate Database
-        run: npx prisma deploy
+        run: npx prisma migrate deploy
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
 
   build:
     name: Generate and Build ERD
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
 
     steps:
       - name: Checkout Repository
