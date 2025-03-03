@@ -1,4 +1,4 @@
-name: Update Kubernetes Cluster (Dev)
+name: Update Kubernetes Cluster (Prod)
 
 on:
   push:
