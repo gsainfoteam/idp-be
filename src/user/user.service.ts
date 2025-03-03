@@ -92,10 +92,8 @@ export class UserService {
       await this.verifyService.validateJwtToken(verificationJwtToken);
 
     if (payload.sub !== email) {
-      this.logger.debug(
-        `certification jwt token not valid: ${verificationJwtToken}`,
-      );
-      throw new ForbiddenException('certification jwt token not valid');
+      this.logger.debug(`verification jwt token not valid`);
+      throw new ForbiddenException('verification jwt token not valid');
     }
 
     const hashedPassword: string = bcrypt.hashSync(
