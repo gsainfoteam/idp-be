@@ -2,17 +2,25 @@
   "cSpell.words": [
     "Buildx",
     "dbdocs",
+    "dbml",
     "Fastify",
     "gistory",
     "gitops",
     "gsainfoteam",
     "infoteam",
+    "keyid",
+    "libheif",
+    "linuxmusl",
+    "localtime",
     "loggable",
     "mjml",
     "nestjs",
     "noreply",
+    "PKCE",
+    "presigner",
     "signup",
-    "userinfo"
+    "userinfo",
+    "zoneinfo"
   ],
   "git.branchProtection": ["main"],
   "markdownlint.config": {

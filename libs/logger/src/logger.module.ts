@@ -5,5 +5,6 @@ import { LoggerDecoratorRegister } from './logger.decorator.register';
 @Module({
   imports: [DiscoveryModule],
   providers: [LoggerDecoratorRegister],
+  exports: [LoggerDecoratorRegister],
 })
 export class LoggerModule {}

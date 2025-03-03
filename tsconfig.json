@@ -13,17 +13,46 @@
     "incremental": true,
     "skipLibCheck": true,
     "strictNullChecks": true,
+    "forceConsistentCasingInFileNames": true,
     "noImplicitAny": true,
     "strictBindCallApply": true,
-    "forceConsistentCasingInFileNames": true,
     "noFallthroughCasesInSwitch": true,
-    "esModuleInterop": true,
     "paths": {
+      "@lib/global": [
+        "libs/global/src"
+      ],
+      "@lib/global/*": [
+        "libs/global/src/*"
+      ],
       "@lib/logger": [
         "libs/logger/src"
       ],
       "@lib/logger/*": [
         "libs/logger/src/*"
+      ],
+      "@lib/mail": [
+        "libs/mail/src"
+      ],
+      "@lib/mail/*": [
+        "libs/mail/src/*"
+      ],
+      "@lib/object": [
+        "libs/object/src"
+      ],
+      "@lib/object/*": [
+        "libs/object/src/*"
+      ],
+      "@lib/prisma": [
+        "libs/prisma/src"
+      ],
+      "@lib/prisma/*": [
+        "libs/prisma/src/*"
+      ],
+      "@lib/redis": [
+        "libs/redis/src"
+      ],
+      "@lib/redis/*": [
+        "libs/redis/src/*"
       ]
     }
   }

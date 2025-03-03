@@ -1,31 +1,31 @@
-import { Module } from '@nestjs/common';
-import { AppController } from './app.controller';
-import { ConfigModule } from '@nestjs/config';
-import { PrismaModule } from './prisma/prisma.module';
-import { ClientModule } from './client/client.module';
-import { IdpModule } from './idp/idp.module';
-import { UserModule } from './user/user.module';
-import { EmailModule } from './email/email.module';
-import { OauthModule } from './oauth/oauth.module';
-import { CacheModule } from './cache/cache.module';
-import { HealthModule } from './health/health.module';
 import { LoggerModule } from '@lib/logger';
+import { Module } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
+
+import { AppController } from './app.controller';
+import { AuthModule } from './auth/auth.module';
+import { ClientModule } from './client/client.module';
+import { HealthModule } from './health/health.module';
+import { OauthModule } from './oauth/oauth.module';
+import { UserModule } from './user/user.module';
+import { VerifyModule } from './verify/verify.module';
+import { WellKnownModule } from './well-known/well-known.module';
 
 @Module({
   imports: [
+    LoggerModule,
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: '.env',
+      cache: true,
     }),
-    PrismaModule,
-    ClientModule,
-    IdpModule,
-    UserModule,
-    EmailModule,
-    OauthModule,
-    CacheModule,
     HealthModule,
-    LoggerModule,
+    UserModule,
+    AuthModule,
+    ClientModule,
+    OauthModule,
+    WellKnownModule,
+    VerifyModule,
   ],
   controllers: [AppController],
 })

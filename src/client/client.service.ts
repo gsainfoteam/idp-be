@@ -1,38 +1,24 @@
-import { Injectable, Logger, UnauthorizedException } from '@nestjs/common';
-import { ClientRepository } from './client.repository';
-import { HttpService } from '@nestjs/axios';
+import { Loggable } from '@lib/logger/decorator/loggable';
+import { Injectable } from '@nestjs/common';
+import { Client, User } from '@prisma/client';
 import * as bcrypt from 'bcryptjs';
 import * as crypto from 'crypto';
-import { ConfigService } from '@nestjs/config';
-import { Client } from '@prisma/client';
-import { ClientResDto } from './dto/res/clientRes.dto';
-import { CreateClientDto } from './dto/req/createClient.dto';
-import { ClientCredentialResDto } from './dto/res/ClinetCredential.dto';
-import { firstValueFrom } from 'rxjs';
-import { UpdateClientDto } from './dto/req/updateClient.dto';
-import { UserInfo } from 'src/idp/types/userInfo.type';
-import { ClientPublicResDto } from './dto/res/clientPublicRes.dto';
-import { Loggable } from '@lib/logger/decorator/loggable';
+
+import { ClientRepository } from './client.repository';
+import { CreateClientDto, UpdateClientDto } from './dto/req.dto';
 
 @Injectable()
 @Loggable()
 export class ClientService {
-  private readonly logger = new Logger(ClientService.name);
-  constructor(
-    private readonly clientRepository: ClientRepository,
-    private readonly httpService: HttpService,
-    private readonly configService: ConfigService,
-  ) {}
+  constructor(private readonly clientRepository: ClientRepository) {}
 
   /**
    * Get client list
    * @param user the user who wants to get the client list
    * @returns client list
    */
-  async getClientList(user: UserInfo): Promise<ClientResDto[]> {
-    return (await this.clientRepository.findClientsByUserUuid(user.uuid)).map(
-      this.convertToClientResDto,
-    );
+  async getClientList(user: User): Promise<Client[]> {
+    return this.clientRepository.findClientListByUserUuid(user.uuid);
   }
 
   /**
@@ -41,35 +27,17 @@ export class ClientService {
    * @param user user who wants to get the client
    * @returns client information
    */
-  async getClient(uuid: string, user: UserInfo): Promise<ClientResDto> {
-    return this.convertToClientResDto(
-      await this.clientRepository.findClientByUuidAndUserUuid(uuid, user.uuid),
-    );
+  async getClient(uuid: string, user: User): Promise<Client> {
+    return this.clientRepository.findClientByUuidAndUserUuid(uuid, user.uuid);
   }
 
   /**
-   * Get client public information
-   * @param uuid client's uuid
-   * @param user user who wants to get the client
-   * @returns client public information with specific user
+   * Get client information only by uuid
+   * @param uuid Client's uuid
+   * @returns client information
    */
-  async getClientPublicInformation(
-    id: string,
-    user: UserInfo,
-  ): Promise<ClientPublicResDto> {
-    const client = await this.clientRepository.findById(id);
-    const clientWithConsent =
-      await this.clientRepository.findClientWithConsentByIdAndUserUuid(
-        id,
-        user.uuid,
-      );
-    return {
-      id: client.id,
-      name: client.name,
-      uuid: client.uuid,
-      recentConsent:
-        clientWithConsent?.consent.flatMap((consent) => consent.scopes) ?? [],
-    };
+  async getClientByUuid(uuid: string): Promise<Client> {
+    return this.clientRepository.findClientByUuid(uuid);
   }
 
   /**
@@ -79,24 +47,20 @@ export class ClientService {
    * @returns client credential information
    */
   async registerClient(
-    { id, name, urls }: CreateClientDto,
-    user: UserInfo,
-  ): Promise<ClientCredentialResDto> {
+    { name, urls }: CreateClientDto,
+    user: User,
+  ): Promise<Client> {
     const { secretKey, hashed } = this.generateClientSecret();
     const client = await this.clientRepository.createClient(
       {
-        id,
         name,
         urls,
-        password: hashed,
+        secret: hashed,
       },
       user.uuid,
     );
-    return {
-      uuid: client.uuid,
-      id: client.id,
-      clientSecret: secretKey,
-    };
+    client.secret = secretKey;
+    return client;
   }
 
   /**
@@ -105,23 +69,17 @@ export class ClientService {
    * @param user user who wants to reset the client secret
    * @returns client credential information
    */
-  async resetClientSecret(
-    uuid: string,
-    user: UserInfo,
-  ): Promise<ClientCredentialResDto> {
+  async resetClientSecret(uuid: string, user: User): Promise<Client> {
     const { secretKey, hashed } = this.generateClientSecret();
     const client = await this.clientRepository.updateClientSecret(
       {
         uuid,
-        password: hashed,
+        secret: hashed,
       },
       user.uuid,
     );
-    return {
-      uuid: client.uuid,
-      id: client.id,
-      clientSecret: secretKey,
-    };
+    client.secret = secretKey;
+    return client;
   }
 
   /**
@@ -133,108 +91,28 @@ export class ClientService {
    */
   async updateClient(
     uuid: string,
-    { name, urls }: UpdateClientDto,
-    user: UserInfo,
-  ): Promise<ClientResDto> {
-    return this.convertToClientResDto(
-      await this.clientRepository.updateClient({ uuid, name, urls }, user.uuid),
-    );
-  }
-
-  /**
-   * validate the uri
-   * @param id client's id
-   * @param url url that will be validated
-   * @returns true if the url is valid
-   */
-  async validateUri(id: string, url: string): Promise<boolean> {
-    const client = await this.clientRepository.findById(id);
-    if (client.urls.length === 0) return false;
-    return client.urls.includes(url);
-  }
-
-  /**
-   * send a slack message to notify the permission request
-   * @param uuid client's uuid
-   * @param user user who sends the permission request
-   */
-  async adminRequest(uuid: string, user: UserInfo): Promise<void> {
-    const { name } = await this.clientRepository.findClientByUuidAndUserUuid(
-      uuid,
+    updateClientDto: UpdateClientDto,
+    user: User,
+  ): Promise<Client> {
+    if (updateClientDto.optionalScopes && updateClientDto.scopes) {
+      updateClientDto.optionalScopes = updateClientDto.optionalScopes.filter(
+        (val) => !updateClientDto.scopes?.includes(val),
+      );
+    }
+    return this.clientRepository.updateClient(
+      { uuid, ...updateClientDto },
       user.uuid,
     );
-    await firstValueFrom(
-      this.httpService.post(
-        this.configService.getOrThrow<string>('SLACK_WEBHOOK_URL'),
-        {
-          text: `Service server sends permission request for client ${name}(${uuid})`,
-          attachments: [
-            {
-              color: '#36a64f',
-              title: 'Details',
-              fields: [
-                { title: 'client name', value: name },
-                { title: 'client uuid', value: uuid },
-                { title: 'user id', value: user.uuid },
-              ],
-            },
-          ],
-        },
-      ),
-    );
-  }
-
-  /**
-   * validate the client
-   * @param id client's id
-   * @param secret client's secret
-   * @returns client information if the client is valid
-   */
-  async validateClient(id: string, secret: string): Promise<Client> {
-    const client = await this.clientRepository.findById(id).catch((error) => {
-      this.logger.error(`validateClient: error=${error}`);
-      throw new UnauthorizedException('invalid_client');
-    });
-    if (
-      !(await bcrypt.compare(secret, client.password).catch(() => {
-        throw new UnauthorizedException('invalid_client');
-      }))
-    ) {
-      throw new UnauthorizedException('invalid_client');
-    }
-    return this.clientRepository.findById(id);
   }
 
   private generateClientSecret(): { secretKey: string; hashed: string } {
     const secretKey = crypto
       .randomBytes(32)
       .toString('base64')
-      .replace(/[+\/=]/g, '');
+      .replace(/[+//=]/g, '');
     return {
       secretKey,
       hashed: bcrypt.hashSync(secretKey, bcrypt.genSaltSync(10)),
-    };
-  }
-
-  /**
-   * convert client to client response dto
-   * @param param0 Client
-   * @returns ClientResDto
-   */
-  private convertToClientResDto({
-    urls,
-    ...rest
-  }: Omit<Client, 'password'>): ClientResDto {
-    if (urls === null) {
-      return {
-        ...rest,
-        urls: [],
-      };
-    }
-    const listUrls = urls as string[];
-    return {
-      ...rest,
-      urls: listUrls,
     };
   }
 }

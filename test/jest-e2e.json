@@ -11,7 +11,19 @@
     "^.+\\.(t|j)s$": "ts-jest"
   },
   "moduleNameMapper": {
+    "@lib/cache": "<rootDir>/../libs/cache/src",
+    "@lib/cache/(.*)": "<rootDir>/../libs/cache/src/$1",
+    "@lib/global": "<rootDir>/../libs/global/src",
+    "@lib/global/(.*)": "<rootDir>/../libs/global/src/$1",
+    "@lib/logger": "<rootDir>/../libs/logger/src",
     "@lib/logger/(.*)": "<rootDir>/../libs/logger/src/$1",
-    "@lib/logger": "<rootDir>/../libs/logger/src"
+    "@lib/mail": "<rootDir>/../libs/mail/src",
+    "@lib/mail/(.*)": "<rootDir>/../libs/mail/src/$1",
+    "@lib/object": "<rootDir>/../libs/object/src",
+    "@lib/object/(.*)": "<rootDir>/../libs/object/src/$1",
+    "@lib/prisma": "<rootDir>/../libs/prisma/src",
+    "@lib/prisma/(.*)": "<rootDir>/../libs/prisma/src/$1",
+    "@lib/redis": "<rootDir>/../libs/redis/src",
+    "@lib/redis/(.*)": "<rootDir>/../libs/redis/src/$1"
   }
 }

@@ -1,41 +1,43 @@
-import { Controller, Get, HttpCode } from '@nestjs/common';
+import { Controller, Get } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import {
   ApiInternalServerErrorResponse,
-  ApiNoContentResponse,
   ApiOkResponse,
   ApiOperation,
+  ApiTags,
 } from '@nestjs/swagger';
 
+@ApiTags('app')
 @Controller()
 export class AppController {
-  private readonly apiVersion =
-    this.configService.getOrThrow<string>('API_VERSION');
-  private readonly publishedAt = new Date().toISOString();
-  constructor(private readonly configService: ConfigService) {}
+  private readonly apiVersion: string;
+  private readonly publishedAt: string;
+  constructor(private readonly configService: ConfigService) {
+    this.apiVersion = this.configService.getOrThrow<string>('API_VERSION');
+    this.publishedAt = new Date().toISOString();
+  }
 
   @ApiOperation({
-    summary: 'API INFO',
-    description: 'API 서버의 정보를 확인합니다.',
+    summary: 'Get information about the service',
+    description: '현재 서버의 기본적인 정보를 확인할 수 있습니다.',
   })
-  @ApiOkResponse()
-  @ApiInternalServerErrorResponse()
+  @ApiOkResponse({
+    description: '성공',
+    example: {
+      name: 'infoteam-idp',
+      version: 'v2.0.0',
+      publishedAt: new Date().toISOString(),
+    },
+  })
+  @ApiInternalServerErrorResponse({
+    description: '서버에 문제가 생김',
+  })
   @Get()
-  async health() {
+  info() {
     return {
-      name: 'IdP',
+      name: 'infoteam-idp',
       version: this.apiVersion,
       publishedAt: this.publishedAt,
     };
   }
-
-  @ApiOperation({
-    summary: 'Disable favicon',
-    description: '파비콘 요청을 무시합니다.',
-  })
-  @ApiNoContentResponse()
-  @ApiInternalServerErrorResponse()
-  @Get('favicon.ico')
-  @HttpCode(204)
-  async favicon() {}
 }

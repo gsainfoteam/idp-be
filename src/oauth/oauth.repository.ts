@@ -1,175 +1,125 @@
+import { PrismaService } from '@lib/prisma';
 import {
-  BadRequestException,
   Injectable,
   InternalServerErrorException,
   Logger,
 } from '@nestjs/common';
-import { PrismaService } from 'src/prisma/prisma.service';
-import { Scope } from './types/Scopes.type';
-import { UserInfo } from 'src/idp/types/userInfo.type';
+import { Consent, RefreshToken } from '@prisma/client';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
-import { ExtendedRefreshToken } from './types/extendedRefreshToken.type';
-import { Loggable } from '@lib/logger/decorator/loggable';
 
-const MAX_REFRESH_TOKEN_COUNT = 10;
+import { OauthTokenException } from './exceptions/oauth.token.exception';
+
+const MAX_REFRESH_TOKEN_AGE = 60 * 60 * 24 * 30; // 30 days
 
 @Injectable()
-@Loggable()
 export class OauthRepository {
   private readonly logger = new Logger(OauthRepository.name);
   constructor(private readonly prismaService: PrismaService) {}
 
-  async updateUserConsent(
-    user: UserInfo,
-    scope: Readonly<Scope[]>,
-    clientId: string,
-  ): Promise<void> {
-    // TODO: reduce this query
-    const client = await this.prismaService.client.findUniqueOrThrow({
-      where: {
-        id: clientId,
-      },
-    });
-    await this.prismaService.consent.upsert({
-      where: {
-        clientUuid_userUuid: {
-          clientUuid: client?.uuid,
-          userUuid: user.uuid,
-        },
-      },
-      create: {
-        client: {
-          connect: {
-            id: client.id,
-          },
-        },
-        user: {
-          connect: {
-            uuid: user.uuid,
-          },
-        },
-        scopes: [...scope],
-      },
-      update: {
-        scopes: [...scope],
-      },
-    });
-  }
-
-  async updateRefreshToken(
-    user: UserInfo,
-    clientId: string,
-    token: string,
-    scopes: Readonly<Scope[]>,
-  ): Promise<void> {
-    const boundaryDate = new Date(new Date().getMonth() - 1);
-    const client = await this.prismaService.client.findUniqueOrThrow({
-      where: {
-        id: clientId,
-      },
-    });
-    await this.prismaService.$transaction([
-      this.prismaService.refreshToken.upsert({
-        where: {
-          token,
-        },
-        create: {
-          token,
-          scopes: [...scopes],
-          consent: {
-            connect: {
-              clientUuid_userUuid: {
-                clientUuid: client.uuid,
-                userUuid: user.uuid,
-              },
-            },
-          },
-        },
-        update: {
-          scopes: [...scopes],
-          consent: {
-            connect: {
-              clientUuid_userUuid: {
-                clientUuid: client.uuid,
-                userUuid: user.uuid,
-              },
-            },
-          },
-        },
-      }),
-      this.prismaService.consent.update({
-        where: {
-          clientUuid_userUuid: {
-            clientUuid: client.uuid,
-            userUuid: user.uuid,
-          },
-        },
-        data: {
-          refreshToken: {
-            delete: (
-              await this.prismaService.refreshToken.findMany({
-                where: {
-                  consent: {
-                    clientUuid: client.uuid,
-                    userUuid: user.uuid,
-                  },
-                },
-                select: {
-                  token: true,
-                  updatedAt: true,
-                },
-                orderBy: {
-                  updatedAt: 'desc',
-                },
-              })
-            )
-              .filter(({ updatedAt }) => {
-                updatedAt >= boundaryDate;
-              })
-              .slice(MAX_REFRESH_TOKEN_COUNT),
-          },
-        },
-      }),
-    ]);
-  }
-
-  async findRefreshToken(refreshToken: string): Promise<ExtendedRefreshToken> {
-    return this.prismaService.refreshToken
+  async findRefreshTokenByToken(token: string): Promise<RefreshToken> {
+    const refreshToken = await this.prismaService.refreshToken
       .findUniqueOrThrow({
         where: {
-          token: refreshToken,
-        },
-        include: {
-          consent: {
-            include: {
-              user: true,
-            },
-          },
+          token,
         },
       })
       .catch((error) => {
-        if (
-          error instanceof PrismaClientKnownRequestError &&
-          error.code === 'P2025'
-        ) {
-          this.logger.debug(`findRefreshToken: ${error.message}`);
-          throw new BadRequestException('invalid_grant');
+        if (error instanceof PrismaClientKnownRequestError) {
+          if (error.code === 'P2025') {
+            this.logger.debug(`Refresh token not found: ${token}`);
+            throw new OauthTokenException('invalid_request');
+          }
+          this.logger.error('database error', error);
         }
-        this.logger.error(`findRefreshToken: ${error.message}`);
+        this.logger.error('unknown error', error);
+        throw new InternalServerErrorException();
+      });
+    if (refreshToken.expiresAt < new Date()) {
+      this.logger.debug(`Refresh token expired: ${token}`);
+      throw new OauthTokenException('invalid_grant');
+    }
+    return refreshToken;
+  }
+
+  async createRefreshToken(
+    token: string,
+    scopes: string[],
+    userUuid: string,
+    clientUuid: string,
+  ): Promise<RefreshToken> {
+    return this.prismaService.refreshToken.create({
+      data: {
+        token,
+        userUuid,
+        clientUuid,
+        scopes,
+        expiresAt: new Date(Date.now() + MAX_REFRESH_TOKEN_AGE * 1000),
+      },
+    });
+  }
+
+  async deleteRefreshTokenByToken(token: string): Promise<void> {
+    await this.prismaService.refreshToken
+      .delete({
+        where: {
+          token,
+        },
+      })
+      .catch((error) => {
+        if (error instanceof PrismaClientKnownRequestError) {
+          if (error.code === 'P2025') {
+            this.logger.debug(`Refresh token not found: ${token}`);
+            throw new OauthTokenException('invalid_request');
+          }
+          this.logger.error('database error', error);
+        }
+        this.logger.error('unknown error', error);
         throw new InternalServerErrorException();
       });
   }
 
-  async deleteRefreshToken(token: string, clientId: string): Promise<void> {
-    const client = await this.prismaService.client.findUniqueOrThrow({
+  async findConsent(userUuid: string, clientUuid: string): Promise<Consent> {
+    return this.prismaService.consent
+      .findUniqueOrThrow({
+        where: {
+          clientUuid_userUuid: {
+            clientUuid,
+            userUuid,
+          },
+        },
+      })
+      .catch((error) => {
+        if (error instanceof PrismaClientKnownRequestError) {
+          if (error.code === 'P2025') {
+            this.logger.debug(`Consent not found: ${clientUuid} ${userUuid}`);
+            throw new OauthTokenException('invalid_grant');
+          }
+          this.logger.error('database error', error);
+        }
+        this.logger.error('unknown error', error);
+        throw new InternalServerErrorException();
+      });
+  }
+
+  async upsertConsent(
+    userUuid: string,
+    clientUuid: string,
+    scopes: string[],
+  ): Promise<void> {
+    await this.prismaService.consent.upsert({
       where: {
-        id: clientId,
+        clientUuid_userUuid: {
+          clientUuid,
+          userUuid,
+        },
       },
-    });
-    await this.prismaService.refreshToken.delete({
-      where: {
-        token,
-        clientUuid: client.uuid,
+      create: {
+        userUuid,
+        clientUuid,
+        scopes,
+      },
+      update: {
+        scopes,
       },
     });
   }

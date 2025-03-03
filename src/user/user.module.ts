@@ -1,27 +1,23 @@
+import { LoggerModule } from '@lib/logger';
+import { ObjectModule } from '@lib/object';
+import { PrismaModule } from '@lib/prisma';
 import { Module } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
+import { AuthModule } from 'src/auth/auth.module';
+import { VerifyModule } from 'src/verify/verify.module';
+
 import { UserController } from './user.controller';
-import { UserService } from './user.service';
 import { UserRepository } from './user.repository';
-import { EmailModule } from 'src/email/email.module';
-import { JwtModule } from '@nestjs/jwt';
-import { ConfigModule, ConfigService } from '@nestjs/config';
-import { CacheModule } from 'src/cache/cache.module';
+import { UserService } from './user.service';
 
 @Module({
   imports: [
-    EmailModule,
-    CacheModule,
-    JwtModule.registerAsync({
-      imports: [ConfigModule],
-      inject: [ConfigService],
-      useFactory: (configService: ConfigService) => ({
-        secret: configService.get<string>('CERTIFICATION_JWT_SECRET'),
-        signOptions: {
-          expiresIn: configService.get<string>('CERTIFICATION_JWT_EXPIRE'),
-          algorithm: 'HS256',
-        },
-      }),
-    }),
+    AuthModule,
+    VerifyModule,
+    ConfigModule,
+    PrismaModule,
+    LoggerModule,
+    ObjectModule,
   ],
   controllers: [UserController],
   providers: [UserService, UserRepository],
