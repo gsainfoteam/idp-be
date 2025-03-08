@@ -18,8 +18,8 @@
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
-    "doc": "node ./patch-compodoc.js && pnpm compodoc -p tsconfig.json -a assets -d ./doc",
-    "doc:serve": "node ./patch-compodoc.js && pnpm compodoc -p tsconfig.json -a assets -d ./doc -s"
+    "doc": "node ./patch-compodoc.js && compodoc -p tsconfig.json -a assets -d ./doc",
+    "doc:serve": "node ./patch-compodoc.js && compodoc -p tsconfig.json -a assets -d ./doc -s"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.750.0",
