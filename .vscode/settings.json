@@ -27,5 +27,22 @@
   "markdownlint.config": {
     "MD033": false,
     "MD041": false
-  }
+  },
+  "dbcode.connections": [
+    {
+      "connectionId": "yYvfH89upaH6wFI45W1Yo",
+      "name": "local:postgres",
+      "driver": "postgres",
+      "color": "#00A6FF",
+      "connectionType": "host",
+      "host": "localhost",
+      "port": 5432,
+      "ssl": false,
+      "username": "postgres",
+      "password": "",
+      "savePassword": "secretStorage",
+      "database": "postgres",
+      "connectionTimeout": 30
+    }
+  ]
 }
