@@ -2,7 +2,6 @@
   "recommendations": [
     "github.vscode-github-actions",
     "prisma.prisma",
-    "redis.redis-for-vscode",
     "streetsidesoftware.code-spell-checker-cspell-bundled-dictionaries",
     "dbcode.dbcode",
     "davidanson.vscode-markdownlint",
