@@ -72,9 +72,37 @@ end
 
 - Refresh Token Grant
 
+```mermaid
+sequenceDiagram
+participant ClientFe as Client Frontend
+participant IdP
 
+ClientFe ->>+ IdP: client_id, refresh_token
+note right of IdP: POST /oauth/token
+
+IdP ->>- ClientFe: access token, refresh token, (id token)
+```
 
 - Client Credential flow
+
+Client를 만들면, 같이 나오는 client의 id와 secret을 이용해서, client가 user의 정보를 가져올 수 있도록 합니다.
+
+```mermaid
+sequenceDiagram
+participant Client
+participant IdP
+
+Client ->>+ IdP: client_id, client_secret, scope
+note right of IdP: POST /oauth/token
+
+IdP ->>- Client: access token, refresh token
+
+opt if client want to get userinfo
+  Client ->>+ IdP: access token, user id
+  note right of IdP: POST /oauth/userinfo
+  IdP ->>- Client: userinfo
+end
+```
 
 ## API DOCS
 
