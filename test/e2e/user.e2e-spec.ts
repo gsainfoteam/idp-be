@@ -1,32 +1,26 @@
-import { PrismaService } from '@lib/prisma';
-import { RedisService } from '@lib/redis';
+import { ConfigService } from '@nestjs/config';
 import { NestApplication } from '@nestjs/core';
 import { Test } from '@nestjs/testing';
 
 import { AppModule } from '../../src/app.module';
-import { TestContainers } from '../setup/singleton';
+import { MockConfigService } from '../util/mock-config.service';
 
-describe('User & Verification', async () => {
+describe('User & Verification', () => {
   let app: NestApplication;
 
   beforeAll(async () => {
-    const prismaService = TestContainers.getInstance().prismaService;
-    const redisService = TestContainers.getInstance().redisService;
+    const configService = new MockConfigService();
 
     const moduleFixture = await Test.createTestingModule({
       imports: [AppModule],
     })
-      .overrideProvider(PrismaService)
-      .useValue(prismaService)
-      .overrideProvider(RedisService)
-      .useValue(redisService)
+      .overrideProvider(ConfigService)
+      .useValue(configService)
       .compile();
 
     app = moduleFixture.createNestApplication();
     await app.init();
   });
 
-  afterAll(async () => {
-    await app.close();
-  });
+  afterAll(async () => {});
 });

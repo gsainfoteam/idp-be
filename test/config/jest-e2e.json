@@ -8,7 +8,14 @@
     "testEnvironment": "node",
     "testRegex": ".e2e-spec.ts$",
     "transform": {
-        "^.+\\.(t|j)s$": "ts-jest"
+        "^.+\\.(t|j)s$": ["ts-jest", {
+            "tsconfig": "tsconfig.json"
+        }]
+    },
+    "globals": {
+        "ts-jest": {
+            "tsconfig": "tsconfig.json"
+        }
     },
     "globalSetup": "<rootDir>/test/setup/global-setup.ts",
     "globalTeardown": "<rootDir>/test/setup/global-teardown.ts",
