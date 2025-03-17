@@ -1,5 +1,3 @@
-import { PrismaService } from '@lib/prisma';
-import { ConfigService } from '@nestjs/config';
 import {
   PostgreSqlContainer,
   StartedPostgreSqlContainer,
@@ -19,7 +17,6 @@ export type PostgresqlConfig = {
 
 export const psqlTestContainer = async (): Promise<{
   container: StartedPostgreSqlContainer;
-  service: PrismaService;
 }> => {
   const container = await new PostgreSqlContainer().start();
 
@@ -37,11 +34,5 @@ export const psqlTestContainer = async (): Promise<{
     `DATABASE_URL=${databaseUrl} npx prisma migrate dev --preview-feature`,
   );
 
-  const mockConfigService = new ConfigService({
-    DATABASE_URL: databaseUrl,
-  });
-
-  const service = new PrismaService(mockConfigService);
-
-  return { container, service };
+  return { container };
 };

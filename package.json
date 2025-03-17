@@ -17,7 +17,7 @@
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "test:e2e": "jest --config ./test/config/jest-e2e.json"
+    "test:e2e": "jest --config test/e2e/config/jest-e2e.ts"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.750.0",
@@ -38,6 +38,7 @@
     "cache-manager": "^6.4.0",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.1",
+    "dotenv": "^16.4.7",
     "fastify": "^5.2.1",
     "ioredis": "^5.4.2",
     "jsonwebtoken": "^9.0.2",
@@ -52,6 +53,7 @@
   "devDependencies": {
     "@eslint/eslintrc": "^3.2.0",
     "@eslint/js": "^9.18.0",
+    "@jest/types": "^29.6.3",
     "@nestjs/cli": "^11.0.0",
     "@nestjs/schematics": "^11.0.0",
     "@nestjs/testing": "^11.0.1",
@@ -88,39 +90,11 @@
     "ts-loader": "^9.5.2",
     "ts-node": "^10.9.2",
     "tsconfig-paths": "^4.2.0",
+    "tsconfig-paths-jest": "^0.0.1",
     "typescript": "^5.7.3",
     "typescript-eslint": "^8.20.0"
   },
-  "jest": {
-    "moduleFileExtensions": [
-      "js",
-      "json",
-      "ts"
-    ],
-    "rootDir": ".",
-    "testRegex": ".*\\.spec\\.ts$",
-    "transform": {
-      "^.+\\.(t|j)s$": "ts-jest"
-    },
-    "collectCoverageFrom": [
-      "**/*.(t|j)s"
-    ],
-    "coverageDirectory": "./coverage",
-    "testEnvironment": "node",
-    "roots": [
-      "<rootDir>/src/",
-      "<rootDir>/libs/"
-    ],
-    "moduleNameMapper": {
-      "^@lib/cache(|/.*)$": "<rootDir>/libs/cache/src/$1",
-      "^@lib/global(|/.*)$": "<rootDir>/libs/global/src/$1",
-      "^@lib/logger(|/.*)$": "<rootDir>/libs/logger/src/$1",
-      "^@lib/mail(|/.*)$": "<rootDir>/libs/mail/src/$1",
-      "^@lib/object(|/.*)$": "<rootDir>/libs/object/src/$1",
-      "^@lib/prisma(|/.*)$": "<rootDir>/libs/prisma/src/$1",
-      "^@lib/redis(|/.*)$": "<rootDir>/libs/redis/src/$1"
-    }
-  },
+ 
   "pnpm": {
     "ignoredBuiltDependencies": [
       "@scarf/scarf",

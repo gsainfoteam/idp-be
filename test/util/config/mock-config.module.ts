@@ -1,0 +1,104 @@
+import { DynamicModule } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import * as dotenv from 'dotenv';
+import * as fs from 'fs';
+import * as path from 'path';
+
+class MockConfigService {
+  private readonly configMap: Map<string, any> = new Map();
+
+  constructor(envFilePath?: string) {
+    // 먼저 .env 파일에서 기본값 로드
+    this.loadFromEnvFile(envFilePath);
+
+    // process.env에서 컨테이너 설정값 로드 (우선순위 높음)
+    this.loadFromProcessEnv();
+
+    // 테스트 환경에 필요한 추가 설정
+    this.setupTestEnvironment();
+  }
+
+  private loadFromEnvFile(customEnvPath?: string): void {
+    const envFilePath =
+      customEnvPath || path.resolve(process.cwd(), 'test', '.test.env');
+
+    if (fs.existsSync(envFilePath)) {
+      const envConfig = dotenv.parse(fs.readFileSync(envFilePath));
+
+      // 환경변수를 configMap에 설정
+      for (const key in envConfig) {
+        if (Object.prototype.hasOwnProperty.call(envConfig, key)) {
+          this.set(key, envConfig[key]);
+        }
+      }
+    } else {
+      console.warn(`${envFilePath} 파일을 찾을 수 없습니다.`);
+    }
+  }
+
+  private loadFromProcessEnv(): void {
+    // 테스트 컨테이너에서 설정된 환경 변수 가져오기
+    const containerEnvKeys = [
+      'DATABASE_URL',
+      'REDIS_URL',
+      'EMAIL_HOST',
+      'EMAIL_PORT',
+      'EMAIL_ACCESS_URL',
+    ];
+
+    for (const key of containerEnvKeys) {
+      if (process.env[key]) {
+        this.set(key, process.env[key]);
+      }
+    }
+  }
+
+  private setupTestEnvironment(): void {
+    // 테스트 환경을 위한 추가 설정
+
+    // 테스트 메일 서버는 SSL을 사용하지 않음
+    this.set('EMAIL_SECURE', false);
+
+    // 테스트 환경에서는 간단한 인증 사용
+    this.set('EMAIL_AUTH_TYPE', 'login');
+    this.set('EMAIL_PASSWORD', 'test');
+  }
+
+  set(key: string, value: any): void {
+    this.configMap.set(key, value);
+  }
+
+  get<T>(key: string): T {
+    return this.configMap.get(key) as T;
+  }
+
+  getOrThrow<T>(key: string): T {
+    if (!this.configMap.has(key)) {
+      throw new Error(`${key} 설정을 찾을 수 없습니다.`);
+    }
+    return this.configMap.get(key) as T;
+  }
+}
+
+export class MockConfigModule {
+  /**
+   * ConfigModule을 모킹한 모듈을 생성합니다.
+   * @param options 설정 옵션
+   * @returns 동적 모듈
+   */
+  static forRoot(options?: { envFilePath?: string }): DynamicModule {
+    const configService = new MockConfigService(options?.envFilePath);
+
+    return {
+      global: true,
+      module: MockConfigModule,
+      providers: [
+        {
+          provide: ConfigService,
+          useValue: configService,
+        },
+      ],
+      exports: [ConfigService],
+    };
+  }
+}
