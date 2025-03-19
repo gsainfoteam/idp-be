@@ -16,8 +16,9 @@ GIST 학생들의 계정을 한 곳에서 관리하여 GIST구성원들이 사�
 
 ### Oauth2.1
 
-본 서비스는 Oauth2.1 프로토콜을 이용해서 구현을 하였습니다. 따라서 본 서비스 로직의 더 자세한 정보를 알고 싶다면, 해당 문서를 참고하시기 바랍니다.  
-[DOCS](https://www.ietf.org/archive/id/draft-ietf-oauth-v2-1-12.html)
+본 서비스는 Oauth2.1 프로토콜을 이용해서 구현을 하였습니다. 따라서 본 서비스 로직의 더 자세한 정보를 알고 싶다면, 아래 문서를 참고하시기 바랍니다.  
+[Oauth2.1](https://www.ietf.org/archive/id/draft-ietf-oauth-v2-1-12.html)  
+[Open id connect](https://openid.net/specs/openid-connect-core-1_0.html)
 
 ### 명칭 정리
 
@@ -29,37 +30,77 @@ client는 infoteam-idp를 사용하여, user의 정보를 받고, 그에 맞추�
 
 ### 로그인 과정
 
+- Authorization Code Flow
+
 ```mermaid
 sequenceDiagram
-participant IdP Frontend
-participant Client Frontend
+participant IdPFe as IdP FrontEnd
+participant ClientFe as Client Frontend
 participant Client
 participant IdP
+
 critical Requesting Login
-  Client Frontend ->> Client: 
-  Client ->> IdP Frontend: 
+  ClientFe ->> Client: Request IdP Login
+  Client ->> ClientFe: REDIRECT idp.gistory.me/authorize
+  ClientFe ->> IdPFe: 
 end
-IdP Frontend ->> IdP Frontend: login or signup
-IdP Frontend ->>+ IdP: Client_id, redirect_uri, scope, response_type
-note right of IdP: POST /oauth/authorize
-IdP ->>- IdP Frontend: code
-IdP Frontend ->> Client Frontend: REDIRECT redirect_uri?code={code}
-Client Frontend->>+ Client: code
-Client ->>+ IdP: Client_id, Client_secret, code, redirect_uri, grant_type
+
+IdPFe ->> IdPFe: login or sign up
+
+IdPFe ->>+ IdP: client_id, code_challenge, code_challenge_method, redirect_uri, scope, "IdP jwt user token"
+note right of IdP: GET /oauth/authorize
+IdP ->>- ClientFe: REDIRECT <client url>?code=code
+
+ClientFe ->> IdP: client_id, code, code_verifier
 note right of IdP: POST /oauth/token
-IdP ->>- Client: AccessToken or RefreshToken
-Client ->> Client: Service logic
-Client ->>- Client Frontend: AccessToken or RefreshToken 
-alt get user info
-  Client Frontend ->>+ Client: AccessToken
-  Client ->>+ IdP: AccessToken
-  note right of IdP: GET oauth/userinfo
-  IdP ->>- Client: User info
-  Client ->>- Client Frontend: User info
-else revoke token
-  Client Frontend ->> Client: AccessToken or RefreshToken
-  Client ->> IdP: AccessToken or RefreshToken
-  note right of IdP: POST /oauth/revoke
+
+alt client doesn't use id token
+  IdP ->> ClientFe: access token, refresh token, id token
+  ClientFe ->>+ Client: access token, refresh token, id token
+  Client ->> Client: service logic with id token
+  Client ->>- ClientFe: 
+else  
+  IdP ->> ClientFe: access token, refresh token
+  ClientFe ->>+ Client: access token, refresh token
+  Client ->>+ IdP: access token
+  note right of IdP: POST /oauth/userinfo
+  IdP ->>- Client: user's information
+  Client ->> ClientFe: 
+end
+
+```
+
+- Refresh Token Grant
+
+```mermaid
+sequenceDiagram
+participant ClientFe as Client Frontend
+participant IdP
+
+ClientFe ->>+ IdP: client_id, refresh_token
+note right of IdP: POST /oauth/token
+
+IdP ->>- ClientFe: access token, refresh token, (id token)
+```
+
+- Client Credential flow
+
+Client를 만들면, 같이 나오는 client의 id와 secret을 이용해서, client가 user의 정보를 가져올 수 있도록 합니다.
+
+```mermaid
+sequenceDiagram
+participant Client
+participant IdP
+
+Client ->>+ IdP: client_id, client_secret, scope
+note right of IdP: POST /oauth/token
+
+IdP ->>- Client: access token, refresh token
+
+opt if client want to get userinfo
+  Client ->>+ IdP: access token, user id
+  note right of IdP: POST /oauth/userinfo
+  IdP ->>- Client: userinfo
 end
 ```
 
