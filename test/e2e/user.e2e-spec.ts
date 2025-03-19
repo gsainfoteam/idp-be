@@ -5,9 +5,9 @@ import { Test } from '@nestjs/testing';
 import request from 'supertest';
 
 import { AppModule } from '../../src/app.module';
-import { MockMailModule } from '../util/mail/mock-mail.module';
-import { MockMailService } from '../util/mail/mock-mail.service';
-import { MockConfigModule } from '../util/config/mock-config.module';
+import { MockConfigModule } from './mock/config/mock-config.module';
+import { MockMailModule } from './mock/mail/mock-mail.module';
+import { MockMailService } from './mock/mail/mock-mail.service';
 
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */

@@ -1,5 +1,5 @@
-import { psqlTestContainer } from '../../util/testcontainers/database';
-import { redisTestContainer } from '../../util/testcontainers/redis';
+import { psqlTestContainer } from '../../../testcontainers/database';
+import { redisTestContainer } from '../../../testcontainers/redis';
 import { TestContainers } from './singleton';
 
 export default async function globalSetup() {

@@ -13,9 +13,6 @@ class MockConfigService {
 
     // process.env에서 컨테이너 설정값 로드 (우선순위 높음)
     this.loadFromProcessEnv();
-
-    // 테스트 환경에 필요한 추가 설정
-    this.setupTestEnvironment();
   }
 
   private loadFromEnvFile(customEnvPath?: string): void {
@@ -51,17 +48,6 @@ class MockConfigService {
         this.set(key, process.env[key]);
       }
     }
-  }
-
-  private setupTestEnvironment(): void {
-    // 테스트 환경을 위한 추가 설정
-
-    // 테스트 메일 서버는 SSL을 사용하지 않음
-    this.set('EMAIL_SECURE', false);
-
-    // 테스트 환경에서는 간단한 인증 사용
-    this.set('EMAIL_AUTH_TYPE', 'login');
-    this.set('EMAIL_PASSWORD', 'test');
   }
 
   set(key: string, value: any): void {
