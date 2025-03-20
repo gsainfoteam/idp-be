@@ -145,6 +145,7 @@ export class ClientController {
   @ApiUnauthorizedResponse({ description: '인증 실패' })
   @ApiForbiddenResponse({ description: '접근 불가' })
   @ApiInternalServerErrorResponse({ description: '서버 오류' })
+  @UseGuards(UserGuard)
   @Delete(':clientId')
   async deleteClient(
     @Param('clientId', ParseUUIDPipe) uuid: string,
