@@ -3,6 +3,7 @@ import {
   Body,
   ClassSerializerInterceptor,
   Controller,
+  Delete,
   Get,
   Param,
   ParseUUIDPipe,
@@ -133,5 +134,22 @@ export class ClientController {
     return new ClientResDto(
       await this.clientService.updateClient(uuid, body, user),
     );
+  }
+
+  @ApiOperation({
+    summary: 'Delete client',
+    description: 'client를 생성한 유저가 client를 삭제한다.',
+  })
+  @ApiBearerAuth('user:jwt')
+  @ApiOkResponse({ description: '성공' })
+  @ApiUnauthorizedResponse({ description: '인증 실패' })
+  @ApiForbiddenResponse({ description: '접근 불가' })
+  @ApiInternalServerErrorResponse({ description: '서버 오류' })
+  @Delete(':clientId')
+  async deleteClient(
+    @Param('clientId', ParseUUIDPipe) uuid: string,
+    @GetUser() user: User,
+  ): Promise<void> {
+    return this.clientService.deleteClient(uuid, user);
   }
 }

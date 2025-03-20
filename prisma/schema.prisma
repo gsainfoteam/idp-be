@@ -46,7 +46,7 @@ model Client {
   scopes         String[]
   optionalScopes String[] @map("optional_scopes")
 
-  member       User[]         @relation("ClientToUser")
+  member       User[]         @relation("ClientToUser") // user who manages this client
   consent      Consent[]
   RefreshToken RefreshToken[]
 

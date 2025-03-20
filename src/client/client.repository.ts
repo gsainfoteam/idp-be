@@ -190,4 +190,29 @@ export class ClientRepository {
         throw new InternalServerErrorException();
       });
   }
+
+  async deleteClient(uuid: string, userUuid: string): Promise<void> {
+    await this.prismaService.client
+      .delete({
+        where: {
+          uuid,
+          member: {
+            some: {
+              uuid: userUuid,
+            },
+          },
+        },
+      })
+      .catch((error) => {
+        if (
+          error instanceof PrismaClientKnownRequestError &&
+          error.code === 'P2025'
+        ) {
+          this.logger.debug(`deleteClient error: ${error.stack}`);
+          throw new ForbiddenException();
+        }
+        this.logger.error(`deleteClient error: ${error}`);
+        throw new InternalServerErrorException();
+      });
+  }
 }
