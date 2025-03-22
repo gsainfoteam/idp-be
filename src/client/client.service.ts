@@ -105,6 +105,15 @@ export class ClientService {
     );
   }
 
+  /**
+   * delete client
+   * @param uuid client's uuid
+   * @param user user who wants to delete the client
+   */
+  async deleteClient(uuid: string, user: User): Promise<void> {
+    return this.clientRepository.deleteClient(uuid, user.uuid);
+  }
+
   private generateClientSecret(): { secretKey: string; hashed: string } {
     const secretKey = crypto
       .randomBytes(32)
