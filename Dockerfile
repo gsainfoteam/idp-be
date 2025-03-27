@@ -1,31 +1,28 @@
-#Step 1: Make a base image
-FROM node:20-slim AS base
-ENV PNPM_HOME="/pnpm"
-ENV PATH="$PNPM_HOME:$PATH"
-RUN npm install -g corepack@latest
-RUN corepack enable
-RUN apt-get update -y && apt-get install -y openssl
-WORKDIR /app
-COPY . /app
+# create a bun base image
+FROM oven/bun:1 AS base
+WORKDIR /usr/src/app
 
-#Step 2: Install dependencies only for production and generate prisma client
-# This is needed to reduce the size of the final image
-FROM base AS prod-deps
-RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --prod --frozen-lockfile
-RUN pnpm add -D prisma
-RUN pnpm prisma generate
+# install bun globally
+FROM base AS installer
+RUN bun install -g prisma
+COPY ./package.json ./bun.lock ./
 
-#Step 3: Build the app
-# Since we need to dev dependencies to build the app, we need to install all dependencies
-FROM base AS builder
-RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile
-RUN pnpm prisma generate
-RUN pnpm run build
+FROM installer AS prod
+COPY ./prisma/schema.prisma ./prisma/schema.prisma
+RUN bun install --production && bun prisma generate --generator=client
 
-#Step 4: Copy the files from the previous steps and run the app
-FROM base 
-COPY --from=prod-deps /app/node_modules /app/node_modules
-COPY --from=builder /app/dist /app/dist
-COPY --from=builder /app/package.json /app/package.json
-EXPOSE 3000
-CMD ["pnpm", "run", "start:prod"]
+FROM installer AS builder
+COPY . .
+RUN bun install && bun run build
+
+
+# copy production dependencies and source code into final image
+FROM base AS release
+COPY --from=prod /usr/src/app/node_modules ./node_modules
+COPY --from=builder ./usr/src/app/dist ./dist
+COPY --from=builder ./usr/src/app/package.json ./package.json
+
+# run the app
+USER bun
+EXPOSE 3000/tcp
+ENTRYPOINT [ "bun", "run", "start:prod" ]
