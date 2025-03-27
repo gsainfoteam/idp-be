@@ -2,7 +2,6 @@ name: Bug Issue Template
 description: An Issue Template for Bugs
 title: '[BUG] '
 labels: ['bug']
-projects: ['gsainfoteam/11']
 assignees: []
 body:
   - type: textarea
