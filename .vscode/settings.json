@@ -38,5 +38,7 @@
   "markdownlint.config": {
     "MD033": false,
     "MD041": false
-  }
+  },
+  "npm.packageManager": "bun",
+  "npm.scriptRunner": "bun"
 }
