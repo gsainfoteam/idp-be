@@ -19,6 +19,7 @@ async function bootstrap() {
     /^https:\/\/.*\.idp-fe\.pages\.dev$/, // for idp fe preview pages
     /^https:\/\/.*idp\.gistory\.me$/, // for idp fe production pages
     /^http:\/\/localhost:3000$/, // for local development
+    /^http:\/\/localhost:5173$/, // for local development
   ];
   app.enableCors({
     origin: function (origin, callback) {
