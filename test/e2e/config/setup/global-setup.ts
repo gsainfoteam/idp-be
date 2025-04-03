@@ -1,4 +1,5 @@
 import { psqlTestContainer } from '../../../testcontainers/database';
+import { minioTestContainer } from '../../../testcontainers/minio';
 import { redisTestContainer } from '../../../testcontainers/redis';
 import { TestContainers } from './singleton';
 
@@ -18,4 +19,9 @@ export default async function globalSetup() {
   process.env.REDIS_URL = redisUrl;
 
   containers.setRedisContainer(redisContainer);
+
+  const { container: minioContainer } = await minioTestContainer();
+  const endpoint = `http://${minioContainer.getHost()}:${minioContainer.getMappedPort(9000)}`;
+  process.env.AWS_S3_ENDPOINT = endpoint;
+  containers.setMinioContainer(minioContainer);
 }

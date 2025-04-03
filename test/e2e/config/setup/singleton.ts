@@ -1,3 +1,4 @@
+import { StartedMinioContainer } from '@testcontainers/minio';
 import { StartedPostgreSqlContainer } from '@testcontainers/postgresql';
 import { StartedRedisContainer } from '@testcontainers/redis';
 
@@ -5,6 +6,7 @@ export class TestContainers {
   private static instance: TestContainers;
   private _postgresContainer: StartedPostgreSqlContainer | null = null;
   private _redisContainer: StartedRedisContainer | null = null;
+  private _minioContainer: StartedMinioContainer | null = null;
 
   private constructor() {}
 
@@ -29,12 +31,22 @@ export class TestContainers {
     return this._redisContainer;
   }
 
+  get minioContainer() {
+    if (!this._minioContainer) {
+      throw new Error('Minio container not initialized');
+    }
+    return this._minioContainer;
+  }
+
   setPostgresContainer(container: StartedPostgreSqlContainer) {
     this._postgresContainer = container;
   }
 
   setRedisContainer(container: StartedRedisContainer) {
     this._redisContainer = container;
+  }
+  setMinioContainer(container: StartedMinioContainer) {
+    this._minioContainer = container;
   }
 
   async cleanup() {
@@ -43,6 +55,9 @@ export class TestContainers {
     }
     if (this._redisContainer) {
       await this._redisContainer.stop();
+    }
+    if (this._minioContainer) {
+      await this._minioContainer.stop();
     }
   }
 }

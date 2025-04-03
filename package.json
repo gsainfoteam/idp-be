@@ -63,6 +63,7 @@
     "@nestjs/testing": "^11.0.1",
     "@swc/cli": "^0.6.0",
     "@swc/core": "^1.10.7",
+    "@testcontainers/minio": "^10.22.0",
     "@testcontainers/postgresql": "^10.20.0",
     "@testcontainers/redis": "^10.20.0",
     "@types/bcryptjs": "^2.4.6",
