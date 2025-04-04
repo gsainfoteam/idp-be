@@ -4,7 +4,7 @@ import * as dotenv from 'dotenv';
 import * as fs from 'fs';
 import * as path from 'path';
 
-export class MockConfigService {
+class MockConfigService {
   private readonly configMap: Map<string, any> = new Map();
 
   constructor(envFilePath?: string) {
