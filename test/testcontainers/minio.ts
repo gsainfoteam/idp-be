@@ -11,10 +11,14 @@ export const minioTestContainer = async (
   const port = container.getMappedPort(9000);
   const endpoint = `http://${host}:${port}`;
 
-  const accessKeyId = configService.get<string>('AWS_ACCESS_KEY_ID')!;
-  const secretAccessKey = configService.get<string>('AWS_SECRET_ACCESS_KEY')!;
-  const region = configService.get<string>('AWS_REGION')!;
-  const bucket = configService.get<string>('AWS_S3_BUCKET')!;
+  const accessKeyId: string =
+    configService.get<string>('AWS_ACCESS_KEY_ID') ?? 'minioadmin';
+  const secretAccessKey: string =
+    configService.get<string>('AWS_SECRET_ACCESS_KEY') ?? 'minioadmin';
+  const region: string =
+    configService.get<string>('AWS_REGION') ?? 'ap-northeast-2';
+  const bucket: string =
+    configService.get<string>('AWS_S3_BUCKET') ?? 'test-bucket';
 
   const client = new minio.Client({
     endPoint: host,

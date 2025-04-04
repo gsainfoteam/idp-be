@@ -1,3 +1,5 @@
+import { MockConfigService } from 'test/e2e/mock/config/mock-config.module';
+
 import { psqlTestContainer } from '../../../testcontainers/database';
 import { minioTestContainer } from '../../../testcontainers/minio';
 import { redisTestContainer } from '../../../testcontainers/redis';
@@ -5,6 +7,7 @@ import { TestContainers } from './singleton';
 
 export default async function globalSetup() {
   const containers = TestContainers.getInstance();
+  const configService = new MockConfigService();
 
   const { container: postgresContainer } = await psqlTestContainer();
 
@@ -20,8 +23,6 @@ export default async function globalSetup() {
 
   containers.setRedisContainer(redisContainer);
 
-  const { container: minioContainer } = await minioTestContainer();
-  const endpoint = `http://${minioContainer.getHost()}:${minioContainer.getMappedPort(9000)}`;
-  process.env.AWS_S3_ENDPOINT = endpoint;
+  const { container: minioContainer } = await minioTestContainer(configService);
   containers.setMinioContainer(minioContainer);
 }
