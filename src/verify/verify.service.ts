@@ -34,7 +34,10 @@ export class VerifyService {
    * @returns void, but it sends email to the email address
    */
   async sendEmailCode({ email }: SendEmailCodeDto): Promise<void> {
-    const emailVerificationCode: string = crypto.randomBytes(6).toString('hex'); // 12 digit hex string.
+    const emailVerificationCode: string = crypto
+      .randomInt(1000000)
+      .toString()
+      .padStart(6, '0'); // 6 digit int string.
 
     await this.mailService.sendEmail(
       email,
