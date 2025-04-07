@@ -8,8 +8,8 @@ import {
   ValidationPipe,
 } from '@nestjs/common';
 import {
+  ApiBadRequestResponse,
   ApiConflictResponse,
-  ApiForbiddenResponse,
   ApiInternalServerErrorResponse,
   ApiOperation,
   ApiResponse,
@@ -37,7 +37,7 @@ export class VerifyController {
     description: 'success',
     type: VerificationJwtResDto,
   })
-  @ApiForbiddenResponse({
+  @ApiBadRequestResponse({
     description: 'certification code is not valid or timeout',
   })
   @ApiInternalServerErrorResponse({ description: 'server error' })
