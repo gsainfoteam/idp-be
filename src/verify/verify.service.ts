@@ -74,19 +74,22 @@ export class VerifyService {
       })
       .catch((error) => {
         if (error instanceof CacheNotFoundException) {
-          this.logger.debug(`Redis cache not found with code: ${code}`);
-          throw new BadRequestException('invalid code');
+          this.logger.debug(`Redis cache not found with subject: ${subject}`);
+          throw new BadRequestException('invalid email or code');
         }
         this.logger.error(`Redis get error: ${error}`);
         throw new InternalServerErrorException();
       });
 
-    if (!crypto.timingSafeEqual(Buffer.from(code), Buffer.from(CachedCode))) {
+    if (
+      Buffer.from(code).length !== Buffer.from(CachedCode).length ||
+      !crypto.timingSafeEqual(Buffer.from(code), Buffer.from(CachedCode))
+    ) {
       this.logger.debug(`code not matched: ${code}`);
-      throw new BadRequestException('invalid code');
+      throw new BadRequestException('invalid email or code');
     }
 
-    await this.redisService.del(code, {
+    await this.redisService.del(subject, {
       prefix: this.emailVerificationCodePrefix,
     });
 
