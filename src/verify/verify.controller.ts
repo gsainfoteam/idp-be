@@ -9,7 +9,6 @@ import {
 } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
-  ApiConflictResponse,
   ApiInternalServerErrorResponse,
   ApiOperation,
   ApiResponse,
@@ -52,7 +51,6 @@ export class VerifyController {
       'send the email certification code to the email address. The code is valid for 5 minutes.',
   })
   @ApiResponse({ status: 201, description: 'success' })
-  @ApiConflictResponse({ description: 'user already exists' })
   @ApiInternalServerErrorResponse({ description: 'server error' })
   @Post('/email')
   async sendEmailCertificationCode(
