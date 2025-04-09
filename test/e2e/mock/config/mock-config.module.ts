@@ -41,6 +41,7 @@ class MockConfigService {
       'EMAIL_HOST',
       'EMAIL_PORT',
       'EMAIL_ACCESS_URL',
+      'AWS_S3_ENDPOINT',
     ];
 
     for (const key of containerEnvKeys) {

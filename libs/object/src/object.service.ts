@@ -17,6 +17,8 @@ export class ObjectService {
   constructor(private readonly configService: ConfigService) {
     this.s3Client = new S3Client({
       region: configService.getOrThrow('AWS_S3_REGION'),
+      endpoint: configService.getOrThrow('AWS_S3_ENDPOINT'),
+      forcePathStyle: !!configService.get('AWS_S3_ENDPOINT'),
       credentials: {
         accessKeyId: configService.getOrThrow('AWS_ACCESS_KEY_ID'),
         secretAccessKey: configService.getOrThrow('AWS_SECRET_ACCESS_KEY'),
