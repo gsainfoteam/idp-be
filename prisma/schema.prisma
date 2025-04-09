@@ -21,7 +21,7 @@ model User {
   name        String
   email       String  @unique
   studentId   String  @unique @map("student_id")
-  phoneNumber String  @unique @map("phone_number") @db.VarChar(11)
+  phoneNumber String  @unique @map("phone_number") @db.VarChar(30)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

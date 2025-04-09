@@ -1,7 +1,7 @@
 import { IsGistEmail } from '@lib/global';
 import { IsStudentId } from '@lib/global/validator/studentId.validator';
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEmail, IsJWT, IsString } from 'class-validator';
+import { IsEmail, IsJWT, IsString, MaxLength } from 'class-validator';
 
 export class ChangePasswordDto {
   @ApiProperty({
@@ -63,6 +63,7 @@ export class RegisterDto {
     description: '전화번호',
   })
   @IsString()
+  @MaxLength(30)
   phoneNumber: string;
 
   @ApiProperty({
