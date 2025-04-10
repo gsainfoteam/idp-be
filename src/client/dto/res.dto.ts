@@ -66,6 +66,54 @@ export class ClientResDto implements Client {
   }
 }
 
+export class ClientPublicResDto implements Client {
+  @ApiProperty({
+    description: 'name of the client',
+    example: 'groups',
+  })
+  name: string;
+
+  @ApiProperty({
+    description: 'uuid of the client',
+    example: 'd290f1ee-6c54-4b01-90e6-d701748f0851',
+  })
+  uuid: string;
+
+  @ApiProperty({
+    description: 'The date the client was created',
+    example: '2021-07-01T00:00:00.000Z',
+  })
+  createdAt: Date;
+
+  @ApiProperty({
+    description: "the scope which need to use the client's service",
+    example: ['profile', 'email'],
+  })
+  scopes: string[];
+
+  @ApiProperty({
+    description: "the scope whether need or not in the client's service",
+    example: ['student_id'],
+  })
+  optionalScopes: string[];
+
+  @Exclude()
+  secret: string;
+
+  @Exclude()
+  urls: string[];
+
+  @Exclude()
+  updatedAt: Date;
+
+  @Exclude()
+  idTokenAllowed: boolean;
+
+  constructor(client: Client) {
+    Object.assign(this, client);
+  }
+}
+
 export class ClientCredentialResDto implements Client {
   @ApiProperty({
     description: 'Client id',
