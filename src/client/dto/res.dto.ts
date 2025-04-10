@@ -68,16 +68,19 @@ export class ClientResDto implements Client {
 
 export class ClientPublicResDto implements Client {
   @ApiProperty({
-    description: 'name of the client',
+    description: 'The UUID of the client',
+    example: 'd290f1ee-6c54-4b01-90e6-d701748f0851',
+  })
+  @Expose()
+  get clientId(): string {
+    return this.uuid;
+  }
+
+  @ApiProperty({
+    description: 'The name of the client',
     example: 'groups',
   })
   name: string;
-
-  @ApiProperty({
-    description: 'uuid of the client',
-    example: 'd290f1ee-6c54-4b01-90e6-d701748f0851',
-  })
-  uuid: string;
 
   @ApiProperty({
     description: 'The date the client was created',
@@ -86,16 +89,19 @@ export class ClientPublicResDto implements Client {
   createdAt: Date;
 
   @ApiProperty({
-    description: "the scope which need to use the client's service",
+    description: "The scope which need to use the client's service",
     example: ['profile', 'email'],
   })
   scopes: string[];
 
   @ApiProperty({
-    description: "the scope whether need or not in the client's service",
+    description: "The scope whether need or not in the client's service",
     example: ['student_id'],
   })
   optionalScopes: string[];
+
+  @Exclude()
+  uuid: string;
 
   @Exclude()
   secret: string;
