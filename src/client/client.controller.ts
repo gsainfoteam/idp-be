@@ -161,4 +161,22 @@ export class ClientController {
       await this.clientService.updateClient(uuid, body, user),
     );
   }
+
+  @ApiOperation({
+    summary: 'send delete request',
+    description: '유저가 client를 삭제하고 싶다는 요청을 보낸다.',
+  })
+  @ApiBearerAuth('user:jwt')
+  @ApiOkResponse({ description: '성공' })
+  @ApiUnauthorizedResponse({ description: '인증 실패' })
+  @ApiForbiddenResponse({ description: '접근 불가' })
+  @ApiInternalServerErrorResponse({ description: '서버 오류' })
+  @Post(':clientId/delete')
+  @UseGuards(UserGuard)
+  deleteClient(
+    @Param('clientId', ParseUUIDPipe) uuid: string,
+    @GetUser() user: User,
+  ): Promise<void> {
+    return this.clientService.deleteClient(uuid, user);
+  }
 }
