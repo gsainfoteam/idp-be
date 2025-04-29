@@ -62,8 +62,8 @@ model RefreshToken {
   clientUuid String @db.Uuid
   userUuid   String @db.Uuid
 
-  client Client @relation(fields: [clientUuid], references: [uuid])
-  user   User   @relation(fields: [userUuid], references: [uuid])
+  client Client @relation(fields: [clientUuid], references: [uuid], onDelete: Cascade)
+  user   User   @relation(fields: [userUuid], references: [uuid], onDelete: Cascade)
 
   @@map("refresh_token")
 }
@@ -75,8 +75,8 @@ model Consent {
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 
-  client Client @relation(fields: [clientUuid], references: [uuid])
-  user   User   @relation(fields: [userUuid], references: [uuid])
+  client Client @relation(fields: [clientUuid], references: [uuid], onDelete: Cascade)
+  user   User   @relation(fields: [userUuid], references: [uuid], onDelete: Cascade)
 
   @@id([clientUuid, userUuid])
   @@map("consent")
