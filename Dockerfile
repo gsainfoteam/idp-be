@@ -1,5 +1,6 @@
 # create a bun base image
 FROM oven/bun:1 AS base
+RUN apt-get update -y && apt-get install -y openssl
 WORKDIR /usr/src/app
 
 # install bun globally
@@ -18,7 +19,6 @@ RUN bun install && bun run build
 
 # copy production dependencies and source code into final image
 FROM base AS release
-RUN apt-get update -y && apt-get install -y openssl
 COPY --from=prod /usr/src/app/node_modules ./node_modules
 COPY --from=builder ./usr/src/app/.env ./.env
 COPY --from=builder ./usr/src/app/dist ./dist
