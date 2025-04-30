@@ -94,19 +94,17 @@ export class UserRepository {
     email,
     password,
     name,
-    profile,
     studentId,
     phoneNumber,
   }: Omit<
     User,
-    'accessLevel' | 'uuid' | 'createdAt' | 'updatedAt'
+    'accessLevel' | 'uuid' | 'createdAt' | 'updatedAt' | 'picture' | 'profile'
   >): Promise<void> {
     await this.prismaService.user
       .create({
         data: {
           email,
           password,
-          profile,
           name,
           studentId,
           phoneNumber,
@@ -154,14 +152,14 @@ export class UserRepository {
       });
   }
 
-  async updateUserProfile(profile: string, uuid: string): Promise<void> {
+  async updateUserPicture(picture: string, uuid: string): Promise<void> {
     await this.prismaService.user
       .update({
         where: {
           uuid,
         },
         data: {
-          profile,
+          picture,
         },
       })
       .catch((error) => {
