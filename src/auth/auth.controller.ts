@@ -51,7 +51,7 @@ export class AuthController {
     response.cookie('refreshToken', refreshToken, {
       httpOnly: true,
       secure: true,
-      sameSite: 'strict',
+      sameSite: 'none',
       expires: new Date(Date.now() + 1000 * 60 * 60 * 24 * 30 * 6),
       path: '/auth',
     });
@@ -70,7 +70,7 @@ export class AuthController {
     response.clearCookie('refreshToken', {
       httpOnly: true,
       secure: true,
-      sameSite: 'strict',
+      sameSite: 'none',
       path: '/auth',
     });
   }
@@ -93,7 +93,7 @@ export class AuthController {
     response.cookie('refreshToken', newRefreshToken, {
       httpOnly: true,
       secure: true,
-      sameSite: 'strict',
+      sameSite: 'none',
       expires: new Date(Date.now() + 1000 * 60 * 60 * 24 * 30 * 6),
       path: '/auth',
     });
