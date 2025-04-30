@@ -4,6 +4,7 @@ WORKDIR /usr/src/app
 
 # install bun globally
 FROM base AS installer
+RUN apt-get update -y && apt-get install -y openssl
 RUN bun install -g prisma
 COPY ./package.json ./bun.lock ./
 
