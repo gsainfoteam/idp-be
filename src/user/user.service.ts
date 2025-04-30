@@ -11,7 +11,7 @@ import {
   DeleteUserReqDto,
   RegisterDto,
 } from './dto/req.dto';
-import { UpdateUserProfileResDto } from './dto/res.dto';
+import { UpdateUserPictureResDto } from './dto/res.dto';
 import { UserConsentType } from './types/userConsent.type';
 import { UserRepository } from './user.repository';
 
@@ -73,7 +73,6 @@ export class UserService {
       email,
       password: hashedPassword,
       name,
-      profile: null,
       studentId,
       phoneNumber,
     });
@@ -108,15 +107,15 @@ export class UserService {
    * @param userUuid user uuid
    * @returns updateUserProfileResDto that contains presignedUrl
    */
-  async updateUserProfile(
+  async updateUserPicture(
     length: number,
     userUuid: string,
-  ): Promise<UpdateUserProfileResDto> {
+  ): Promise<UpdateUserPictureResDto> {
     const presignedUrl = await this.objectService.createPresignedUrl(
       `${userUuid}/profile.webp`,
       length,
     );
-    await this.userRepository.updateUserProfile(presignedUrl, userUuid);
+    await this.userRepository.updateUserPicture(presignedUrl, userUuid);
     return {
       presignedUrl,
     };

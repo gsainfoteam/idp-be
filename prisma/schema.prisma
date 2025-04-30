@@ -18,6 +18,7 @@ model User {
   password String
 
   profile     String?
+  picture     String?
   name        String
   email       String  @unique
   studentId   String  @unique @map("student_id")
