@@ -1,6 +1,12 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Expose, Transform } from 'class-transformer';
-import { IsArray, IsIn, IsOptional, IsString } from 'class-validator';
+import {
+  IsArray,
+  IsIn,
+  IsOptional,
+  IsString,
+  MaxLength,
+} from 'class-validator';
 import { ClientScopeList } from 'src/client/types/clientScopes.type';
 
 import { OauthAuthorizeException } from '../exceptions/oauth.authorize.exception';
@@ -126,6 +132,7 @@ export class AuthorizationReqDto {
     description: 'nonce of the client',
   })
   @IsString()
+  @MaxLength(255)
   @IsOptional()
   nonce?: string;
 }

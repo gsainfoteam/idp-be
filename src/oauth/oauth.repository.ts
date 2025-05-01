@@ -46,6 +46,7 @@ export class OauthRepository {
     scopes: string[],
     userUuid: string,
     clientUuid: string,
+    nonce?: string,
   ): Promise<RefreshToken> {
     return this.prismaService.refreshToken.create({
       data: {
@@ -53,6 +54,7 @@ export class OauthRepository {
         userUuid,
         clientUuid,
         scopes,
+        nonce,
         expiresAt: new Date(Date.now() + MAX_REFRESH_TOKEN_AGE * 1000),
       },
     });
