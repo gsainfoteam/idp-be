@@ -114,7 +114,7 @@ export class ClientService {
    * @param uuid client's uuid
    * @param user user who wants to delete the client
    */
-  async deleteClient(uuid: string, user: User): Promise<void> {
+  async deleteClientRequest(uuid: string, user: User): Promise<void> {
     const client = await this.clientRepository.findClientByUuidAndUserUuid(
       uuid,
       user.uuid,
@@ -125,7 +125,39 @@ export class ClientService {
     await this.slackService.postMessage({
       username: 'IDP_REQUEST',
       icon_emoji: ':warning:',
-      text: `Client ${client.name}(${client.uuid}) send delete request from ${user.email}(${user.uuid}) \n Please check the client information.`,
+      blocks: [
+        {
+          type: 'header',
+          text: {
+            type: 'plain_text',
+            text: `Client delete request`,
+          },
+        },
+        {
+          type: 'divider',
+        },
+        {
+          type: 'section',
+          fields: [
+            {
+              type: 'mrkdwn',
+              text: `*Client Name:*\n${client.name}`,
+            },
+            {
+              type: 'mrkdwn',
+              text: `*Client ID:*\n${client.uuid}`,
+            },
+            {
+              type: 'mrkdwn',
+              text: `*User Email:*\n${user.email}`,
+            },
+            {
+              type: 'mrkdwn',
+              text: `*User ID:*\n${user.uuid}`,
+            },
+          ],
+        },
+      ],
     });
   }
 

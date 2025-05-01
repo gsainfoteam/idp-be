@@ -177,6 +177,6 @@ export class ClientController {
     @Param('clientId', ParseUUIDPipe) uuid: string,
     @GetUser() user: User,
   ): Promise<void> {
-    return this.clientService.deleteClient(uuid, user);
+    return this.clientService.deleteClientRequest(uuid, user);
   }
 }
