@@ -58,6 +58,7 @@ model RefreshToken {
   token     String   @id
   createdAt DateTime @default(now())
   expiresAt DateTime
+  nonce     String?  @db.VarChar(255)
   scopes    String[]
 
   clientUuid String @db.Uuid

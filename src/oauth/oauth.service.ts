@@ -109,6 +109,7 @@ export class OauthService {
       redirectUri,
       scope,
       state,
+      nonce,
     }: AuthorizationReqDto,
     user: User,
   ): Promise<string> {
@@ -135,6 +136,9 @@ export class OauthService {
       if (!client.idTokenAllowed) {
         throw new OauthAuthorizeException('invalid_scope');
       }
+      if (!nonce) {
+        throw new OauthAuthorizeException('invalid_request');
+      }
     }
 
     const code = this.generateOpaqueToken();
@@ -147,6 +151,7 @@ export class OauthService {
         codeChallengeMethod,
         redirectUri,
         scope,
+        nonce,
       },
       {
         prefix: this.CodePrefix,
@@ -257,6 +262,7 @@ export class OauthService {
           aud: cache.clientId,
           exp: Math.floor(Date.now() / 1000) + 60 * 60, // 1 hour
           iat: Math.floor(Date.now() / 1000),
+          nonce: cache.nonce,
           scope: cache.scope.join(' '),
           profile: cache.scope.includes('profile') ? user.profile : undefined,
           picture: cache.scope.includes('profile') ? user.picture : undefined,
@@ -338,6 +344,9 @@ export class OauthService {
 
     let idToken = undefined;
     if (refreshTokenData.scopes.includes('openid')) {
+      if (!refreshTokenData.nonce) {
+        throw new OauthTokenException('invalid_request');
+      }
       const user = await this.userService.findUserByUuid({
         uuid: refreshTokenData.userUuid,
       });
@@ -350,6 +359,7 @@ export class OauthService {
           exp: Math.floor(Date.now() / 1000) + 60 * 60, // 1 hour
           iat: Math.floor(Date.now() / 1000),
           scope: refreshTokenData.scopes.join(' '),
+          nonce: refreshTokenData.nonce,
           profile: refreshTokenData.scopes.includes('profile')
             ? user.profile
             : undefined,

@@ -42,6 +42,7 @@ Table refresh_token {
   token String [pk]
   createdAt DateTime [default: `now()`, not null]
   expiresAt DateTime [not null]
+  nonce String
   scopes String[] [not null]
   clientUuid String [not null]
   userUuid String [not null]
