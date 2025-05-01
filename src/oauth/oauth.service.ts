@@ -151,6 +151,7 @@ export class OauthService {
         codeChallengeMethod,
         redirectUri,
         scope,
+        nonce,
       },
       {
         prefix: this.CodePrefix,
