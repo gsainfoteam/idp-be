@@ -11,6 +11,7 @@ Table user {
   uuid String [pk]
   password String [not null]
   profile String
+  picture String
   name String [not null]
   email String [unique, not null]
   studentId String [unique, not null]
@@ -67,10 +68,10 @@ Table ClientToUser {
   memberId String [ref: > user.uuid]
 }
 
-Ref: refresh_token.clientUuid > client.uuid
+Ref: refresh_token.clientUuid > client.uuid [delete: Cascade]
 
-Ref: refresh_token.userUuid > user.uuid
+Ref: refresh_token.userUuid > user.uuid [delete: Cascade]
 
-Ref: consent.clientUuid > client.uuid
+Ref: consent.clientUuid > client.uuid [delete: Cascade]
 
-Ref: consent.userUuid > user.uuid
+Ref: consent.userUuid > user.uuid [delete: Cascade]

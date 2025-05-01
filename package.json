@@ -11,15 +11,15 @@
     "start": "nest start",
     "start:dev": "nest start --watch",
     "start:debug": "nest start --debug --watch",
-    "start:prod": "node dist/main",
+    "start:prod": "bun dist/main",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
-    "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
+    "test:debug": "bun --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config test/e2e/config/jest-e2e.ts",
-    "doc": "node ./patch-compodoc.js && compodoc -p tsconfig.json -a assets -d ./doc",
-    "doc:serve": "node ./patch-compodoc.js && compodoc -p tsconfig.json -a assets -d ./doc -s"
+    "doc": "bun ./patch-compodoc.js && compodoc -p tsconfig.json -a assets -d ./doc",
+    "doc:serve": "bun ./patch-compodoc.js && compodoc -p tsconfig.json -a assets -d ./doc -s"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.750.0",
@@ -41,7 +41,6 @@
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.1",
     "dotenv": "^16.4.7",
-    "fastify": "^5.2.1",
     "ioredis": "^5.4.2",
     "jsonwebtoken": "^9.0.2",
     "nestjs-slack": "^2.0.0",

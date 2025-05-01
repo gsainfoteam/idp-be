@@ -259,7 +259,8 @@ export class OauthService {
           iat: Math.floor(Date.now() / 1000),
           scope: cache.scope.join(' '),
           profile: cache.scope.includes('profile') ? user.profile : undefined,
-          name: cache.scope.includes('name') ? user.name : undefined,
+          picture: cache.scope.includes('profile') ? user.picture : undefined,
+          name: cache.scope.includes('profile') ? user.name : undefined,
           email: cache.scope.includes('email') ? user.email : undefined,
           student_id: cache.scope.includes('student_id')
             ? user.studentId
@@ -352,7 +353,10 @@ export class OauthService {
           profile: refreshTokenData.scopes.includes('profile')
             ? user.profile
             : undefined,
-          name: refreshTokenData.scopes.includes('name')
+          picture: refreshTokenData.scopes.includes('profile')
+            ? user.picture
+            : undefined,
+          name: refreshTokenData.scopes.includes('profile')
             ? user.name
             : undefined,
           email: refreshTokenData.scopes.includes('email')
@@ -490,8 +494,9 @@ export class OauthService {
 
     return {
       sub: user.uuid,
+      name: tokenData.scope.includes('profile') ? user.name : undefined,
       profile: tokenData.scope.includes('profile') ? user.profile : undefined,
-      name: tokenData.scope.includes('name') ? user.name : undefined,
+      picture: tokenData.scope.includes('profile') ? user.picture : undefined,
       email: tokenData.scope.includes('email') ? user.email : undefined,
       studentId: tokenData.scope.includes('student_id')
         ? user.studentId
