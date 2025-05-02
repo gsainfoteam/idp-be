@@ -109,6 +109,7 @@ export class OauthService {
       redirectUri,
       scope,
       state,
+      nonce,
     }: AuthorizationReqDto,
     user: User,
   ): Promise<string> {
@@ -135,6 +136,9 @@ export class OauthService {
       if (!client.idTokenAllowed) {
         throw new OauthAuthorizeException('invalid_scope');
       }
+      if (!nonce) {
+        throw new OauthAuthorizeException('invalid_request');
+      }
     }
 
     const code = this.generateOpaqueToken();
@@ -147,6 +151,7 @@ export class OauthService {
         codeChallengeMethod,
         redirectUri,
         scope,
+        nonce,
       },
       {
         prefix: this.CodePrefix,
@@ -257,9 +262,11 @@ export class OauthService {
           aud: cache.clientId,
           exp: Math.floor(Date.now() / 1000) + 60 * 60, // 1 hour
           iat: Math.floor(Date.now() / 1000),
+          nonce: cache.nonce,
           scope: cache.scope.join(' '),
           profile: cache.scope.includes('profile') ? user.profile : undefined,
-          name: cache.scope.includes('name') ? user.name : undefined,
+          picture: cache.scope.includes('profile') ? user.picture : undefined,
+          name: cache.scope.includes('profile') ? user.name : undefined,
           email: cache.scope.includes('email') ? user.email : undefined,
           student_id: cache.scope.includes('student_id')
             ? user.studentId
@@ -337,6 +344,9 @@ export class OauthService {
 
     let idToken = undefined;
     if (refreshTokenData.scopes.includes('openid')) {
+      if (!refreshTokenData.nonce) {
+        throw new OauthTokenException('invalid_request');
+      }
       const user = await this.userService.findUserByUuid({
         uuid: refreshTokenData.userUuid,
       });
@@ -349,10 +359,14 @@ export class OauthService {
           exp: Math.floor(Date.now() / 1000) + 60 * 60, // 1 hour
           iat: Math.floor(Date.now() / 1000),
           scope: refreshTokenData.scopes.join(' '),
+          nonce: refreshTokenData.nonce,
           profile: refreshTokenData.scopes.includes('profile')
             ? user.profile
             : undefined,
-          name: refreshTokenData.scopes.includes('name')
+          picture: refreshTokenData.scopes.includes('profile')
+            ? user.picture
+            : undefined,
+          name: refreshTokenData.scopes.includes('profile')
             ? user.name
             : undefined,
           email: refreshTokenData.scopes.includes('email')
@@ -490,8 +504,9 @@ export class OauthService {
 
     return {
       sub: user.uuid,
+      name: tokenData.scope.includes('profile') ? user.name : undefined,
       profile: tokenData.scope.includes('profile') ? user.profile : undefined,
-      name: tokenData.scope.includes('name') ? user.name : undefined,
+      picture: tokenData.scope.includes('profile') ? user.picture : undefined,
       email: tokenData.scope.includes('email') ? user.email : undefined,
       studentId: tokenData.scope.includes('student_id')
         ? user.studentId

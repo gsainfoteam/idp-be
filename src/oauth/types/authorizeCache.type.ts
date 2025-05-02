@@ -8,4 +8,5 @@ export type AuthorizeCacheType = {
   codeChallenge: string;
   redirectUri: string;
   scope: ScopeType[];
+  nonce?: string;
 };

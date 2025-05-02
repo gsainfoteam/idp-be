@@ -81,10 +81,17 @@ export class UserInfoResDto {
 
   @ApiProperty({
     example: 'https://example.com/profile',
-    description: 'profile image url',
+    description: 'profile url',
     required: false,
   })
   profile?: string | null;
+
+  @ApiProperty({
+    example: 'https://bucket.s3.ap-northeast-2.amazonaws.com/1626740269.webp',
+    description: 'profile image url',
+    required: false,
+  })
+  picture?: string | null;
 
   @ApiProperty({
     example: 'johnDoe',

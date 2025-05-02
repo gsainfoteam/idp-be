@@ -36,7 +36,7 @@ import {
   RegisterDto,
 } from './dto/req.dto';
 import {
-  UpdateUserProfileResDto,
+  UpdateUserPictureResDto,
   UserConsentListResDto,
   UserConsentResDto,
   UserResDto,
@@ -111,21 +111,21 @@ export class UserController {
   }
 
   @ApiOperation({
-    summary: 'update profile',
+    summary: 'update picture',
     description:
       'api for updating profile image. it will return updated profile presigned url. image format must be webp',
   })
   @ApiBearerAuth('user:jwt')
-  @ApiOkResponse({ description: 'success', type: UpdateUserProfileResDto })
+  @ApiOkResponse({ description: 'success', type: UpdateUserPictureResDto })
   @ApiUnauthorizedResponse({ description: 'token not valid' })
   @ApiInternalServerErrorResponse({ description: 'server error' })
   @UseGuards(UserGuard)
-  @Patch('/profile')
-  async updateProfile(
+  @Patch('/picture')
+  async updatePicture(
     @Query('length', ParseIntPipe) length: number,
     @GetUser() user: User,
-  ): Promise<UpdateUserProfileResDto> {
-    return this.userService.updateUserProfile(length, user.uuid);
+  ): Promise<UpdateUserPictureResDto> {
+    return this.userService.updateUserPicture(length, user.uuid);
   }
 
   @ApiOperation({

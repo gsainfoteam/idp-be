@@ -21,6 +21,12 @@ export class UserResDto implements User {
     example: 'https://bucket.s3.ap-northeast-2.amazonaws.com/1626740269.webp',
     description: '프로필 이미지 url',
   })
+  picture: string | null;
+
+  @ApiProperty({
+    example: 'https://idp.gistory.me/profile/name',
+    description: '사용자 idp profile url',
+  })
   profile: string | null;
 
   @ApiProperty({
@@ -61,7 +67,7 @@ export class UserResDto implements User {
   }
 }
 
-export class UpdateUserProfileResDto {
+export class UpdateUserPictureResDto {
   @ApiProperty({
     example:
       'https://bucket.s3.ap-northeast-2.amazonaws.com/1626740269/profile.webp',
