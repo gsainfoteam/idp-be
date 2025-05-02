@@ -1,9 +1,10 @@
+import { accessTokenExtractor } from '@lib/global';
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
 import { User } from '@prisma/client';
 import { JwtPayload } from 'jsonwebtoken';
-import { ExtractJwt, Strategy } from 'passport-jwt';
+import { Strategy } from 'passport-jwt';
 
 import { AuthService } from '../auth.service';
 
@@ -14,7 +15,7 @@ export class UserStrategy extends PassportStrategy(Strategy, 'user:jwt') {
     readonly configService: ConfigService,
   ) {
     super({
-      jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+      jwtFromRequest: accessTokenExtractor,
       issuer: configService.getOrThrow<string>('JWT_ISSUER'),
       audience: configService.getOrThrow<string>('JWT_AUDIENCE'),
       secretOrKey: configService.getOrThrow<string>('JWT_SECRET'),

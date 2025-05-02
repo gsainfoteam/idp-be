@@ -1,10 +1,12 @@
 import { Loggable } from '@lib/logger/decorator/loggable';
 import { RedisService } from '@lib/redis';
 import { Injectable, Logger, UnauthorizedException } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { User } from '@prisma/client';
 import * as bcrypt from 'bcryptjs';
 import * as crypto from 'crypto';
+import ms, { StringValue } from 'ms';
 
 import { AuthRepository } from './auth.repository';
 import { LoginDto } from './dto/req.dto';
@@ -14,12 +16,22 @@ import { LoginResultType } from './types/loginResult.type';
 @Loggable()
 export class AuthService {
   private readonly logger = new Logger(AuthService.name);
+  private readonly accessTokenExpireTime: number;
+  private readonly refreshTokenExpireTime: number;
   private readonly refreshTokenPrefix = 'refreshToken';
   constructor(
     private readonly authRepository: AuthRepository,
+    private readonly configService: ConfigService,
     private readonly redisService: RedisService,
     private readonly jwtService: JwtService,
-  ) {}
+  ) {
+    this.accessTokenExpireTime = ms(
+      configService.getOrThrow<string>('JWT_EXPIRE') as StringValue,
+    );
+    this.refreshTokenExpireTime = ms(
+      configService.getOrThrow<string>('REFRESH_TOKEN_EXPIRE') as StringValue,
+    );
+  }
 
   async login({ email, password }: LoginDto): Promise<LoginResultType> {
     const user = await this.authRepository.findUserByEmail(email);
@@ -36,12 +48,14 @@ export class AuthService {
       },
       {
         prefix: this.refreshTokenPrefix,
-        ttl: 60 * 60 * 24 * 30 * 6,
+        ttl: this.refreshTokenExpireTime,
       },
     );
     return {
       accessToken: this.jwtService.sign({}, { subject: user.uuid }),
       refreshToken,
+      accessTokenExpireTime: this.accessTokenExpireTime,
+      refreshTokenExpireTime: this.refreshTokenExpireTime,
     };
   }
 
@@ -69,12 +83,14 @@ export class AuthService {
     const newRefreshToken: string = this.generateOpaqueToken();
     void this.redisService.set<Pick<User, 'uuid'>>(newRefreshToken, user, {
       prefix: this.refreshTokenPrefix,
-      ttl: 60 * 60 * 24 * 30 * 6,
+      ttl: this.refreshTokenExpireTime,
     });
 
     return {
       accessToken: this.jwtService.sign({}, { subject: user.uuid }),
       refreshToken: newRefreshToken,
+      accessTokenExpireTime: this.accessTokenExpireTime,
+      refreshTokenExpireTime: this.refreshTokenExpireTime,
     };
   }
 

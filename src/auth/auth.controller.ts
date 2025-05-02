@@ -47,15 +47,29 @@ export class AuthController {
     @Body() loginDto: LoginDto,
     @Res({ passthrough: true }) response: FastifyReply,
   ): Promise<LoginResDto> {
-    const { refreshToken, ...rest } = await this.authService.login(loginDto);
+    const {
+      refreshToken,
+      accessToken,
+      refreshTokenExpireTime,
+      accessTokenExpireTime,
+    } = await this.authService.login(loginDto);
+    response.cookie('accessToken', accessToken, {
+      httpOnly: true,
+      secure: true,
+      sameSite: 'strict',
+      expires: new Date(Date.now() + accessTokenExpireTime),
+      path: '/',
+    });
     response.cookie('refreshToken', refreshToken, {
       httpOnly: true,
       secure: true,
       sameSite: 'strict',
-      expires: new Date(Date.now() + 1000 * 60 * 60 * 24 * 30 * 6),
+      expires: new Date(Date.now() + refreshTokenExpireTime),
       path: '/auth',
     });
-    return rest;
+    return {
+      accessToken,
+    };
   }
 
   @ApiOperation({ summary: 'logout' })
@@ -67,6 +81,12 @@ export class AuthController {
     @Res({ passthrough: true }) response: FastifyReply,
   ): Promise<void> {
     await this.authService.logout(request.cookies.refreshToken ?? '');
+    response.clearCookie('accessToken', {
+      httpOnly: true,
+      secure: true,
+      sameSite: 'strict',
+      path: '/',
+    });
     response.clearCookie('refreshToken', {
       httpOnly: true,
       secure: true,
@@ -88,15 +108,28 @@ export class AuthController {
     @Req() request: FastifyRequest,
     @Res({ passthrough: true }) response: FastifyReply,
   ): Promise<LoginResDto> {
-    const { refreshToken: newRefreshToken, ...rest } =
-      await this.authService.refresh(request.cookies.refreshToken ?? '');
+    const {
+      refreshToken: newRefreshToken,
+      accessToken,
+      refreshTokenExpireTime,
+      accessTokenExpireTime,
+    } = await this.authService.refresh(request.cookies.refreshToken ?? '');
+    response.cookie('accessToken', accessToken, {
+      httpOnly: true,
+      secure: true,
+      sameSite: 'strict',
+      expires: new Date(Date.now() + accessTokenExpireTime),
+      path: '/',
+    });
     response.cookie('refreshToken', newRefreshToken, {
       httpOnly: true,
       secure: true,
       sameSite: 'strict',
-      expires: new Date(Date.now() + 1000 * 60 * 60 * 24 * 30 * 6),
+      expires: new Date(Date.now() + refreshTokenExpireTime),
       path: '/auth',
     });
-    return rest;
+    return {
+      accessToken,
+    };
   }
 }
