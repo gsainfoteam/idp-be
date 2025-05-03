@@ -6,7 +6,9 @@ import {
   Delete,
   Get,
   Headers,
+  HttpCode,
   HttpRedirectResponse,
+  HttpStatus,
   Post,
   Query,
   Redirect,
@@ -106,6 +108,7 @@ export class OauthController {
   @ApiBadRequestResponse({ description: 'invalid request' })
   @UseGuards(BasicAuthGuard)
   @Post('token')
+  @HttpCode(HttpStatus.OK)
   token(@Body() body: TokenReqDto): Promise<TokenResDto> {
     return this.oauthService.token(body as GrantContentType);
   }
