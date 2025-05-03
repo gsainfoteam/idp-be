@@ -16,6 +16,8 @@ export class BasicAuthGuard implements CanActivate {
         const [username, password] = basicAuthContent.split(':');
         request.body = {
           ...(request.body || {}),
+          client_id: username,
+          client_secret: password,
           clientId: username,
           clientSecret: password,
         };
