@@ -1,3 +1,4 @@
+import { Loggable } from '@lib/logger';
 import { PrismaService } from '@lib/prisma';
 import {
   Injectable,
@@ -11,6 +12,7 @@ import { OauthTokenException } from './exceptions/oauth.token.exception';
 
 const MAX_REFRESH_TOKEN_AGE = 60 * 60 * 24 * 30; // 30 days
 
+@Loggable()
 @Injectable()
 export class OauthRepository {
   private readonly logger = new Logger(OauthRepository.name);

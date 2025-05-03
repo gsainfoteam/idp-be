@@ -1,3 +1,4 @@
+import { Loggable } from '@lib/logger';
 import { RedisService } from '@lib/redis';
 import {
   BadRequestException,
@@ -31,6 +32,7 @@ import {
 import { TokenScopeList } from './types/scope.type';
 import { TokenCacheType } from './types/tokenCache.type';
 
+@Loggable()
 @Injectable()
 export class OauthService {
   private readonly CodePrefix = 'code';
