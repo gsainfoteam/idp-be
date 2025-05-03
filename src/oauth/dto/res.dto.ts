@@ -11,6 +11,7 @@ export class TokenResDto {
   })
   @Expose({
     name: 'access_token',
+    toPlainOnly: true,
   })
   accessToken: string;
 
@@ -21,6 +22,7 @@ export class TokenResDto {
   })
   @Expose({
     name: 'token_type',
+    toPlainOnly: true,
   })
   tokenType: string;
 
@@ -31,6 +33,7 @@ export class TokenResDto {
   })
   @Expose({
     name: 'expires_in',
+    toPlainOnly: true,
   })
   expiresIn: number;
 
@@ -41,6 +44,7 @@ export class TokenResDto {
   })
   @Expose({
     name: 'refresh_token',
+    toPlainOnly: true,
   })
   refreshToken?: string;
 
@@ -51,6 +55,7 @@ export class TokenResDto {
   })
   @Expose({
     name: 'refresh_token_expires_in',
+    toPlainOnly: true,
   })
   refreshTokenExpiresIn?: number;
 
@@ -61,6 +66,7 @@ export class TokenResDto {
   })
   @Expose({
     name: 'id_token',
+    toPlainOnly: true,
   })
   idToken?: string;
 
