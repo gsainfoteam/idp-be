@@ -106,9 +106,8 @@ export class OauthController {
   @ApiBadRequestResponse({ description: 'invalid request' })
   @UseGuards(BasicAuthGuard)
   @Post('token')
-  async token(@Body() body: TokenReqDto): Promise<TokenResDto> {
-    const res = await this.oauthService.token(body as GrantContentType);
-    return new TokenResDto(res);
+  token(@Body() body: TokenReqDto): Promise<TokenResDto> {
+    return this.oauthService.token(body as GrantContentType);
   }
 
   @ApiOperation({
