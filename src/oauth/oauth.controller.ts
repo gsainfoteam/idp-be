@@ -12,6 +12,7 @@ import {
   Post,
   Query,
   Redirect,
+  SerializeOptions,
   UseGuards,
   UseInterceptors,
   UsePipes,
@@ -109,6 +110,7 @@ export class OauthController {
   @UseGuards(BasicAuthGuard)
   @Post('token')
   @HttpCode(HttpStatus.OK)
+  @SerializeOptions({ type: TokenResDto })
   token(@Body() body: TokenReqDto): Promise<TokenResDto> {
     return this.oauthService.token(body as GrantContentType);
   }
