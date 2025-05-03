@@ -10,6 +10,7 @@ import {
   Post,
   Query,
   Redirect,
+  SerializeOptions,
   UseGuards,
   UseInterceptors,
   UsePipes,
@@ -105,6 +106,7 @@ export class OauthController {
   @ApiConsumes('application/x-www-form-urlencoded', 'application/json')
   @ApiBadRequestResponse({ description: 'invalid request' })
   @UseGuards(BasicAuthGuard)
+  @SerializeOptions({ type: TokenResDto })
   @Post('token')
   token(@Body() body: TokenReqDto): Promise<TokenResDto> {
     return this.oauthService.token(body as GrantContentType);
