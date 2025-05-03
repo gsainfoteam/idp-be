@@ -255,30 +255,22 @@ export class OauthService {
         uuid: cache.UserUuid,
       });
 
-      idToken = this.jwtService.sign(
-        {
-          sub: cache.UserUuid,
-          iss: this.configService.getOrThrow<string>('JWT_ISSUER'),
-          aud: cache.clientId,
-          exp: Math.floor(Date.now() / 1000) + 60 * 60, // 1 hour
-          iat: Math.floor(Date.now() / 1000),
-          nonce: cache.nonce,
-          scope: cache.scope.join(' '),
-          profile: cache.scope.includes('profile') ? user.profile : undefined,
-          picture: cache.scope.includes('profile') ? user.picture : undefined,
-          name: cache.scope.includes('profile') ? user.name : undefined,
-          email: cache.scope.includes('email') ? user.email : undefined,
-          student_id: cache.scope.includes('student_id')
-            ? user.studentId
-            : undefined,
-          phone_number: cache.scope.includes('phone_number')
-            ? user.phoneNumber
-            : undefined,
-        },
-        {
-          keyid: this.configService.getOrThrow<string>('JWT_KEYID'),
-        },
-      );
+      idToken = this.jwtService.sign({
+        sub: cache.UserUuid,
+        aud: cache.clientId,
+        nonce: cache.nonce,
+        scope: cache.scope.join(' '),
+        profile: cache.scope.includes('profile') ? user.profile : undefined,
+        picture: cache.scope.includes('profile') ? user.picture : undefined,
+        name: cache.scope.includes('profile') ? user.name : undefined,
+        email: cache.scope.includes('email') ? user.email : undefined,
+        student_id: cache.scope.includes('student_id')
+          ? user.studentId
+          : undefined,
+        phone_number: cache.scope.includes('phone_number')
+          ? user.phoneNumber
+          : undefined,
+      });
     }
 
     return {
@@ -351,38 +343,30 @@ export class OauthService {
         uuid: refreshTokenData.userUuid,
       });
 
-      idToken = this.jwtService.sign(
-        {
-          sub: refreshTokenData.userUuid,
-          iss: this.configService.getOrThrow<string>('JWT_ISSUER'),
-          aud: refreshTokenData.clientUuid,
-          exp: Math.floor(Date.now() / 1000) + 60 * 60, // 1 hour
-          iat: Math.floor(Date.now() / 1000),
-          scope: refreshTokenData.scopes.join(' '),
-          nonce: refreshTokenData.nonce,
-          profile: refreshTokenData.scopes.includes('profile')
-            ? user.profile
-            : undefined,
-          picture: refreshTokenData.scopes.includes('profile')
-            ? user.picture
-            : undefined,
-          name: refreshTokenData.scopes.includes('profile')
-            ? user.name
-            : undefined,
-          email: refreshTokenData.scopes.includes('email')
-            ? user.email
-            : undefined,
-          student_id: refreshTokenData.scopes.includes('student_id')
-            ? user.studentId
-            : undefined,
-          phone_number: refreshTokenData.scopes.includes('phone_number')
-            ? user.phoneNumber
-            : undefined,
-        },
-        {
-          keyid: this.configService.getOrThrow<string>('JWT_KEYID'),
-        },
-      );
+      idToken = this.jwtService.sign({
+        sub: refreshTokenData.userUuid,
+        aud: refreshTokenData.clientUuid,
+        scope: refreshTokenData.scopes.join(' '),
+        nonce: refreshTokenData.nonce,
+        profile: refreshTokenData.scopes.includes('profile')
+          ? user.profile
+          : undefined,
+        picture: refreshTokenData.scopes.includes('profile')
+          ? user.picture
+          : undefined,
+        name: refreshTokenData.scopes.includes('profile')
+          ? user.name
+          : undefined,
+        email: refreshTokenData.scopes.includes('email')
+          ? user.email
+          : undefined,
+        student_id: refreshTokenData.scopes.includes('student_id')
+          ? user.studentId
+          : undefined,
+        phone_number: refreshTokenData.scopes.includes('phone_number')
+          ? user.phoneNumber
+          : undefined,
+      });
     }
     await this.oauthRepository.deleteRefreshTokenByToken(refreshToken);
 
