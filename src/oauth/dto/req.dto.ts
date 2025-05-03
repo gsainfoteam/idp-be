@@ -1,4 +1,4 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Expose, Transform } from 'class-transformer';
 import {
   IsArray,
@@ -121,14 +121,14 @@ export class AuthorizationReqDto {
   @IsArray()
   scope: ScopeType[];
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     description: 'state of the client',
   })
   @IsString()
   @IsOptional()
   state?: string;
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     description: 'nonce of the client',
   })
   @IsString()
@@ -153,7 +153,7 @@ export class TokenReqDto {
   })
   grantType: GrantType;
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     description: 'client_id of the client',
     name: 'client_id',
     required: false,
@@ -165,7 +165,7 @@ export class TokenReqDto {
   @IsOptional()
   clientId?: string;
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     description: 'client_secret of the client',
     name: 'client_secret',
     required: false,
@@ -177,7 +177,7 @@ export class TokenReqDto {
   @IsOptional()
   clientSecret?: string;
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     description: 'code of the client',
     required: false,
   })
@@ -185,7 +185,7 @@ export class TokenReqDto {
   @IsOptional()
   code?: string;
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     description:
       'code_verifier of the client, this is required when using PKCE, you should make it when you provide code_challenge',
     name: 'code_verifier',
@@ -198,7 +198,7 @@ export class TokenReqDto {
   @IsOptional()
   codeVerifier?: string;
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     description: 'refresh_token of the client',
     name: 'refresh_token',
     required: false,
@@ -210,7 +210,7 @@ export class TokenReqDto {
   @IsOptional()
   refreshToken?: string;
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     description: 'scope of the client',
   })
   @Transform(({ value }) => {
@@ -234,7 +234,7 @@ export class RevokeReqDto {
   @IsString()
   token: string;
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     description: 'token type hint',
     name: 'token_type_hint',
   })
