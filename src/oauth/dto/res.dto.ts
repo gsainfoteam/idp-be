@@ -121,6 +121,7 @@ export class UserInfoResDto {
   })
   @Expose({
     name: 'student_id',
+    toPlainOnly: true,
   })
   studentId?: string;
 
@@ -132,6 +133,7 @@ export class UserInfoResDto {
   })
   @Expose({
     name: 'phone_number',
+    toPlainOnly: true,
   })
   phoneNumber?: string;
 }

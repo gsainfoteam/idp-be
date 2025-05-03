@@ -131,6 +131,7 @@ export class OauthController {
       'get the user information from the token. through this endpoint, the client can get the user information from the token.',
   })
   @Get('userinfo')
+  @SerializeOptions({ type: UserInfoResDto })
   async userinfo(
     @Headers('Authorization') authorizationHeader: string,
     @Query('sub') sub?: string,
