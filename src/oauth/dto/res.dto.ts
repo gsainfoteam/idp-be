@@ -1,4 +1,4 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Expose } from 'class-transformer';
 
 import { ScopeList, ScopeType } from '../types/scope.type';
@@ -37,7 +37,7 @@ export class TokenResDto {
   })
   expiresIn: number;
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXV9',
     description: 'refresh token',
     name: 'refresh_token',
@@ -48,7 +48,7 @@ export class TokenResDto {
   })
   refreshToken?: string;
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     example: '84000',
     description: 'refresh token expires in',
     name: 'refresh_token_expires_in',
@@ -59,7 +59,7 @@ export class TokenResDto {
   })
   refreshTokenExpiresIn?: number;
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     example: 'ey...',
     description: 'id token',
     name: 'id_token',
@@ -85,35 +85,35 @@ export class UserInfoResDto {
   })
   sub: string;
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     example: 'https://example.com/profile',
     description: 'profile url',
     required: false,
   })
   profile?: string | null;
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     example: 'https://bucket.s3.ap-northeast-2.amazonaws.com/1626740269.webp',
     description: 'profile image url',
     required: false,
   })
   picture?: string | null;
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     example: 'johnDoe',
     description: 'name',
     required: false,
   })
   name?: string;
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     example: 'johnDoe@gmail.com',
     description: 'email',
     required: false,
   })
   email?: string;
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     example: 'studentId',
     description: 'student id',
     required: false,
@@ -124,7 +124,7 @@ export class UserInfoResDto {
   })
   studentId?: string;
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     example: '01012345678',
     description: 'phone number',
     required: false,
