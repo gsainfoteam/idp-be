@@ -108,9 +108,7 @@ export class OauthController {
   @Post('token')
   async token(@Body() body: TokenReqDto): Promise<TokenResDto> {
     const res = await this.oauthService.token(body as GrantContentType);
-    const tokenResDto = new TokenResDto();
-    Object.assign(tokenResDto, res);
-    return tokenResDto;
+    return new TokenResDto(res);
   }
 
   @ApiOperation({

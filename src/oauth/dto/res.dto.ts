@@ -70,6 +70,10 @@ export class TokenResDto {
     enum: ScopeList,
   })
   scope: ScopeType[];
+
+  constructor(partial: Partial<TokenResDto>) {
+    Object.assign(this, partial);
+  }
 }
 
 export class UserInfoResDto {
