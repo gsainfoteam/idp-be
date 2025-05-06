@@ -34,6 +34,9 @@ export class AllowCorsInterceptor implements NestInterceptor {
       'Access-Control-Allow-Credentials',
       String(corsOptions.credentials),
     );
+    if (request.method === 'OPTIONS') {
+      response.status(corsOptions.optionsSuccessStatus).send();
+    }
     return next.handle();
   }
 }
