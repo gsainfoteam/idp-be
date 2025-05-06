@@ -1,4 +1,4 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
   IsArray,
   IsBoolean,
@@ -18,7 +18,7 @@ export class CreateClientDto {
   @IsString()
   name: string;
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     description: 'The urls of the client',
     example: ['http://localhost:3000'],
   })
@@ -30,7 +30,7 @@ export class CreateClientDto {
 }
 
 export class UpdateClientDto {
-  @ApiProperty({
+  @ApiPropertyOptional({
     description: 'The name of the client',
     example: 'client-1',
   })
@@ -38,7 +38,7 @@ export class UpdateClientDto {
   @IsOptional()
   name?: string;
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     description: 'The urls of the client',
     example: ['http://localhost:3000'],
   })
@@ -48,7 +48,7 @@ export class UpdateClientDto {
   @IsOptional()
   urls?: string[];
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     description: 'The scopes which the client uses',
     example: ['email'],
   })
@@ -58,7 +58,7 @@ export class UpdateClientDto {
   @IsOptional()
   scopes?: ClientScopeType[];
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     description: 'The scopes which the client might uses',
     example: ['student_id'],
   })
@@ -68,7 +68,7 @@ export class UpdateClientDto {
   @IsOptional()
   optionalScopes?: ClientScopeType[];
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     description: 'whether using id token or not',
     example: true,
   })
