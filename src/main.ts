@@ -38,7 +38,7 @@ async function bootstrap() {
         // No origin, no CORS
         callback(null, {
           origin: whitelist,
-          methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+          methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE'],
           optionsSuccessStatus: 204,
           preflightContinue: false,
           credentials: true,
@@ -48,7 +48,7 @@ async function bootstrap() {
         // Allow all origins for the specified paths
         callback(null, {
           origin,
-          methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+          methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE'],
           optionsSuccessStatus: 204,
           preflightContinue: false,
           credentials: true,
@@ -57,7 +57,7 @@ async function bootstrap() {
         // Allow only whitelisted origins
         callback(null, {
           origin,
-          methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+          methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE'],
           optionsSuccessStatus: 204,
           preflightContinue: false,
           credentials: true,
