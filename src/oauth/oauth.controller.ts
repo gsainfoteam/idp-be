@@ -10,6 +10,7 @@ import {
   HttpCode,
   HttpRedirectResponse,
   HttpStatus,
+  Options,
   Post,
   Query,
   Redirect,
@@ -59,6 +60,12 @@ export class OauthController {
   @UseInterceptors(AllowCorsInterceptor)
   certs() {
     return this.oauthService.certs();
+  }
+
+  @Options('certs')
+  @UseInterceptors(AllowCorsInterceptor)
+  optionsCerts() {
+    return {};
   }
 
   @ApiOperation({
@@ -129,6 +136,12 @@ export class OauthController {
     return this.oauthService.revoke(body);
   }
 
+  @Options('token')
+  @UseInterceptors(AllowCorsInterceptor)
+  optionsToken() {
+    return {};
+  }
+
   @ApiOperation({
     summary: 'get the userinfo',
     description:
@@ -146,5 +159,11 @@ export class OauthController {
       throw new BadRequestException('invalid token type');
     }
     return this.oauthService.userinfo(token, sub);
+  }
+
+  @Options('userinfo')
+  @UseInterceptors(AllowCorsInterceptor)
+  optionsUserinfo() {
+    return {};
   }
 }

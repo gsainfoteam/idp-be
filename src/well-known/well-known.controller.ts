@@ -1,5 +1,5 @@
 import { AllowCorsInterceptor } from '@lib/global/interceptor/allowCors.interceptor';
-import { Controller, Get, UseInterceptors } from '@nestjs/common';
+import { Controller, Get, Options, UseInterceptors } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 
 import { WellKnownService } from './well-known.service';
@@ -13,5 +13,10 @@ export class WellKnownController {
   @Get('openid-configuration')
   discovery(): object {
     return this.wellKnownService.discovery();
+  }
+
+  @Options('openid-configuration')
+  optionsDiscovery(): object {
+    return {};
   }
 }
