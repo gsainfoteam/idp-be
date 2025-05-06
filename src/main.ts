@@ -63,7 +63,13 @@ async function bootstrap() {
           credentials: true,
         });
       } else {
-        callback(new Error('Not allowed by CORS'));
+        callback(new Error('Not allowed by CORS'), {
+          origin: false,
+          methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE'],
+          optionsSuccessStatus: 204,
+          preflightContinue: false,
+          credentials: true,
+        });
       }
     },
   });

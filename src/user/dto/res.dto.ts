@@ -1,4 +1,4 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { User } from '@prisma/client';
 import { Exclude } from 'class-transformer';
 
@@ -17,15 +17,19 @@ export class UserResDto implements User {
   })
   uuid: string;
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     example: 'https://bucket.s3.ap-northeast-2.amazonaws.com/1626740269.webp',
     description: '프로필 이미지 url',
+    type: 'string',
+    nullable: true,
   })
   picture: string | null;
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     example: 'https://idp.gistory.me/profile/name',
     description: '사용자 idp profile url',
+    type: 'string',
+    nullable: true,
   })
   profile: string | null;
 
