@@ -1,4 +1,5 @@
 import fastifyCookie from '@fastify/cookie';
+import { MethodNotAllowedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
 import {
@@ -63,7 +64,7 @@ async function bootstrap() {
           credentials: true,
         });
       } else {
-        callback(new Error('Not allowed by CORS'), {
+        callback(new MethodNotAllowedException(), {
           origin: false,
           methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE'],
           optionsSuccessStatus: 204,
