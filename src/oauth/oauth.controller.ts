@@ -1,3 +1,4 @@
+import { AllowCorsInterceptor } from '@lib/global/interceptor/allowCors.interceptor';
 import {
   BadRequestException,
   Body,
@@ -55,6 +56,7 @@ export class OauthController {
       'get the public key to verify the jwt token. through this endpoint, the client can get the public key to verify the jwt token.',
   })
   @Get('certs')
+  @UseInterceptors(AllowCorsInterceptor)
   certs() {
     return this.oauthService.certs();
   }
@@ -111,6 +113,7 @@ export class OauthController {
   @Post('token')
   @HttpCode(HttpStatus.OK)
   @SerializeOptions({ type: TokenResDto })
+  @UseInterceptors(AllowCorsInterceptor)
   token(@Body() body: TokenReqDto): Promise<TokenResDto> {
     return this.oauthService.token(body as GrantContentType);
   }
@@ -121,6 +124,7 @@ export class OauthController {
       'revoke the token from the client. through this endpoint, the client can revoke the token.',
   })
   @Delete('token')
+  @UseInterceptors(AllowCorsInterceptor)
   async revoke(@Body() body: RevokeReqDto): Promise<void> {
     return this.oauthService.revoke(body);
   }
@@ -132,6 +136,7 @@ export class OauthController {
   })
   @Get('userinfo')
   @SerializeOptions({ type: UserInfoResDto })
+  @UseInterceptors(AllowCorsInterceptor)
   async userinfo(
     @Headers('Authorization') authorizationHeader: string,
     @Query('sub') sub?: string,
