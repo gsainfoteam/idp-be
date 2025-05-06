@@ -15,13 +15,14 @@ export class AllowCorsInterceptor implements NestInterceptor {
     next: CallHandler<any>,
   ): Observable<any> | Promise<Observable<any>> {
     const response = context.switchToHttp().getResponse<FastifyReply>();
-    const corsOptions: CorsOptions = {
+    const corsOptions = {
       origin: '*',
       methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE'],
-      credentials: true,
+      allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
       optionsSuccessStatus: 204,
       preflightContinue: false,
-    };
+      credentials: false,
+    } satisfies CorsOptions;
     response.header('Access-Control-Allow-Origin', corsOptions.origin);
     response.header('Access-Control-Allow-Methods', corsOptions.methods);
     response.header('Access-Control-Allow-Headers', corsOptions.allowedHeaders);
