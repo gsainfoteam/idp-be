@@ -1,7 +1,13 @@
 import { IsGistEmail } from '@lib/global';
 import { IsStudentId } from '@lib/global/validator/studentId.validator';
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEmail, IsJWT, IsString, MaxLength } from 'class-validator';
+import {
+  IsEmail,
+  IsJWT,
+  IsLowercase,
+  IsString,
+  MaxLength,
+} from 'class-validator';
 
 export class ChangePasswordDto {
   @ApiProperty({
@@ -35,6 +41,7 @@ export class RegisterDto {
   })
   @IsEmail()
   @IsGistEmail({ message: 'GIST 이메일을 입력해주세요.' })
+  @IsLowercase()
   email: string;
 
   @ApiProperty({
