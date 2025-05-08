@@ -135,7 +135,7 @@ export class ClientCredentialResDto implements Client {
     example: 'client-secret',
   })
   @Expose()
-  get client_secret(): string {
+  get clientSecret(): string {
     return this.secret;
   }
 
