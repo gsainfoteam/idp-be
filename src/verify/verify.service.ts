@@ -67,6 +67,7 @@ export class VerifyService {
     if (hint !== 'email') {
       throw new BadRequestException('only email supported');
     }
+    subject = subject.toLowerCase(); // to lower case
 
     const CachedCode = await this.redisService
       .getOrThrow<string>(subject, {

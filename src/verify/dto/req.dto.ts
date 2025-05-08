@@ -1,5 +1,7 @@
 import { IsGistEmail } from '@lib/global';
+import { BadRequestException } from '@nestjs/common';
 import { ApiProperty } from '@nestjs/swagger';
+import { Transform } from 'class-transformer';
 import { IsEmail } from 'class-validator';
 
 import { VerificationList, VerificationType } from '../types/verification.type';
@@ -12,6 +14,12 @@ export class SendEmailCodeDto {
   })
   @IsEmail()
   @IsGistEmail({ message: 'GIST 이메일을 입력해주세요.' })
+  @Transform(({ value }) => {
+    if (typeof value === 'string') {
+      return value.toLowerCase();
+    }
+    throw new BadRequestException('이메일 형식이 올바르지 않습니다.');
+  })
   email: string;
 }
 
