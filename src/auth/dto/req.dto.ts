@@ -1,5 +1,7 @@
 import { IsGistEmail } from '@lib/global';
+import { BadRequestException } from '@nestjs/common';
 import { ApiProperty } from '@nestjs/swagger';
+import { Transform } from 'class-transformer';
 import { IsEmail, IsString } from 'class-validator';
 
 export class LoginDto {
@@ -9,6 +11,12 @@ export class LoginDto {
   })
   @IsEmail()
   @IsGistEmail()
+  @Transform(({ value }) => {
+    if (typeof value === 'string') {
+      return value.toLowerCase();
+    }
+    throw new BadRequestException('이메일 형식이 올바르지 않습니다.');
+  })
   email: string;
 
   @ApiProperty({
