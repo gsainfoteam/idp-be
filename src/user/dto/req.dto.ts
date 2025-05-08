@@ -12,6 +12,12 @@ export class ChangePasswordDto {
   })
   @IsEmail()
   @IsGistEmail()
+  @Transform(({ value }) => {
+    if (typeof value === 'string') {
+      return value.toLowerCase();
+    }
+    throw new BadRequestException('이메일 형식이 올바르지 않습니다.');
+  })
   email: string;
 
   @ApiProperty({
