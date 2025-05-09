@@ -24,7 +24,14 @@ export class CreateClientDto {
   })
   @IsArray()
   @IsString({ each: true })
-  @IsUrl({ require_tld: false }, { each: true })
+  @IsUrl(
+    {
+      require_valid_protocol: false,
+      require_tld: false,
+      require_protocol: true,
+    },
+    { each: true },
+  )
   @IsOptional()
   urls?: string[];
 }

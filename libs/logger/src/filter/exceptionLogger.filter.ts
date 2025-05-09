@@ -16,11 +16,15 @@ export class ExceptionLoggerFilter implements ExceptionFilter {
     const request = ctx.getRequest<FastifyRequest>();
     const status = exception.getStatus();
 
-    this.logger.debug(exception.message + '\nwhere ' + request.url);
+    this.logger.debug(
+      exception.message + '\nwhere ' + request.url,
+      exception.getResponse(),
+    );
 
     response.status(status).send({
       statusCode: status,
       message: exception.message,
+      detail: exception.getResponse(),
       timestamp: new Date().toISOString(),
       path: request.url,
     });
