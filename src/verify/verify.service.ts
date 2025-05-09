@@ -20,6 +20,9 @@ import { VerificationJwtPayloadType } from './types/verificationJwtPayload.type'
 export class VerifyService {
   private readonly emailVerificationCodePrefix = 'EmailVerificationCode';
   private readonly logger = new Logger(VerifyService.name);
+  private readonly sender =
+    this.configService.get<string | undefined>('EMAIL_SENDER') ??
+    this.configService.get<string>('EMAIL_USER');
   constructor(
     private readonly configService: ConfigService,
     private readonly jwtService: JwtService,
@@ -41,11 +44,9 @@ export class VerifyService {
 
     await this.mailService.sendEmail(
       email,
-      `"GSA 통합 계정 로그인" <${this.configService.get<string>(
-        'EMAIL_USER',
-      )}>`,
-      'Gist Email Verification Code ✔',
-      `verification code is <b>${emailVerificationCode}</b>`,
+      `"GIST 메일로 로그인" <${this.sender}>`,
+      'GIST 메일로 로그인 인증 코드',
+      `인증 코드는 <b>[${emailVerificationCode}]</b> 입니다.`,
     );
 
     await this.redisService.set<string>(email, emailVerificationCode, {
