@@ -1,14 +1,18 @@
 import { Loggable } from '@lib/logger';
+import { MailService } from '@lib/mail';
 import { ObjectService } from '@lib/object';
 import { ForbiddenException, Injectable, Logger } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { User } from '@prisma/client';
 import * as bcrypt from 'bcryptjs';
+import * as crypto from 'crypto';
 import { VerificationJwtPayloadType } from 'src/verify/types/verificationJwtPayload.type';
 import { VerifyService } from 'src/verify/verify.service';
 
 import {
   ChangePasswordDto,
   DeleteUserReqDto,
+  IssuePasswordDto,
   RegisterDto,
 } from './dto/req.dto';
 import { UpdateUserPictureResDto } from './dto/res.dto';
@@ -19,8 +23,13 @@ import { UserRepository } from './user.repository';
 @Injectable()
 export class UserService {
   private readonly logger = new Logger(UserService.name);
+  private readonly sender =
+    this.configService.get<string | undefined>('EMAIL_SENDER') ??
+    this.configService.get<string>('EMAIL_USER');
   constructor(
     private readonly userRepository: UserRepository,
+    private readonly configService: ConfigService,
+    private readonly mailService: MailService,
     private readonly verifyService: VerifyService,
     private readonly objectService: ObjectService,
   ) {}
@@ -79,17 +88,32 @@ export class UserService {
   }
 
   /**
+   * issue a new password to the user
+   * @param param0 it contains email
+   */
+  async issuePassword({ email }: IssuePasswordDto): Promise<void> {
+    const user = await this.userRepository.findUserByEmail(email);
+    const newPassword = crypto.randomBytes(18).toString('base64');
+    await this.mailService.sendEmail(
+      email,
+      `"GIST 메일로 로그인" <${this.sender}>`,
+      'GIST 메일로 로그인 비밀번호',
+      `변경된 비밀번호는 <b>[${newPassword}]</b> 입니다.`,
+    );
+    await this.userRepository.updateUserPassword(
+      user.uuid,
+      bcrypt.hashSync(newPassword, bcrypt.genSaltSync(10)),
+    );
+  }
+
+  /**
    * change the user password (validate the user from the jwt token that comes from the email)
    * @param param0 it contains email, password, verificationJwtToken
    */
   async changePassword(
-    { email, password, oldPassword }: ChangePasswordDto,
+    { password, oldPassword }: ChangePasswordDto,
     user: User,
   ): Promise<void> {
-    if (user.email !== email) {
-      this.logger.debug('user email not valid');
-      throw new ForbiddenException('user email not valid');
-    }
     if (!bcrypt.compareSync(oldPassword, user.password)) {
       this.logger.debug('old password not valid');
       throw new ForbiddenException('old password not valid');
@@ -98,7 +122,7 @@ export class UserService {
       password,
       bcrypt.genSaltSync(10),
     );
-    await this.userRepository.updateUserPassword(email, hashedPassword);
+    await this.userRepository.updateUserPassword(user.uuid, hashedPassword);
   }
 
   /**

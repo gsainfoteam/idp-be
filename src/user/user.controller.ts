@@ -34,6 +34,7 @@ import { UserGuard } from 'src/auth/guard/auth.guard';
 import {
   ChangePasswordDto,
   DeleteUserReqDto,
+  IssuePasswordDto,
   RegisterDto,
 } from './dto/req.dto';
 import {
@@ -97,6 +98,21 @@ export class UserController {
   @Post()
   async register(@Body() body: RegisterDto): Promise<void> {
     return this.userService.register(body);
+  }
+
+  @ApiOperation({
+    summary: 'issue password',
+    description: 'api for issuing new password through email',
+  })
+  @ApiCreatedResponse({ description: 'success' })
+  @ApiBadRequestResponse({ description: 'body form is not valid' })
+  @ApiForbiddenResponse({
+    description: 'email is not valid, or user not found',
+  })
+  @ApiInternalServerErrorResponse({ description: 'server error' })
+  @Post('/password')
+  async issuePassword(@Body() body: IssuePasswordDto): Promise<void> {
+    return this.userService.issuePassword(body);
   }
 
   @ApiOperation({
