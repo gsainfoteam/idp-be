@@ -1,4 +1,5 @@
 import { LoggerModule } from '@lib/logger';
+import { MailModule } from '@lib/mail';
 import { ObjectModule } from '@lib/object';
 import { PrismaModule } from '@lib/prisma';
 import { Module } from '@nestjs/common';
@@ -13,6 +14,7 @@ import { UserService } from './user.service';
 @Module({
   imports: [
     AuthModule,
+    MailModule,
     VerifyModule,
     ConfigModule,
     PrismaModule,

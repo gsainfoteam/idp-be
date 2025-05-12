@@ -16,6 +16,7 @@ import {
   ValidationPipe,
 } from '@nestjs/common';
 import {
+  ApiBadRequestResponse,
   ApiBearerAuth,
   ApiConflictResponse,
   ApiCreatedResponse,
@@ -33,6 +34,7 @@ import { UserGuard } from 'src/auth/guard/auth.guard';
 import {
   ChangePasswordDto,
   DeleteUserReqDto,
+  IssuePasswordDto,
   RegisterDto,
 } from './dto/req.dto';
 import {
@@ -99,15 +101,38 @@ export class UserController {
   }
 
   @ApiOperation({
+    summary: 'issue password',
+    description: 'api for issuing new password through email',
+  })
+  @ApiCreatedResponse({ description: 'success' })
+  @ApiBadRequestResponse({ description: 'body form is not valid' })
+  @ApiForbiddenResponse({
+    description: 'email is not valid, or user not found',
+  })
+  @ApiInternalServerErrorResponse({ description: 'server error' })
+  @Post('/password')
+  async issuePassword(@Body() body: IssuePasswordDto): Promise<void> {
+    return this.userService.issuePassword(body);
+  }
+
+  @ApiOperation({
     summary: 'change password',
     description: 'api for changing password',
   })
   @ApiOkResponse({ description: 'success' })
-  @ApiForbiddenResponse({ description: 'token not valid' })
+  @ApiBadRequestResponse({ description: 'body form is not valid' })
+  @ApiUnauthorizedResponse({ description: 'token not valid' })
+  @ApiForbiddenResponse({
+    description: 'oldPassword not valid, or access token and user not match',
+  })
   @ApiInternalServerErrorResponse({ description: 'server error' })
+  @UseGuards(UserGuard)
   @Patch('/password')
-  async changePassword(@Body() body: ChangePasswordDto): Promise<void> {
-    return this.userService.changePassword(body);
+  async changePassword(
+    @Body() body: ChangePasswordDto,
+    @GetUser() user: User,
+  ): Promise<void> {
+    return this.userService.changePassword(body, user);
   }
 
   @ApiOperation({
