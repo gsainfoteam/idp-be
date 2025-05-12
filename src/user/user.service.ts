@@ -82,19 +82,18 @@ export class UserService {
    * change the user password (validate the user from the jwt token that comes from the email)
    * @param param0 it contains email, password, verificationJwtToken
    */
-  async changePassword({
-    email,
-    password,
-    verificationJwtToken,
-  }: ChangePasswordDto): Promise<void> {
-    const payload: VerificationJwtPayloadType =
-      await this.verifyService.validateJwtToken(verificationJwtToken);
-
-    if (payload.sub !== email) {
-      this.logger.debug(`verification jwt token not valid`);
-      throw new ForbiddenException('verification jwt token not valid');
+  async changePassword(
+    { email, password, oldPassword }: ChangePasswordDto,
+    user: User,
+  ): Promise<void> {
+    if (user.email !== email) {
+      this.logger.debug('user email not valid');
+      throw new ForbiddenException('user email not valid');
     }
-
+    if (!bcrypt.compareSync(oldPassword, user.password)) {
+      this.logger.debug('old password not valid');
+      throw new ForbiddenException('old password not valid');
+    }
     const hashedPassword: string = bcrypt.hashSync(
       password,
       bcrypt.genSaltSync(10),
