@@ -67,7 +67,7 @@ export class AuthService {
 
   async refresh(refreshToken: string): Promise<LoginResultType> {
     if (!refreshToken) throw new UnauthorizedException();
-    const user: Pick<User, 'uuid'> = await this.redisService
+    const cachedUser: Pick<User, 'uuid'> = await this.redisService
       .getOrThrow<Pick<User, 'uuid'>>(refreshToken, {
         prefix: this.refreshTokenPrefix,
       })
@@ -75,16 +75,21 @@ export class AuthService {
         this.logger.debug(`refreshToken not found: ${refreshToken}`);
         throw new UnauthorizedException();
       });
+    const user = await this.authRepository.findUserByUuid(cachedUser.uuid); // for checking user existence
 
     await this.redisService.del(refreshToken, {
       prefix: this.refreshTokenPrefix,
     });
 
     const newRefreshToken: string = this.generateOpaqueToken();
-    void this.redisService.set<Pick<User, 'uuid'>>(newRefreshToken, user, {
-      prefix: this.refreshTokenPrefix,
-      ttl: this.refreshTokenExpireTime,
-    });
+    void this.redisService.set<Pick<User, 'uuid'>>(
+      newRefreshToken,
+      cachedUser,
+      {
+        prefix: this.refreshTokenPrefix,
+        ttl: this.refreshTokenExpireTime,
+      },
+    );
 
     return {
       accessToken: this.jwtService.sign({}, { subject: user.uuid }),
