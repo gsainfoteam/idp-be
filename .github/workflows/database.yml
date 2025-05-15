@@ -1,4 +1,4 @@
-name: Update Database
+name: Update Database (Dev)
 
 on:
   push:
