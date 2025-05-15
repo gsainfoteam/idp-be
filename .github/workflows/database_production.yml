@@ -1,0 +1,26 @@
+name: Update Database (Prod)
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  deploy:
+    name: Migrate Database
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Install bun
+        uses: oven-sh/setup-bun@v2
+
+      - name: Install Prisma
+        run: bun install
+
+      - name: Migrate Database
+        run: npx prisma migrate deploy
+        env:
+          DATABASE_URL: ${{ secrets.PROD_DATABASE_URL }}
