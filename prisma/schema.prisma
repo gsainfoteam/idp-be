@@ -39,6 +39,7 @@ model Client {
   secret String
 
   name      String
+  picture   String?
   urls      String[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
