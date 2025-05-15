@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { Expose } from 'class-transformer';
+import { Expose, Transform } from 'class-transformer';
 
 import { ScopeList, ScopeType } from '../types/scope.type';
 
@@ -74,6 +74,11 @@ export class TokenResDto {
     example: 'openid profile email',
     description: 'scope',
     enum: ScopeList,
+  })
+  @Transform(({ value }) => {
+    if (Array.isArray(value)) return value.join(' ');
+    if (typeof value === 'string') return value;
+    return null;
   })
   scope: ScopeType[];
 }
