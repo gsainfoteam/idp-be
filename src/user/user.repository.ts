@@ -199,4 +199,31 @@ export class UserRepository {
         throw new InternalServerErrorException();
       });
   }
+
+  /**
+   * delete user picture
+   * @param uuid uuid of user to delete
+   */
+  async deleteUserPicture(uuid: string): Promise<void> {
+    await this.prismaService.user
+      .update({
+        where: {
+          uuid,
+        },
+        data: {
+          picture: null,
+        },
+      })
+      .catch((error) => {
+        if (
+          error instanceof PrismaClientKnownRequestError &&
+          error.code === 'P2025'
+        ) {
+          this.logger.debug(`user not found with uuid: ${uuid}`);
+          throw new ForbiddenException('user not found');
+        }
+        this.logger.error(`delete user picture error: ${error}`);
+        throw new InternalServerErrorException();
+      });
+  }
 }
