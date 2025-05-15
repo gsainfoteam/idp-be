@@ -169,4 +169,18 @@ export class UserController {
   ): Promise<void> {
     return this.userService.deleteUser(user.uuid, body);
   }
+
+  @ApiOperation({
+    summary: 'delete user picture',
+    description: 'api for deleting user profile image',
+  })
+  @ApiBearerAuth('user:jwt')
+  @ApiOkResponse({ description: 'success' })
+  @ApiUnauthorizedResponse({ description: 'token not valid' })
+  @ApiInternalServerErrorResponse({ description: 'server error' })
+  @UseGuards(UserGuard)
+  @Delete('/picture')
+  async deletePicture(@GetUser() user: User): Promise<void> {
+    return this.userService.deleteUserPicture(user.uuid);
+  }
 }

@@ -135,7 +135,7 @@ export class UserService {
     userUuid: string,
   ): Promise<UpdateUserPictureResDto> {
     const presignedUrl = await this.objectService.createPresignedUrl(
-      `${userUuid}/profile.webp`,
+      `user/${userUuid}/profile.webp`,
       length,
     );
     await this.userRepository.updateUserPicture(presignedUrl, userUuid);
@@ -158,5 +158,19 @@ export class UserService {
       throw new ForbiddenException('password is not valid');
     }
     await this.userRepository.deleteUser(userUuid);
+  }
+
+  /**
+   * validate user and delete user profile image
+   * @param userUuid user's uuid
+   */
+  async deleteUserPicture(userUuid: string): Promise<void> {
+    const user = await this.userRepository.findUserByUuid(userUuid);
+    if (!user.picture) {
+      this.logger.debug('user picture not found');
+      return;
+    }
+    await this.userRepository.deleteUserPicture(userUuid);
+    await this.objectService.deleteObject(`user/${userUuid}/profile.webp`);
   }
 }
