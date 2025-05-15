@@ -171,7 +171,7 @@ export class ClientController {
       'api for updating client image. it will return updated client presigned url. image format must be webp',
   })
   @ApiBearerAuth('user:jwt')
-  @ApiOkResponse({ description: 'success', type: ClientCredentialResDto })
+  @ApiOkResponse({ description: 'success', type: UpdateClientPictureResDto })
   @ApiUnauthorizedResponse({ description: 'token not valid' })
   @ApiForbiddenResponse({ description: 'access token and user not match' })
   @ApiInternalServerErrorResponse({ description: 'server error' })
