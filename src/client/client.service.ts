@@ -1,4 +1,5 @@
 import { Loggable } from '@lib/logger/decorator/loggable';
+import { ObjectService } from '@lib/object';
 import { ForbiddenException, Injectable } from '@nestjs/common';
 import { Client, User } from '@prisma/client';
 import * as bcrypt from 'bcryptjs';
@@ -7,6 +8,7 @@ import { SlackService } from 'nestjs-slack';
 
 import { ClientRepository } from './client.repository';
 import { CreateClientDto, UpdateClientDto } from './dto/req.dto';
+import { UpdateClientPictureResDto } from './dto/res.dto';
 
 @Injectable()
 @Loggable()
@@ -14,6 +16,7 @@ export class ClientService {
   constructor(
     private readonly clientRepository: ClientRepository,
     private readonly slackService: SlackService,
+    private readonly objectService: ObjectService,
   ) {}
 
   /**
@@ -107,6 +110,30 @@ export class ClientService {
       { uuid, ...updateClientDto },
       user.uuid,
     );
+  }
+
+  /**
+   * update client picture
+   * @param uuid client's uuid
+   * @param user user who wants to update the client
+   */
+  async updateClientPicture(
+    length: number,
+    uuid: string,
+    userUuid: string,
+  ): Promise<UpdateClientPictureResDto> {
+    const presignedUrl = await this.objectService.createPresignedUrl(
+      `client/${uuid}/client.webp`,
+      length,
+    );
+    await this.clientRepository.updateClientPicture(
+      presignedUrl,
+      uuid,
+      userUuid,
+    );
+    return {
+      presignedUrl,
+    };
   }
 
   /**
