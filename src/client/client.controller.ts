@@ -5,9 +5,11 @@ import {
   Controller,
   Get,
   Param,
+  ParseIntPipe,
   ParseUUIDPipe,
   Patch,
   Post,
+  Query,
   UseFilters,
   UseGuards,
   UseInterceptors,
@@ -36,6 +38,7 @@ import {
   ClientCredentialResDto,
   ClientPublicResDto,
   ClientResDto,
+  UpdateClientPictureResDto,
 } from './dto/res.dto';
 
 @ApiTags('client')
@@ -160,6 +163,26 @@ export class ClientController {
     return new ClientResDto(
       await this.clientService.updateClient(uuid, body, user),
     );
+  }
+
+  @ApiOperation({
+    summary: 'update picture',
+    description:
+      'api for updating client image. it will return updated client presigned url. image format must be webp',
+  })
+  @ApiBearerAuth('user:jwt')
+  @ApiOkResponse({ description: 'success', type: UpdateClientPictureResDto })
+  @ApiUnauthorizedResponse({ description: 'token not valid' })
+  @ApiForbiddenResponse({ description: 'access token and user not match' })
+  @ApiInternalServerErrorResponse({ description: 'server error' })
+  @UseGuards(UserGuard)
+  @Patch(':clientId/picture')
+  async updateClientPicture(
+    @Param('clientId', ParseUUIDPipe) uuid: string,
+    @Query('length', ParseIntPipe) length: number,
+    @GetUser() user: User,
+  ): Promise<UpdateClientPictureResDto> {
+    return this.clientService.updateClientPicture(length, uuid, user.uuid);
   }
 
   @ApiOperation({

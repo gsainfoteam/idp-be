@@ -1,4 +1,5 @@
 import { LoggerModule } from '@lib/logger';
+import { ObjectModule } from '@lib/object';
 import { PrismaModule } from '@lib/prisma';
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
@@ -14,6 +15,7 @@ import { ClientService } from './client.service';
     LoggerModule,
     PrismaModule,
     AuthModule,
+    ObjectModule,
     SlackModule.forRootAsync({
       inject: [ConfigService],
       imports: [ConfigModule],

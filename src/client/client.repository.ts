@@ -190,4 +190,36 @@ export class ClientRepository {
         throw new InternalServerErrorException();
       });
   }
+
+  async updateClientPicture(
+    picture: string,
+    uuid: string,
+    userUuid: string,
+  ): Promise<Client> {
+    return this.prismaService.client
+      .update({
+        where: {
+          uuid,
+          member: {
+            some: {
+              uuid: userUuid,
+            },
+          },
+        },
+        data: {
+          picture,
+        },
+      })
+      .catch((error) => {
+        if (
+          error instanceof PrismaClientKnownRequestError &&
+          error.code === 'P2025'
+        ) {
+          this.logger.debug(`updateClientPicture error: ${error.stack}`);
+          throw new ForbiddenException();
+        }
+        this.logger.error(`updateClientPicture error: ${error}`);
+        throw new InternalServerErrorException();
+      });
+  }
 }

@@ -26,6 +26,12 @@ export class ClientResDto implements Client {
   urls: string[];
 
   @ApiProperty({
+    description: 'The picture urls of the client',
+    example: 'https://example.com',
+  })
+  picture: string | null;
+
+  @ApiProperty({
     description: 'The date the client was created',
     example: '2021-07-01T00:00:00.000Z',
   })
@@ -81,6 +87,12 @@ export class ClientPublicResDto implements Client {
     example: 'groups',
   })
   name: string;
+
+  @ApiProperty({
+    description: 'The picture urls of the client',
+    example: 'https://example.com',
+  })
+  picture: string | null;
 
   @ApiProperty({
     description: 'The date the client was created',
@@ -146,6 +158,9 @@ export class ClientCredentialResDto implements Client {
   uuid: string;
 
   @Exclude()
+  picture: string | null;
+
+  @Exclude()
   secret: string;
 
   @Exclude()
@@ -169,4 +184,12 @@ export class ClientCredentialResDto implements Client {
   constructor(client: Client) {
     Object.assign(this, client);
   }
+}
+
+export class UpdateClientPictureResDto {
+  @ApiProperty({
+    description: 'presigned url for client picture',
+    example: 'https://example.com/client-picture.png',
+  })
+  presignedUrl: string;
 }
