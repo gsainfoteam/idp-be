@@ -75,11 +75,14 @@ export class TokenResDto {
     description: 'scope',
     enum: ScopeList,
   })
-  @Transform(({ value }) => {
-    if (Array.isArray(value)) return value.join(' ');
-    if (typeof value === 'string') return value;
-    return null;
-  })
+  @Transform(
+    ({ value }) => {
+      if (Array.isArray(value)) return value.join(' ');
+      if (typeof value === 'string') return value;
+      return null;
+    },
+    { toPlainOnly: true },
+  )
   scope: ScopeType[];
 }
 
