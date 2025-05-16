@@ -134,11 +134,15 @@ export class UserService {
     length: number,
     userUuid: string,
   ): Promise<UpdateUserPictureResDto> {
+    const path = `user/${userUuid}/profile.webp`;
     const presignedUrl = await this.objectService.createPresignedUrl(
-      `user/${userUuid}/profile.webp`,
+      path,
       length,
     );
-    await this.userRepository.updateUserPicture(presignedUrl, userUuid);
+    await this.userRepository.updateUserPicture(
+      this.objectService.getUrl(path),
+      userUuid,
+    );
     return {
       presignedUrl,
     };
