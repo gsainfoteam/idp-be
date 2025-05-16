@@ -122,12 +122,13 @@ export class ClientService {
     uuid: string,
     userUuid: string,
   ): Promise<UpdateClientPictureResDto> {
+    const path = `client/${uuid}/client.webp`;
     const presignedUrl = await this.objectService.createPresignedUrl(
-      `client/${uuid}/client.webp`,
+      path,
       length,
     );
     await this.clientRepository.updateClientPicture(
-      presignedUrl,
+      this.objectService.getUrl(path),
       uuid,
       userUuid,
     );

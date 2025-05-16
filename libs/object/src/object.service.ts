@@ -24,6 +24,10 @@ export class ObjectService {
     });
   }
 
+  getUrl(key: string): string {
+    return `https://${this.configService.getOrThrow<string>('AWS_S3_BUCKET')}.s3.${this.configService.getOrThrow<string>('AWS_S3_REGION')}.amazonaws.com/${key}`;
+  }
+
   /**
    * create a presigned URL for an object in the S3 bucket
    * @param key the key of the object to create a presigned URL for (usually the filename or path)
