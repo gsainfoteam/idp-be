@@ -7,10 +7,8 @@ import {
   NestFastifyApplication,
 } from '@nestjs/platform-fastify';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import { instanceToPlain, plainToInstance } from 'class-transformer';
 
 import { AppModule } from './app.module';
-import { TokenResDto } from './oauth/dto/res.dto';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestFastifyApplication>(
@@ -101,25 +99,6 @@ async function bootstrap() {
   });
   // Execute the application
   await app.listen(process.env.PORT ?? 3000, '0.0.0.0');
-
-  const accessToken = 'accessToken';
-  const refreshToken = 'refreshToken';
-  const idToken = 'idToken';
-  const scope = ['scope', 'scope2'];
-  const cache = {
-    scope,
-  };
-  const res = {
-    accessToken,
-    tokenType: 'Bearer',
-    expiresIn: 3 * 60 * 60, // 3 hours
-    refreshToken,
-    refreshTokenExpiresIn: 3 * 30 * 24 * 60 * 60, // 3 months
-    idToken,
-    scope: cache.scope,
-  };
-  console.log(plainToInstance(TokenResDto, res));
-  console.log(instanceToPlain(plainToInstance(TokenResDto, res)));
 }
 // eslint-disable-next-line @typescript-eslint/no-floating-promises
 bootstrap();
