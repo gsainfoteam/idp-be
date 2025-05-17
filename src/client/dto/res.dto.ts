@@ -28,6 +28,8 @@ export class ClientResDto implements Client {
   @ApiProperty({
     description: 'The picture urls of the client',
     example: 'https://example.com',
+    type: 'string',
+    nullable: true,
   })
   picture: string | null;
 
@@ -91,6 +93,8 @@ export class ClientPublicResDto implements Client {
   @ApiProperty({
     description: 'The picture urls of the client',
     example: 'https://example.com',
+    type: 'string',
+    nullable: true,
   })
   picture: string | null;
 
