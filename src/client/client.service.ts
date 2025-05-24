@@ -187,6 +187,7 @@ export class ClientService {
         },
       ],
     });
+    await this.clientRepository.deleteRequestClient(uuid, user.uuid);
   }
 
   async deleteClientPicture(uuid: string, userUuid: string): Promise<void> {

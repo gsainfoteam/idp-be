@@ -223,6 +223,34 @@ export class ClientRepository {
       });
   }
 
+  async deleteRequestClient(uuid: string, userUuid: string): Promise<void> {
+    await this.prismaService.client
+      .update({
+        where: {
+          uuid,
+          member: {
+            some: {
+              uuid: userUuid,
+            },
+          },
+        },
+        data: {
+          deleteRequestedAt: new Date(),
+        },
+      })
+      .catch((error) => {
+        if (
+          error instanceof PrismaClientKnownRequestError &&
+          error.code === 'P2025'
+        ) {
+          this.logger.debug(`deleteRequestClient error: ${error.stack}`);
+          throw new ForbiddenException();
+        }
+        this.logger.error(`deleteRequestClient error: ${error}`);
+        throw new InternalServerErrorException();
+      });
+  }
+
   async deleteClientPicture(uuid: string, userUuid: string): Promise<void> {
     await this.prismaService.client
       .update({
