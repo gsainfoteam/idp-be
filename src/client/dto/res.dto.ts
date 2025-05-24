@@ -63,6 +63,13 @@ export class ClientResDto implements Client {
   })
   idTokenAllowed: boolean;
 
+  @ApiProperty({
+    description: 'The date the client requested to be deleted',
+    example: '2021-07-01T00:00:00.000Z',
+    nullable: true,
+  })
+  deleteRequestedAt: Date | null;
+
   @Exclude()
   secret: string;
 
@@ -131,6 +138,9 @@ export class ClientPublicResDto implements Client {
   @Exclude()
   idTokenAllowed: boolean;
 
+  @Exclude()
+  deleteRequestedAt: Date | null;
+
   constructor(client: Client) {
     Object.assign(this, client);
   }
@@ -184,6 +194,9 @@ export class ClientCredentialResDto implements Client {
 
   @Exclude()
   optionalScopes: string[];
+
+  @Exclude()
+  deleteRequestedAt: Date | null;
 
   constructor(client: Client) {
     Object.assign(this, client);
