@@ -189,6 +189,18 @@ export class ClientService {
     });
   }
 
+  async deleteClientPicture(uuid: string, userUuid: string): Promise<void> {
+    const client = await this.clientRepository.findClientByUuidAndUserUuid(
+      uuid,
+      userUuid,
+    );
+    if (!client.picture) {
+      throw new ForbiddenException('Client picture not found');
+    }
+    await this.objectService.deleteObject(`client/${uuid}/client.webp`);
+    await this.clientRepository.deleteClientPicture(uuid, userUuid);
+  }
+
   private generateClientSecret(): { secretKey: string; hashed: string } {
     const secretKey = crypto
       .randomBytes(32)

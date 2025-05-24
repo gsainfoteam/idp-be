@@ -3,6 +3,7 @@ import {
   Body,
   ClassSerializerInterceptor,
   Controller,
+  Delete,
   Get,
   Param,
   ParseIntPipe,
@@ -201,5 +202,23 @@ export class ClientController {
     @GetUser() user: User,
   ): Promise<void> {
     return this.clientService.deleteClientRequest(uuid, user);
+  }
+
+  @ApiOperation({
+    summary: 'delete client picture',
+    description: '유저가 client의 이미지를 삭제한다.',
+  })
+  @ApiBearerAuth('user:jwt')
+  @ApiOkResponse({ description: '성공' })
+  @ApiUnauthorizedResponse({ description: '인증 실패' })
+  @ApiForbiddenResponse({ description: '접근 불가' })
+  @ApiInternalServerErrorResponse({ description: '서버 오류' })
+  @Delete(':clientId/picture')
+  @UseGuards(UserGuard)
+  async deleteClientPicture(
+    @Param('clientId', ParseUUIDPipe) uuid: string,
+    @GetUser() user: User,
+  ): Promise<void> {
+    return this.clientService.deleteClientPicture(uuid, user.uuid);
   }
 }
