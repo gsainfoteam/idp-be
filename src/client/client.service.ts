@@ -25,7 +25,17 @@ export class ClientService {
    * @returns client list
    */
   async getClientList(user: User): Promise<Client[]> {
-    return this.clientRepository.findClientListByUserUuid(user.uuid);
+    return (
+      await this.clientRepository.findClientListByUserUuid(user.uuid)
+    ).map(
+      (client: Client): Client => ({
+        ...client,
+        picture:
+          client.picture === null
+            ? null
+            : this.objectService.getUrl(client.picture),
+      }),
+    );
   }
 
   /**
@@ -35,7 +45,17 @@ export class ClientService {
    * @returns client information
    */
   async getClient(uuid: string, user: User): Promise<Client> {
-    return this.clientRepository.findClientByUuidAndUserUuid(uuid, user.uuid);
+    const client = await this.clientRepository.findClientByUuidAndUserUuid(
+      uuid,
+      user.uuid,
+    );
+    return {
+      ...client,
+      picture:
+        client.picture === null
+          ? null
+          : this.objectService.getUrl(client.picture),
+    };
   }
 
   /**
@@ -44,7 +64,14 @@ export class ClientService {
    * @returns client information
    */
   async getClientByUuid(uuid: string): Promise<Client> {
-    return this.clientRepository.findClientByUuid(uuid);
+    const client = await this.clientRepository.findClientByUuid(uuid);
+    return {
+      ...client,
+      picture:
+        client.picture === null
+          ? null
+          : this.objectService.getUrl(client.picture),
+    };
   }
 
   /**
@@ -122,16 +149,12 @@ export class ClientService {
     uuid: string,
     userUuid: string,
   ): Promise<UpdateClientPictureResDto> {
-    const path = `client/${uuid}/client.webp`;
+    const key = `client/${uuid}/client_${crypto.randomBytes(16).toString('base64')}.webp`;
     const presignedUrl = await this.objectService.createPresignedUrl(
-      path,
+      key,
       length,
     );
-    await this.clientRepository.updateClientPicture(
-      this.objectService.getUrl(path),
-      uuid,
-      userUuid,
-    );
+    await this.clientRepository.updateClientPicture(key, uuid, userUuid);
     return {
       presignedUrl,
     };
@@ -198,7 +221,7 @@ export class ClientService {
     if (!client.picture) {
       throw new ForbiddenException('Client picture not found');
     }
-    await this.objectService.deleteObject(`client/${uuid}/client.webp`);
+    await this.objectService.deleteObject(client.picture);
     await this.clientRepository.deleteClientPicture(uuid, userUuid);
   }
 

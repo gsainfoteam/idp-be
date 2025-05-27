@@ -40,7 +40,12 @@ export class UserService {
    * @returns user if the user exists
    */
   async findUserByUuid({ uuid }: Pick<User, 'uuid'>): Promise<User> {
-    return this.userRepository.findUserByUuid(uuid);
+    const user = await this.userRepository.findUserByUuid(uuid);
+    return {
+      ...user,
+      picture:
+        user.picture === null ? null : this.objectService.getUrl(user.picture),
+    };
   }
 
   async findUserConsentByUuid({
@@ -134,13 +139,13 @@ export class UserService {
     length: number,
     userUuid: string,
   ): Promise<UpdateUserPictureResDto> {
-    const path = `user/${userUuid}/profile.webp`;
+    const key = `user/${userUuid}/profile_${crypto.randomBytes(16).toString('base64')}.webp`;
     const presignedUrl = await this.objectService.createPresignedUrl(
-      path,
+      key,
       length,
     );
     await this.userRepository.updateUserPicture(
-      this.objectService.getUrl(path),
+      this.objectService.getUrl(key),
       userUuid,
     );
     return {
