@@ -67,6 +67,7 @@ export class ClientResDto implements Client {
     description: 'The date the client requested to be deleted',
     example: '2021-07-01T00:00:00.000Z',
     nullable: true,
+    type: Date,
   })
   deleteRequestedAt: Date | null;
 
