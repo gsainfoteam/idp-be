@@ -400,7 +400,7 @@ export class OauthService {
     }
 
     scope.forEach((s) => {
-      if (!client.scopes.includes(s) || !client.optionalScopes.includes(s)) {
+      if (!client.scopes.includes(s) && !client.optionalScopes.includes(s)) {
         throw new OauthTokenException('invalid_scope');
       }
     });
