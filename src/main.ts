@@ -35,6 +35,8 @@ async function bootstrap() {
     delegator: (req, callback) => {
       const origin = req.headers.origin;
       const url = req.url;
+      // Extract pathname from URL (remove query parameters)
+      const pathname = url.split('?')[0];
       if (!origin) {
         // No origin, no CORS
         callback(null, {
@@ -45,7 +47,7 @@ async function bootstrap() {
           credentials: true,
         });
         return;
-      } else if (pathWhitelist.some((path) => url.endsWith(path))) {
+      } else if (pathWhitelist.some((path) => pathname.endsWith(path))) {
         // Allow all origins for the specified paths
         callback(null, {
           origin,
