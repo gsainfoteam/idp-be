@@ -149,7 +149,7 @@ export class ClientService {
     uuid: string,
     userUuid: string,
   ): Promise<UpdateClientPictureResDto> {
-    const key = `client/${uuid}/client_${crypto.randomBytes(16).toString('base64')}.webp`;
+    const key = `client/${uuid}/client_${crypto.randomBytes(16).toString('base64url')}.webp`;
     const presignedUrl = await this.objectService.createPresignedUrl(
       key,
       length,
