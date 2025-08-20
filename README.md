@@ -113,6 +113,6 @@ Staging: <https://api.stg.idp.gistory.me/api>
 
 ## Database Structure
 
-Database structure는 dbdocs로 구현되었으며, 문서는 아래의 링크에서 확인할 수 있습니다.
+Database structure는 [mermaid](https://mermaid.js.org/)로 구현되었으며, 문서는 아래의 링크에서 확인할 수 있습니다.
 
-<https://dbdocs.io/INFOTEAM%20GIST/idp>
+[ERD 링크](./docs/erd.md)

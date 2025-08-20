@@ -2,10 +2,9 @@ generator client {
   provider = "prisma-client-js"
 }
 
-generator dbml {
-  provider            = "prisma-dbml-generator"
-  projectName         = "idp"
-  projectDatabaseType = "PostgreSQL"
+generator erd {
+  provider = "prisma-erd-generator"
+  output   = "../docs/erd.md"
 }
 
 datasource db {
