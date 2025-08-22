@@ -61,7 +61,7 @@ export class VerifyService {
           description: `
 <span class="orange">GIST 메일로 로그인</span> 서비스의 이메일 인증번호 전송용 메일입니다.<br />
 상기 코드를 입력하여 메일을 인증하여 주시기 바랍니다.<br /><br />
-<strong>중요:</strong> 이 인증번호는 5분 내에 만료됩니다. 시간 안에 입력해주세요.
+<strong>중요:</strong> 이 인증번호는 3분 내에 만료됩니다. 시간 안에 입력해주세요.
 `.trim(),
         }),
       ),
