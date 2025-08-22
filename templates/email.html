@@ -1,0 +1,174 @@
+<!doctype html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <style type="text/css">
+      /* CLIENT-SPECIFIC RESETS */
+      /* Outlook.com(Hotmail)의 전체 너비 및 적절한 줄 높이를 허용 */
+      .ReadMsgBody {
+        width: 100%;
+      }
+      .ExternalClass {
+        width: 100%;
+      }
+      .ExternalClass,
+      .ExternalClass p,
+      .ExternalClass span,
+      .ExternalClass font,
+      .ExternalClass td,
+      .ExternalClass div {
+        line-height: 100%;
+      }
+      /* Outlook 2007 이상에서 Outlook이 추가하는 테이블 주위의 간격을 제거 */
+      table,
+      td {
+        mso-table-lspace: 0pt;
+        mso-table-rspace: 0pt;
+      }
+      /* Internet Explorer에서 크기가 조정된 이미지를 렌더링하는 방식을 수정 */
+      img {
+        -ms-interpolation-mode: bicubic;
+      }
+      /* Webkit 및 Windows 기반 클라이언트가 텍스트 크기를 자동으로 조정하지 않도록 수정 */
+      body,
+      table,
+      td,
+      p,
+      a,
+      li,
+      blockquote {
+        -ms-text-size-adjust: 100%;
+        -webkit-text-size-adjust: 100%;
+      }
+    </style>
+    <style type="text/css">
+      body,
+      #bodyTable {
+        width: 100% !important;
+        height: 100% !important;
+        margin: 0;
+        padding: 0;
+      }
+      #bodyTable {
+        padding: 20px 0 30px 0;
+        background-color: #ffffff;
+      }
+      img,
+      a img {
+        border: 0;
+        outline: none;
+        text-decoration: none;
+      }
+      .imageFix {
+        display: block;
+      }
+      table,
+      td {
+        border-collapse: collapse;
+      }
+    </style>
+    <style type="style/css">
+      .container {
+        width: 100%;
+      }
+      .footer {
+        background-color: #f6f6f6;
+        height: 94px;
+      }
+      .h-padding {
+        width: 30px;
+      }
+      .outer-h-padding {
+        height: 40px;
+      }
+      .inner-h-padding {
+        height: 30px;
+      }
+      .orange {
+        font-weight: 700;
+        color: #ff4500;
+      }
+      .title {
+        font-size: 30px;
+        font-weight: 700;
+      }
+      .code {
+        background-color: #f6f6f6;
+        border-radius: 8px;
+        font-size: 32px;
+        font-weight: 900;
+        padding-top: 8px;
+        padding-left: 16px;
+        padding-bottom: 8px;
+        padding-right: 16px;
+      }
+      .description {
+        font-size: 16px;
+      }
+    </style>
+  </head>
+  <body style="margin: 0; padding: 0">
+    <table id="bodyTable">
+      <tr>
+        <td>
+          <table class="container">
+            <tr>
+              <td class="outer-h-padding" />
+              <td class="outer-h-padding" />
+              <td class="outer-h-padding" />
+            </tr>
+            <tr>
+              <td class="h-padding" />
+              <td class="title">이메일 인증번호</td>
+              <td class="h-padding" />
+            </tr>
+            <tr>
+              <td class="inner-h-padding" />
+              <td class="inner-h-padding" />
+              <td class="inner-h-padding" />
+            </tr>
+            <tr>
+              <td class="h-padding" />
+              <td class="code">{{code}}</td>
+              <td class="h-padding" />
+            </tr>
+            <tr>
+              <td class="inner-h-padding" />
+              <td class="inner-h-padding" />
+              <td class="inner-h-padding" />
+            </tr>
+            <tr>
+              <td class="h-padding" />
+              <td class="description">
+                <span class="orange">GIST 메일로 로그인</span> 서비스의 이메일
+                인증번호 전송용 메일입니다.<br />
+                상기 코드를 입력하여 메일을 인증하여 주시기 바랍니다.<br /><br />
+                <strong>중요:</strong> 이 인증번호는 5분 내에 만료됩니다. 시간
+                안에 입력해주세요.
+              </td>
+              <td class="h-padding" />
+            </tr>
+            <tr>
+              <td class="inner-h-padding" />
+              <td class="inner-h-padding" />
+              <td class="inner-h-padding" />
+            </tr>
+            <tr class="footer">
+              <td class="h-padding" />
+              <td>
+                <img
+                  src="https://raw.githubusercontent.com/gsainfoteam/.github/refs/heads/main/asset/logo-with-text.png"
+                  alt="infoteam"
+                  height="50"
+                  width="208"
+                />
+              </td>
+              <td class="h-padding" />
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>
