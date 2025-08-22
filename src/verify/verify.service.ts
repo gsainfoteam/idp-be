@@ -10,6 +10,10 @@ import {
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import * as crypto from 'crypto';
+import fs from 'fs';
+import Handlebars from 'handlebars';
+import juice from 'juice';
+import path from 'path';
 
 import { SendEmailCodeDto, VerifyCodeDto } from './dto/req.dto';
 import { VerificationJwtResDto } from './dto/res.dto';
@@ -23,6 +27,10 @@ export class VerifyService {
   private readonly sender =
     this.configService.get<string | undefined>('EMAIL_SENDER') ??
     this.configService.get<string>('EMAIL_USER');
+  private readonly template = Handlebars.compile(
+    fs.readFileSync(path.join(__dirname, '../templates', 'email.html'), 'utf8'),
+  );
+
   constructor(
     private readonly configService: ConfigService,
     private readonly jwtService: JwtService,
@@ -46,7 +54,17 @@ export class VerifyService {
       email,
       `"GIST 메일로 로그인" <${this.sender}>`,
       'GIST 메일로 로그인 인증 코드',
-      `인증 코드는 <b>[${emailVerificationCode}]</b> 입니다.`,
+      juice(
+        this.template({
+          code: emailVerificationCode,
+          title: '이메일 인증번호',
+          description: `
+<span class="orange">GIST 메일로 로그인</span> 서비스의 이메일 인증번호 전송용 메일입니다.<br />
+상기 코드를 입력하여 메일을 인증하여 주시기 바랍니다.<br /><br />
+<strong>중요:</strong> 이 인증번호는 3분 내에 만료됩니다. 시간 안에 입력해주세요.
+`.trim(),
+        }),
+      ),
     );
 
     await this.redisService.set<string>(email, emailVerificationCode, {

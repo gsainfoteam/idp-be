@@ -6,6 +6,10 @@ import { ConfigService } from '@nestjs/config';
 import { User } from '@prisma/client';
 import * as bcrypt from 'bcryptjs';
 import * as crypto from 'crypto';
+import fs from 'fs';
+import Handlebars from 'handlebars';
+import juice from 'juice';
+import path from 'path';
 import { VerificationJwtPayloadType } from 'src/verify/types/verificationJwtPayload.type';
 import { VerifyService } from 'src/verify/verify.service';
 
@@ -26,6 +30,10 @@ export class UserService {
   private readonly sender =
     this.configService.get<string | undefined>('EMAIL_SENDER') ??
     this.configService.get<string>('EMAIL_USER');
+  private readonly template = Handlebars.compile(
+    fs.readFileSync(path.join(__dirname, '../templates', 'email.html'), 'utf8'),
+  );
+
   constructor(
     private readonly userRepository: UserRepository,
     private readonly configService: ConfigService,
@@ -103,7 +111,17 @@ export class UserService {
       email,
       `"GIST 메일로 로그인" <${this.sender}>`,
       'GIST 메일로 로그인 비밀번호',
-      `변경된 비밀번호는 <b>[${newPassword}]</b> 입니다.`,
+      juice(
+        this.template({
+          code: newPassword,
+          title: '임시 비밀번호',
+          description: `
+<span class="orange">GIST 메일로 로그인</span> 서비스의 임시 비밀번호 전송용 메일입니다.<br />
+상기 임시 비밀번호를 입력하여 로그인을 완료해주세요.<br /><br />
+<strong>중요:</strong> 로그인 후 꼭 비밀번호 변경을 하여 임시 비밀번호를 제거하세요.
+`.trim(),
+        }),
+      ),
     );
     await this.userRepository.updateUserPassword(
       user.uuid,
