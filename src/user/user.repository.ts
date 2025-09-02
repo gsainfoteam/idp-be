@@ -11,6 +11,7 @@ import { User } from '@prisma/client';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 
 import { UserConsentType } from './types/userConsent.type';
+import { UserWithAuthenticators } from './types/userWithAuthenticators';
 
 @Loggable()
 @Injectable()
@@ -23,11 +24,14 @@ export class UserRepository {
    * @param email email of user to find
    * @returns User object
    */
-  async findUserByEmail(email: string): Promise<User> {
+  async findUserByEmail(email: string): Promise<UserWithAuthenticators> {
     return this.prismaService.user
       .findUniqueOrThrow({
         where: {
           email,
+        },
+        include: {
+          authenticators: true,
         },
       })
       .catch((error) => {

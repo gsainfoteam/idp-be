@@ -31,12 +31,15 @@ import {
 } from './types/grant.type';
 import { TokenScopeList } from './types/scope.type';
 import { TokenCacheType } from './types/tokenCache.type';
+import { generateRegistrationOptions } from '@simplewebauthn/server';
+import { UserRepository } from 'src/user/user.repository';
 
 @Loggable()
 @Injectable()
 export class OauthService {
   private readonly CodePrefix = 'code';
   private readonly TokenPrefix = 'token';
+  private readonly baseUrl: string;
   constructor(
     private readonly oauthRepository: OauthRepository,
     private readonly redisService: RedisService,
@@ -44,7 +47,10 @@ export class OauthService {
     private readonly clientService: ClientService,
     private readonly userService: UserService,
     private readonly jwtService: JwtService,
-  ) {}
+    private readonly userRepository: UserRepository,
+  ) {
+    this.baseUrl = this.configService.getOrThrow<string>('BASE_URL');
+  }
 
   /**
    * the endpoint that returns the public key for the client to verify the jwt token
@@ -501,6 +507,23 @@ export class OauthService {
         ? user.phoneNumber
         : undefined,
     };
+  }
+
+  async generateRegistrationOptions(email: string) {
+    const user = await this.userRepository.findUserByEmail(email);
+
+    const options = await generateRegistrationOptions({
+      rpName: 'idp',
+      rpID: this.baseUrl,
+      userID: Buffer.from(user.uuid),
+      userName: user.name,
+      excludeCredentials: user.authenticators.map((auth) => ({
+        id: auth.credentialId.toString(),
+        type: 'public-key',
+      })),
+    });
+
+    return options;
   }
 
   /**

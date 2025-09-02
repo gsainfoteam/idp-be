@@ -36,6 +36,8 @@
     "@nestjs/swagger": "^11.0.3",
     "@nestjs/terminus": "^11.0.0",
     "@prisma/client": "^6.3.0",
+    "@simplewebauthn/server": "^13.1.2",
+    "@simplewebauthn/typescript-types": "^8.3.4",
     "bcryptjs": "^2.4.3",
     "cache-manager": "^6.4.0",
     "class-transformer": "^0.5.1",
