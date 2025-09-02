@@ -23,7 +23,7 @@ import {
 import { FastifyReply, FastifyRequest } from 'fastify';
 
 import { AuthService } from './auth.service';
-import { LoginDto } from './dto/req.dto';
+import { LoginDto, PasskeyReqDto } from './dto/req.dto';
 import { LoginResDto } from './dto/res.dto';
 
 @ApiTags('auth')
@@ -131,5 +131,14 @@ export class AuthController {
     return {
       accessToken,
     };
+  }
+
+  @ApiOperation({
+    summary: 'regist the passkey',
+    description: '패스키를 등록합니다.',
+  })
+  @Post('passkey/regist')
+  async registOptions(@Body() { email }: PasskeyReqDto) {
+    return this.authService.generateRegistrationOptions(email);
   }
 }

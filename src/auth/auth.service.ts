@@ -11,6 +11,8 @@ import ms, { StringValue } from 'ms';
 import { AuthRepository } from './auth.repository';
 import { LoginDto } from './dto/req.dto';
 import { LoginResultType } from './types/loginResult.type';
+import { UserRepository } from 'src/user/user.repository';
+import { generateRegistrationOptions } from '@simplewebauthn/server';
 
 @Injectable()
 @Loggable()
@@ -19,11 +21,15 @@ export class AuthService {
   private readonly accessTokenExpireTime: number;
   private readonly refreshTokenExpireTime: number;
   private readonly refreshTokenPrefix = 'refreshToken';
+  private readonly passkeyPrefix = 'passkey';
+  private readonly passkeyRpId: string;
+
   constructor(
     private readonly authRepository: AuthRepository,
     private readonly configService: ConfigService,
     private readonly redisService: RedisService,
     private readonly jwtService: JwtService,
+    private readonly userRepository: UserRepository,
   ) {
     this.accessTokenExpireTime = ms(
       configService.getOrThrow<string>('JWT_EXPIRE') as StringValue,
@@ -31,6 +37,7 @@ export class AuthService {
     this.refreshTokenExpireTime = ms(
       configService.getOrThrow<string>('REFRESH_TOKEN_EXPIRE') as StringValue,
     );
+    this.passkeyRpId = this.configService.getOrThrow<string>('PASSKEY_RP_ID');
   }
 
   async login({ email, password }: LoginDto): Promise<LoginResultType> {
@@ -101,6 +108,28 @@ export class AuthService {
 
   async findUserByUuid(uuid: string): Promise<User> {
     return this.authRepository.findUserByUuid(uuid);
+  }
+
+  async generateRegistrationOptions(email: string) {
+    const user = await this.userRepository.findUserByEmail(email);
+
+    const options = await generateRegistrationOptions({
+      rpName: 'idp',
+      rpID: this.passkeyRpId,
+      userID: Buffer.from(user.uuid),
+      userName: user.name,
+      excludeCredentials: user.authenticators.map((auth) => ({
+        id: auth.credentialId.toString(),
+        type: 'public-key',
+      })),
+    });
+
+    await this.redisService.set<string>(user.uuid, options.challenge, {
+      prefix: this.passkeyPrefix,
+      ttl: 10 * 60,
+    });
+
+    return options;
   }
 
   /**
