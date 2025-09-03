@@ -12,7 +12,11 @@ import { AuthRepository } from './auth.repository';
 import { LoginDto } from './dto/req.dto';
 import { LoginResultType } from './types/loginResult.type';
 import { UserRepository } from 'src/user/user.repository';
-import { generateRegistrationOptions } from '@simplewebauthn/server';
+import {
+  generateRegistrationOptions,
+  verifyRegistrationResponse,
+} from '@simplewebauthn/server';
+import { RegistrationResponseJSON } from '@simplewebauthn/typescript-types';
 
 @Injectable()
 @Loggable()
@@ -22,6 +26,7 @@ export class AuthService {
   private readonly refreshTokenExpireTime: number;
   private readonly refreshTokenPrefix = 'refreshToken';
   private readonly passkeyPrefix = 'passkey';
+  private readonly passkeyRpOrigin: string;
   private readonly passkeyRpId: string;
 
   constructor(
@@ -37,6 +42,8 @@ export class AuthService {
     this.refreshTokenExpireTime = ms(
       configService.getOrThrow<string>('REFRESH_TOKEN_EXPIRE') as StringValue,
     );
+    this.passkeyRpOrigin =
+      this.configService.getOrThrow<string>('PASSKEY_RP_ORIGIN');
     this.passkeyRpId = this.configService.getOrThrow<string>('PASSKEY_RP_ID');
   }
 
@@ -110,7 +117,9 @@ export class AuthService {
     return this.authRepository.findUserByUuid(uuid);
   }
 
-  async generateRegistrationOptions(email: string) {
+  async generateRegistrationOptions(
+    email: string,
+  ): Promise<PublicKeyCredentialCreationOptionsJSON> {
     const user = await this.userRepository.findUserByEmail(email);
 
     const options = await generateRegistrationOptions({
@@ -129,7 +138,58 @@ export class AuthService {
       ttl: 10 * 60,
     });
 
+    console.log(options);
+
     return options;
+  }
+
+  async verifyRegistration(
+    email: string,
+    response: RegistrationResponseJSON,
+  ): Promise<LoginResultType> {
+    const user = await this.userRepository.findUserByEmail(email);
+    const expectedChallenge = await this.redisService.getOrThrow<string>(
+      user.uuid,
+      {
+        prefix: this.passkeyPrefix,
+      },
+    );
+
+    const { verified, registrationInfo } = await verifyRegistrationResponse({
+      response,
+      expectedChallenge,
+      expectedOrigin: this.passkeyRpOrigin,
+      expectedRPID: this.passkeyRpId,
+    });
+
+    if (verified && registrationInfo) {
+      const { id, publicKey, counter } = registrationInfo.credential;
+
+      await this.authRepository.saveAuthenticator({
+        credentialId: Buffer.from(id),
+        publicKey,
+        counter,
+        userUuid: user.uuid,
+      });
+    }
+
+    const refreshToken: string = this.generateOpaqueToken();
+    await this.redisService.set<Pick<User, 'uuid'>>(
+      refreshToken,
+      {
+        uuid: user.uuid,
+      },
+      {
+        prefix: this.refreshTokenPrefix,
+        ttl: this.refreshTokenExpireTime,
+      },
+    );
+    return {
+      accessToken: this.jwtService.sign({}, { subject: user.uuid }),
+      refreshToken,
+      accessTokenExpireTime: this.accessTokenExpireTime,
+      refreshTokenExpireTime: this.refreshTokenExpireTime,
+    };
   }
 
   /**

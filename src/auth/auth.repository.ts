@@ -5,7 +5,7 @@ import {
   Logger,
   UnauthorizedException,
 } from '@nestjs/common';
-import { User } from '@prisma/client';
+import { Authenticator, User } from '@prisma/client';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 
 @Injectable()
@@ -59,5 +59,16 @@ export class AuthRepository {
         this.logger.error(`unknown error: ${error}`);
         throw new InternalServerErrorException();
       });
+  }
+
+  async saveAuthenticator(autheticator: {
+    credentialId: Uint8Array;
+    publicKey: Uint8Array;
+    counter: number;
+    userUuid: string;
+  }): Promise<Authenticator> {
+    return this.prismaService.authenticator.create({
+      data: autheticator,
+    });
   }
 }
