@@ -73,22 +73,48 @@ export class AuthRepository {
   }
 
   async findAuthenticator(credentialId: Uint8Array): Promise<Authenticator> {
-    return this.prismaService.authenticator.findUniqueOrThrow({
-      where: {
-        credentialId,
-      },
-    });
+    return this.prismaService.authenticator
+      .findUniqueOrThrow({
+        where: {
+          credentialId,
+        },
+      })
+      .catch((error) => {
+        if (error instanceof PrismaClientKnownRequestError) {
+          if (error.code === 'P2025') {
+            this.logger.debug(`authenticator not found`);
+            throw new UnauthorizedException();
+          }
+          this.logger.error(`prisma error: ${error.message}`);
+          throw new InternalServerErrorException();
+        }
+        this.logger.error(`unknown error: ${error}`);
+        throw new InternalServerErrorException();
+      });
   }
 
   async updatePasskeyCounter(
     credentialId: Uint8Array,
     counter: number,
   ): Promise<Authenticator> {
-    return this.prismaService.authenticator.update({
-      where: {
-        credentialId,
-      },
-      data: { counter },
-    });
+    return this.prismaService.authenticator
+      .update({
+        where: {
+          credentialId,
+        },
+        data: { counter },
+      })
+      .catch((error) => {
+        if (error instanceof PrismaClientKnownRequestError) {
+          if (error.code === 'P2025') {
+            this.logger.debug(`authenticator not found`);
+            throw new UnauthorizedException();
+          }
+          this.logger.error(`prisma error: ${error.message}`);
+          throw new InternalServerErrorException();
+        }
+        this.logger.error(`unknown error: ${error}`);
+        throw new InternalServerErrorException();
+      });
   }
 }
