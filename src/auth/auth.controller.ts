@@ -23,7 +23,12 @@ import {
 import { FastifyReply, FastifyRequest } from 'fastify';
 
 import { AuthService } from './auth.service';
-import { LoginDto, PasskeyDto, VerifyPasskeyDto } from './dto/req.dto';
+import {
+  LoginDto,
+  PasskeyDto,
+  VerifyPasskeyAuthenticationDto,
+  VerifyPasskeyRetistrationDto,
+} from './dto/req.dto';
 import { LoginResDto } from './dto/res.dto';
 
 @ApiTags('auth')
@@ -135,21 +140,41 @@ export class AuthController {
 
   @ApiOperation({
     summary: 'register the passkey',
-    description: '패스키를 등록합니다.',
+    description: '패스키를 등록을 위한 challenge를 발급합니다.',
   })
   @Post('passkey/register')
   async registerOptions(@Body() { email }: PasskeyDto) {
-    return this.authService.generateRegistrationOptions(email);
+    return this.authService.registerOptions(email);
   }
 
   @ApiOperation({
-    summary: 'verify the passkey',
-    description: '패스키를 인증합니다.',
+    summary: 'verify the registration options',
+    description: '패스키 등록합니다.',
   })
-  @Post('passkey/verify')
-  async verifyPasskey(
-    @Body() { email, registrationResponse }: VerifyPasskeyDto,
+  @Post('passkey/register/verify')
+  async verifyRegistration(
+    @Body() { email, registrationResponse }: VerifyPasskeyRetistrationDto,
   ) {
     return this.authService.verifyRegistration(email, registrationResponse);
+  }
+
+  @ApiOperation({
+    summary: 'login the passkey',
+    description: '패스키를 사용해 로그인합니다.',
+  })
+  @Post('passkey/login')
+  async loginPasskey(@Body() { email }: PasskeyDto) {
+    return this.authService.authenticateOptions(email);
+  }
+
+  @ApiOperation({
+    summary: 'verify the passkey options',
+    description: '패스키를 인증합니다.',
+  })
+  @Post('passkey/login/verify')
+  async verifyPasskey(
+    @Body() { email, authenticationResponse }: VerifyPasskeyAuthenticationDto,
+  ) {
+    return this.authService.verifyAuthentication(email, authenticationResponse);
   }
 }

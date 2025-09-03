@@ -1,6 +1,11 @@
 import { Loggable } from '@lib/logger/decorator/loggable';
 import { RedisService } from '@lib/redis';
-import { Injectable, Logger, UnauthorizedException } from '@nestjs/common';
+import {
+  Injectable,
+  Logger,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { User } from '@prisma/client';
@@ -13,10 +18,15 @@ import { LoginDto } from './dto/req.dto';
 import { LoginResultType } from './types/loginResult.type';
 import { UserRepository } from 'src/user/user.repository';
 import {
+  generateAuthenticationOptions,
   generateRegistrationOptions,
+  verifyAuthenticationResponse,
   verifyRegistrationResponse,
 } from '@simplewebauthn/server';
-import { RegistrationResponseJSON } from '@simplewebauthn/typescript-types';
+import {
+  AuthenticationResponseJSON,
+  RegistrationResponseJSON,
+} from '@simplewebauthn/typescript-types';
 
 @Injectable()
 @Loggable()
@@ -117,7 +127,7 @@ export class AuthService {
     return this.authRepository.findUserByUuid(uuid);
   }
 
-  async generateRegistrationOptions(
+  async registerOptions(
     email: string,
   ): Promise<PublicKeyCredentialCreationOptionsJSON> {
     const user = await this.userRepository.findUserByEmail(email);
@@ -137,8 +147,6 @@ export class AuthService {
       prefix: this.passkeyPrefix,
       ttl: 10 * 60,
     });
-
-    console.log(options);
 
     return options;
   }
@@ -162,16 +170,105 @@ export class AuthService {
       expectedRPID: this.passkeyRpId,
     });
 
-    if (verified && registrationInfo) {
-      const { id, publicKey, counter } = registrationInfo.credential;
-
-      await this.authRepository.saveAuthenticator({
-        credentialId: Buffer.from(id),
-        publicKey,
-        counter,
-        userUuid: user.uuid,
-      });
+    if (!verified || !registrationInfo) {
+      throw new UnauthorizedException();
     }
+
+    const { id, publicKey, counter } = registrationInfo.credential;
+
+    await this.authRepository.saveAuthenticator({
+      credentialId: Buffer.from(id),
+      publicKey,
+      counter,
+      userUuid: user.uuid,
+    });
+
+    const refreshToken: string = this.generateOpaqueToken();
+    await this.redisService.set<Pick<User, 'uuid'>>(
+      refreshToken,
+      {
+        uuid: user.uuid,
+      },
+      {
+        prefix: this.refreshTokenPrefix,
+        ttl: this.refreshTokenExpireTime,
+      },
+    );
+    return {
+      accessToken: this.jwtService.sign({}, { subject: user.uuid }),
+      refreshToken,
+      accessTokenExpireTime: this.accessTokenExpireTime,
+      refreshTokenExpireTime: this.refreshTokenExpireTime,
+    };
+  }
+
+  async authenticateOptions(
+    email: string,
+  ): Promise<PublicKeyCredentialRequestOptionsJSON> {
+    const user = await this.userRepository.findUserByEmail(email);
+
+    if (!user || user.authenticators.length === 0) {
+      throw new NotFoundException();
+    }
+
+    const options = await generateAuthenticationOptions({
+      rpID: this.passkeyRpId,
+      allowCredentials: user.authenticators.map((auth) => ({
+        id: Buffer.from(auth.credentialId).toString(),
+        type: 'public-key',
+      })),
+    });
+
+    await this.redisService.set<string>(user.uuid, options.challenge, {
+      prefix: this.passkeyPrefix,
+      ttl: 10 * 60,
+    });
+
+    return options;
+  }
+
+  async verifyAuthentication(
+    email: string,
+    response: AuthenticationResponseJSON,
+  ) {
+    const user = await this.userRepository.findUserByEmail(email);
+    if (!user) throw new NotFoundException();
+
+    const expectedChallenge = await this.redisService.getOrThrow<string>(
+      user.uuid,
+      {
+        prefix: this.passkeyPrefix,
+      },
+    );
+    if (!expectedChallenge) throw new UnauthorizedException();
+
+    const authenticator = await this.authRepository.findAuthenticator(
+      Buffer.from(response.id),
+    );
+    if (!user.authenticators) throw new UnauthorizedException();
+
+    const { verified, authenticationInfo } = await verifyAuthenticationResponse(
+      {
+        response,
+        expectedChallenge,
+        expectedOrigin: this.passkeyRpOrigin,
+        expectedRPID: this.passkeyRpId,
+        credential: {
+          ...authenticator,
+          id: authenticator.credentialId.toString(),
+        },
+        requireUserVerification: true,
+      },
+    );
+
+    if (!verified) {
+      throw new UnauthorizedException();
+    }
+
+    await this.authRepository.updatePasskeyCounter(
+      authenticator.credentialId,
+      authenticationInfo.newCounter,
+    );
 
     const refreshToken: string = this.generateOpaqueToken();
     await this.redisService.set<Pick<User, 'uuid'>>(

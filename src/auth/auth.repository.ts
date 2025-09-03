@@ -71,4 +71,24 @@ export class AuthRepository {
       data: autheticator,
     });
   }
+
+  async findAuthenticator(credentialId: Uint8Array): Promise<Authenticator> {
+    return this.prismaService.authenticator.findUniqueOrThrow({
+      where: {
+        credentialId,
+      },
+    });
+  }
+
+  async updatePasskeyCounter(
+    credentialId: Uint8Array,
+    counter: number,
+  ): Promise<Authenticator> {
+    return this.prismaService.authenticator.update({
+      where: {
+        credentialId,
+      },
+      data: { counter },
+    });
+  }
 }
