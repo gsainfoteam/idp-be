@@ -1,7 +1,12 @@
 import { Loggable } from '@lib/logger';
 import { MailService } from '@lib/mail';
 import { ObjectService } from '@lib/object';
-import { ForbiddenException, Injectable, Logger } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Injectable,
+  Logger,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { User } from '@prisma/client';
 import * as bcrypt from 'bcryptjs';
@@ -16,12 +21,18 @@ import { VerifyService } from 'src/verify/verify.service';
 import {
   ChangePasswordDto,
   DeleteUserReqDto,
-  IssuePasswordDto,
+  IssueUserSecretDto,
   RegisterDto,
 } from './dto/req.dto';
 import { UpdateUserPictureResDto } from './dto/res.dto';
 import { UserConsentType } from './types/userConsent.type';
 import { UserRepository } from './user.repository';
+import {
+  generateRegistrationOptions,
+  verifyRegistrationResponse,
+} from '@simplewebauthn/server';
+import { RegistrationResponseJSON } from '@simplewebauthn/types';
+import { RedisService } from '@lib/redis';
 
 @Loggable()
 @Injectable()
@@ -33,6 +44,9 @@ export class UserService {
   private readonly template = Handlebars.compile(
     fs.readFileSync(path.join(__dirname, '../templates', 'email.html'), 'utf8'),
   );
+  private readonly passkeyPrefix = 'passkey';
+  private readonly passkeyRpOrigin: string;
+  private readonly passkeyRpId: string;
 
   constructor(
     private readonly userRepository: UserRepository,
@@ -40,7 +54,12 @@ export class UserService {
     private readonly mailService: MailService,
     private readonly verifyService: VerifyService,
     private readonly objectService: ObjectService,
-  ) {}
+    private readonly redisService: RedisService,
+  ) {
+    this.passkeyRpOrigin =
+      this.configService.getOrThrow<string>('PASSKEY_RP_ORIGIN');
+    this.passkeyRpId = this.configService.getOrThrow<string>('PASSKEY_RP_ID');
+  }
 
   /**
    * find the user by email
@@ -104,7 +123,7 @@ export class UserService {
    * issue a new password to the user
    * @param param0 it contains email
    */
-  async issuePassword({ email }: IssuePasswordDto): Promise<void> {
+  async issuePassword({ email }: IssueUserSecretDto): Promise<void> {
     const user = await this.userRepository.findUserByEmail(email);
     const newPassword = crypto.randomBytes(18).toString('base64');
     await this.mailService.sendEmail(
@@ -199,5 +218,64 @@ export class UserService {
     }
     await this.userRepository.deleteUserPicture(userUuid);
     await this.objectService.deleteObject(`user/${userUuid}/profile.webp`);
+  }
+
+  async registerOptions(
+    email: string,
+  ): Promise<PublicKeyCredentialCreationOptionsJSON> {
+    const user = await this.userRepository.findUserByEmail(email);
+
+    const options = await generateRegistrationOptions({
+      rpName: 'idp',
+      rpID: this.passkeyRpId,
+      userID: Buffer.from(user.uuid),
+      userName: user.name,
+      excludeCredentials: user.authenticators.map((auth) => ({
+        id: auth.credentialId.toString(),
+        type: 'public-key',
+      })),
+    });
+
+    await this.redisService.set<string>(user.uuid, options.challenge, {
+      prefix: this.passkeyPrefix,
+      ttl: 10 * 60,
+    });
+
+    return options;
+  }
+
+  async verifyRegistration(
+    email: string,
+    response: RegistrationResponseJSON,
+  ): Promise<boolean> {
+    const user = await this.userRepository.findUserByEmail(email);
+    const expectedChallenge = await this.redisService.getOrThrow<string>(
+      user.uuid,
+      {
+        prefix: this.passkeyPrefix,
+      },
+    );
+
+    const { verified, registrationInfo } = await verifyRegistrationResponse({
+      response,
+      expectedChallenge,
+      expectedOrigin: this.passkeyRpOrigin,
+      expectedRPID: this.passkeyRpId,
+    });
+
+    if (!verified || !registrationInfo) {
+      throw new UnauthorizedException();
+    }
+
+    const { id, publicKey, counter } = registrationInfo.credential;
+
+    await this.userRepository.saveAuthenticator({
+      credentialId: id,
+      publicKey,
+      counter,
+      userUuid: user.uuid,
+    });
+
+    return true;
   }
 }

@@ -1,10 +1,7 @@
 import { IsGistEmail } from '@lib/global';
 import { BadRequestException } from '@nestjs/common';
 import { ApiProperty } from '@nestjs/swagger';
-import {
-  AuthenticationResponseJSON,
-  RegistrationResponseJSON,
-} from '@simplewebauthn/typescript-types';
+import { AuthenticationResponseJSON } from '@simplewebauthn/types';
 import { Transform } from 'class-transformer';
 import { IsEmail, IsObject, IsString } from 'class-validator';
 
@@ -45,28 +42,6 @@ export class PasskeyDto {
     throw new BadRequestException('이메일 형식이 올바르지 않습니다.');
   })
   email: string;
-}
-
-export class VerifyPasskeyRegistrationDto {
-  @ApiProperty({
-    example: 'JohbDoe@gm.gist.ac.kr',
-    description: '유저의 이메일 주소',
-  })
-  @IsEmail()
-  @IsGistEmail()
-  @Transform(({ value }) => {
-    if (typeof value === 'string') {
-      return value.toLowerCase();
-    }
-    throw new BadRequestException('이메일 형식이 올바르지 않습니다.');
-  })
-  email: string;
-
-  @ApiProperty({
-    description: '유저의 패스키 등록 응답',
-  })
-  @IsObject()
-  registrationResponse: RegistrationResponseJSON;
 }
 
 export class VerifyPasskeyAuthenticationDto {

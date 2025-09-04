@@ -10,6 +10,7 @@ import { VerifyModule } from 'src/verify/verify.module';
 import { UserController } from './user.controller';
 import { UserRepository } from './user.repository';
 import { UserService } from './user.service';
+import { RedisModule } from '@lib/redis';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { UserService } from './user.service';
     PrismaModule,
     LoggerModule,
     ObjectModule,
+    RedisModule,
   ],
   controllers: [UserController],
   providers: [UserService, UserRepository],

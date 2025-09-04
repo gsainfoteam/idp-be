@@ -7,6 +7,7 @@ import {
 } from '@nestjs/common';
 import { Authenticator, User } from '@prisma/client';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
+import { UserWithAuthenticators } from './types/userWithAuthenticators';
 
 @Injectable()
 export class AuthRepository {
@@ -36,7 +37,9 @@ export class AuthRepository {
 
   async findUserByEmail(
     email: string,
-  ): Promise<Pick<User, 'uuid' | 'password'>> {
+  ): Promise<
+    Pick<UserWithAuthenticators, 'uuid' | 'password' | 'authenticators'>
+  > {
     return this.prismaService.user
       .findUniqueOrThrow({
         where: {
@@ -45,6 +48,7 @@ export class AuthRepository {
         select: {
           uuid: true,
           password: true,
+          authenticators: true,
         },
       })
       .catch((error) => {
@@ -59,17 +63,6 @@ export class AuthRepository {
         this.logger.error(`unknown error: ${error}`);
         throw new InternalServerErrorException();
       });
-  }
-
-  async saveAuthenticator(authenticator: {
-    credentialId: string;
-    publicKey: Uint8Array;
-    counter: number;
-    userUuid: string;
-  }): Promise<Authenticator> {
-    return this.prismaService.authenticator.create({
-      data: authenticator,
-    });
   }
 
   async findAuthenticator(credentialId: string): Promise<Authenticator> {

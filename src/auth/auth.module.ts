@@ -1,7 +1,7 @@
 import { LoggerModule } from '@lib/logger';
 import { PrismaModule } from '@lib/prisma';
 import { RedisModule } from '@lib/redis';
-import { forwardRef, Module } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
 
@@ -10,7 +10,6 @@ import { AuthRepository } from './auth.repository';
 import { AuthService } from './auth.service';
 import { UserGuard } from './guard/auth.guard';
 import { UserStrategy } from './guard/auth.strategy';
-import { UserModule } from 'src/user/user.module';
 
 @Module({
   imports: [
@@ -31,7 +30,6 @@ import { UserModule } from 'src/user/user.module';
         },
       }),
     }),
-    forwardRef(() => UserModule),
   ],
   controllers: [AuthController],
   providers: [AuthService, AuthRepository, UserStrategy, UserGuard],

@@ -7,7 +7,7 @@ import {
   InternalServerErrorException,
   Logger,
 } from '@nestjs/common';
-import { User } from '@prisma/client';
+import { Authenticator, User } from '@prisma/client';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 
 import { UserConsentType } from './types/userConsent.type';
@@ -229,5 +229,16 @@ export class UserRepository {
         this.logger.error(`delete user picture error: ${error}`);
         throw new InternalServerErrorException();
       });
+  }
+
+  async saveAuthenticator(authenticator: {
+    credentialId: string;
+    publicKey: Uint8Array;
+    counter: number;
+    userUuid: string;
+  }): Promise<Authenticator> {
+    return this.prismaService.authenticator.create({
+      data: authenticator,
+    });
   }
 }

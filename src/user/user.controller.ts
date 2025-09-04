@@ -34,8 +34,9 @@ import { UserGuard } from 'src/auth/guard/auth.guard';
 import {
   ChangePasswordDto,
   DeleteUserReqDto,
-  IssuePasswordDto,
+  IssueUserSecretDto,
   RegisterDto,
+  VerifyPasskeyRegistrationDto,
 } from './dto/req.dto';
 import {
   UpdateUserPictureResDto,
@@ -111,7 +112,7 @@ export class UserController {
   })
   @ApiInternalServerErrorResponse({ description: 'server error' })
   @Post('/password')
-  async issuePassword(@Body() body: IssuePasswordDto): Promise<void> {
+  async issuePassword(@Body() body: IssueUserSecretDto): Promise<void> {
     return this.userService.issuePassword(body);
   }
 
@@ -182,5 +183,30 @@ export class UserController {
   @Delete('/picture')
   async deletePicture(@GetUser() user: User): Promise<void> {
     return this.userService.deleteUserPicture(user.uuid);
+  }
+
+  @ApiOperation({
+    summary: 'register the passkey',
+    description: '패스키를 등록을 위한 challenge를 발급합니다.',
+  })
+  @Post('passkey')
+  async registerOptions(
+    @Body() { email }: IssueUserSecretDto,
+  ): Promise<PublicKeyCredentialRequestOptionsJSON> {
+    return await this.userService.registerOptions(email);
+  }
+
+  @ApiOperation({
+    summary: 'verify the registration options',
+    description: '패스키 등록합니다.',
+  })
+  @Post('passkey/verify')
+  async verifyRegistration(
+    @Body() { email, registrationResponse }: VerifyPasskeyRegistrationDto,
+  ): Promise<boolean> {
+    return await this.userService.verifyRegistration(
+      email,
+      registrationResponse,
+    );
   }
 }

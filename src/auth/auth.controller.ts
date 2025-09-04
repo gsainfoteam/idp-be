@@ -27,7 +27,6 @@ import {
   LoginDto,
   PasskeyDto,
   VerifyPasskeyAuthenticationDto,
-  VerifyPasskeyRegistrationDto,
 } from './dto/req.dto';
 import { LoginResDto } from './dto/res.dto';
 
@@ -139,32 +138,10 @@ export class AuthController {
   }
 
   @ApiOperation({
-    summary: 'register the passkey',
-    description: '패스키를 등록을 위한 challenge를 발급합니다.',
-  })
-  @Post('passkey/register')
-  async registerOptions(
-    @Body() { email }: PasskeyDto,
-  ): Promise<PublicKeyCredentialRequestOptionsJSON> {
-    return this.authService.registerOptions(email);
-  }
-
-  @ApiOperation({
-    summary: 'verify the registration options',
-    description: '패스키 등록합니다.',
-  })
-  @Post('passkey/register/verify')
-  async verifyRegistration(
-    @Body() { email, registrationResponse }: VerifyPasskeyRegistrationDto,
-  ): Promise<LoginResDto> {
-    return this.authService.verifyRegistration(email, registrationResponse);
-  }
-
-  @ApiOperation({
     summary: 'get the passkey options',
     description: '패스키 로그인을 위한 정보를 불러옵니다.',
   })
-  @Post('passkey/login')
+  @Post('passkey')
   async authenticateOptions(
     @Body() { email }: PasskeyDto,
   ): Promise<PublicKeyCredentialRequestOptionsJSON> {
@@ -175,7 +152,7 @@ export class AuthController {
     summary: 'verify the passkey options',
     description: '패스키를 인증합니다.',
   })
-  @Post('passkey/login/verify')
+  @Post('passkey/verify')
   async verifyAuthentication(
     @Body() { email, authenticationResponse }: VerifyPasskeyAuthenticationDto,
   ): Promise<LoginResDto> {
