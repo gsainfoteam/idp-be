@@ -230,7 +230,7 @@ export class AuthService {
   async verifyAuthentication(
     email: string,
     response: AuthenticationResponseJSON,
-  ) {
+  ): Promise<LoginResultType> {
     const user = await this.userRepository.findUserByEmail(email);
     if (!user) throw new NotFoundException();
 

@@ -47,7 +47,7 @@ export class PasskeyDto {
   email: string;
 }
 
-export class VerifyPasskeyRetistrationDto {
+export class VerifyPasskeyRegistrationDto {
   @ApiProperty({
     example: 'JohbDoe@gm.gist.ac.kr',
     description: '유저의 이메일 주소',
@@ -63,7 +63,7 @@ export class VerifyPasskeyRetistrationDto {
   email: string;
 
   @ApiProperty({
-    description: '유저의 패스키 등록 주소',
+    description: '유저의 패스키 등록 응답',
   })
   @IsObject()
   registrationResponse: RegistrationResponseJSON;
@@ -85,7 +85,7 @@ export class VerifyPasskeyAuthenticationDto {
   email: string;
 
   @ApiProperty({
-    description: '유저의 패스키 등록 주소',
+    description: '유저의 패스키 인증 응답',
   })
   @IsObject()
   authenticationResponse: AuthenticationResponseJSON;

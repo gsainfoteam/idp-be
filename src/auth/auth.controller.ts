@@ -27,9 +27,10 @@ import {
   LoginDto,
   PasskeyDto,
   VerifyPasskeyAuthenticationDto,
-  VerifyPasskeyRetistrationDto,
+  VerifyPasskeyRegistrationDto,
 } from './dto/req.dto';
 import { LoginResDto } from './dto/res.dto';
+import { LoginResultType } from './types/loginResult.type';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -143,7 +144,9 @@ export class AuthController {
     description: '패스키를 등록을 위한 challenge를 발급합니다.',
   })
   @Post('passkey/register')
-  async registerOptions(@Body() { email }: PasskeyDto) {
+  async registerOptions(
+    @Body() { email }: PasskeyDto,
+  ): Promise<PublicKeyCredentialRequestOptionsJSON> {
     return this.authService.registerOptions(email);
   }
 
@@ -153,8 +156,8 @@ export class AuthController {
   })
   @Post('passkey/register/verify')
   async verifyRegistration(
-    @Body() { email, registrationResponse }: VerifyPasskeyRetistrationDto,
-  ) {
+    @Body() { email, registrationResponse }: VerifyPasskeyRegistrationDto,
+  ): Promise<LoginResultType> {
     return this.authService.verifyRegistration(email, registrationResponse);
   }
 
@@ -163,7 +166,9 @@ export class AuthController {
     description: '패스키를 사용해 로그인합니다.',
   })
   @Post('passkey/login')
-  async loginPasskey(@Body() { email }: PasskeyDto) {
+  async loginPasskey(
+    @Body() { email }: PasskeyDto,
+  ): Promise<PublicKeyCredentialRequestOptionsJSON> {
     return this.authService.authenticateOptions(email);
   }
 
@@ -174,7 +179,7 @@ export class AuthController {
   @Post('passkey/login/verify')
   async verifyPasskey(
     @Body() { email, authenticationResponse }: VerifyPasskeyAuthenticationDto,
-  ) {
+  ): Promise<LoginResultType> {
     return this.authService.verifyAuthentication(email, authenticationResponse);
   }
 }

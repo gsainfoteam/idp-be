@@ -61,14 +61,14 @@ export class AuthRepository {
       });
   }
 
-  async saveAuthenticator(autheticator: {
+  async saveAuthenticator(authenticator: {
     credentialId: Uint8Array;
     publicKey: Uint8Array;
     counter: number;
     userUuid: string;
   }): Promise<Authenticator> {
     return this.prismaService.authenticator.create({
-      data: autheticator,
+      data: authenticator,
     });
   }
 
