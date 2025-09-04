@@ -31,6 +31,8 @@ async function bootstrap() {
     '/oauth/userinfo',
     '/.well-known/openid-configuration',
   ];
+  app.enableCors();
+  /*
   app.enableCors({
     delegator: (req, callback) => {
       const origin = req.headers.origin;
@@ -76,6 +78,7 @@ async function bootstrap() {
       }
     },
   });
+  */
   // cookie parser setup
   await app.register(fastifyCookie);
   // Swagger setup

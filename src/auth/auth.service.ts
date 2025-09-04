@@ -177,7 +177,7 @@ export class AuthService {
     const { id, publicKey, counter } = registrationInfo.credential;
 
     await this.authRepository.saveAuthenticator({
-      credentialId: Buffer.from(id),
+      credentialId: id,
       publicKey,
       counter,
       userUuid: user.uuid,
@@ -243,7 +243,7 @@ export class AuthService {
     if (!expectedChallenge) throw new UnauthorizedException();
 
     const authenticator = await this.authRepository.findAuthenticator(
-      Buffer.from(response.id),
+      response.id,
     );
 
     const { verified, authenticationInfo } = await verifyAuthenticationResponse(

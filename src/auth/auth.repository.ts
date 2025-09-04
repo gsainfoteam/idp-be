@@ -62,7 +62,7 @@ export class AuthRepository {
   }
 
   async saveAuthenticator(authenticator: {
-    credentialId: Uint8Array;
+    credentialId: string;
     publicKey: Uint8Array;
     counter: number;
     userUuid: string;
@@ -72,7 +72,7 @@ export class AuthRepository {
     });
   }
 
-  async findAuthenticator(credentialId: Uint8Array): Promise<Authenticator> {
+  async findAuthenticator(credentialId: string): Promise<Authenticator> {
     return this.prismaService.authenticator
       .findUniqueOrThrow({
         where: {
@@ -94,7 +94,7 @@ export class AuthRepository {
   }
 
   async updatePasskeyCounter(
-    credentialId: Uint8Array,
+    credentialId: string,
     counter: number,
   ): Promise<Authenticator> {
     return this.prismaService.authenticator

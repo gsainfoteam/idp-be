@@ -1,7 +1,7 @@
 -- CreateTable
 CREATE TABLE "authenticator" (
     "id" TEXT NOT NULL,
-    "credential_id" BYTEA NOT NULL,
+    "credential_id" TEXT NOT NULL,
     "public_key" BYTEA NOT NULL,
     "counter" INTEGER NOT NULL,
     "user_uuid" UUID NOT NULL,
