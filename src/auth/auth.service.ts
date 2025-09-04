@@ -9,13 +9,6 @@ import {
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { User } from '@prisma/client';
-import * as bcrypt from 'bcryptjs';
-import * as crypto from 'crypto';
-import ms, { StringValue } from 'ms';
-
-import { AuthRepository } from './auth.repository';
-import { LoginDto } from './dto/req.dto';
-import { LoginResultType } from './types/loginResult.type';
 import {
   generateAuthenticationOptions,
   verifyAuthenticationResponse,
@@ -24,6 +17,13 @@ import {
   AuthenticationResponseJSON,
   PublicKeyCredentialRequestOptionsJSON,
 } from '@simplewebauthn/types';
+import * as bcrypt from 'bcryptjs';
+import * as crypto from 'crypto';
+import ms, { StringValue } from 'ms';
+
+import { AuthRepository } from './auth.repository';
+import { LoginDto } from './dto/req.dto';
+import { LoginResultType } from './types/loginResult.type';
 
 @Injectable()
 @Loggable()

@@ -20,6 +20,7 @@ import {
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
+import { PublicKeyCredentialRequestOptionsJSON } from '@simplewebauthn/types';
 import { FastifyReply, FastifyRequest } from 'fastify';
 
 import { AuthService } from './auth.service';
@@ -29,7 +30,6 @@ import {
   VerifyPasskeyAuthenticationDto,
 } from './dto/req.dto';
 import { LoginResDto } from './dto/res.dto';
-import { PublicKeyCredentialRequestOptionsJSON } from '@simplewebauthn/types';
 
 @ApiTags('auth')
 @Controller('auth')

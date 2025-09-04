@@ -28,6 +28,7 @@ import {
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { User } from '@prisma/client';
+import { PublicKeyCredentialRequestOptionsJSON } from '@simplewebauthn/types';
 import { GetUser } from 'src/auth/decorator/getUser.decorator';
 import { UserGuard } from 'src/auth/guard/auth.guard';
 
@@ -45,7 +46,6 @@ import {
   UserResDto,
 } from './dto/res.dto';
 import { UserService } from './user.service';
-import { PublicKeyCredentialRequestOptionsJSON } from '@simplewebauthn/types';
 
 @ApiTags('user')
 @Controller('user')

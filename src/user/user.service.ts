@@ -1,6 +1,7 @@
 import { Loggable } from '@lib/logger';
 import { MailService } from '@lib/mail';
 import { ObjectService } from '@lib/object';
+import { RedisService } from '@lib/redis';
 import {
   ForbiddenException,
   Injectable,
@@ -9,6 +10,14 @@ import {
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { User } from '@prisma/client';
+import {
+  generateRegistrationOptions,
+  verifyRegistrationResponse,
+} from '@simplewebauthn/server';
+import {
+  PublicKeyCredentialCreationOptionsJSON,
+  RegistrationResponseJSON,
+} from '@simplewebauthn/types';
 import * as bcrypt from 'bcryptjs';
 import * as crypto from 'crypto';
 import fs from 'fs';
@@ -27,15 +36,6 @@ import {
 import { UpdateUserPictureResDto } from './dto/res.dto';
 import { UserConsentType } from './types/userConsent.type';
 import { UserRepository } from './user.repository';
-import {
-  generateRegistrationOptions,
-  verifyRegistrationResponse,
-} from '@simplewebauthn/server';
-import {
-  PublicKeyCredentialCreationOptionsJSON,
-  RegistrationResponseJSON,
-} from '@simplewebauthn/types';
-import { RedisService } from '@lib/redis';
 
 @Loggable()
 @Injectable()
