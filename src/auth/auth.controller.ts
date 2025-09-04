@@ -29,6 +29,7 @@ import {
   VerifyPasskeyAuthenticationDto,
 } from './dto/req.dto';
 import { LoginResDto } from './dto/res.dto';
+import { PublicKeyCredentialRequestOptionsJSON } from '@simplewebauthn/types';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -155,7 +156,33 @@ export class AuthController {
   @Post('passkey/verify')
   async verifyAuthentication(
     @Body() { email, authenticationResponse }: VerifyPasskeyAuthenticationDto,
+    @Res({ passthrough: true }) response: FastifyReply,
   ): Promise<LoginResDto> {
-    return this.authService.verifyAuthentication(email, authenticationResponse);
+    const {
+      refreshToken,
+      accessToken,
+      refreshTokenExpireTime,
+      accessTokenExpireTime,
+    } = await this.authService.verifyAuthentication(
+      email,
+      authenticationResponse,
+    );
+    response.cookie('accessToken', accessToken, {
+      httpOnly: true,
+      secure: true,
+      sameSite: 'strict',
+      expires: new Date(Date.now() + accessTokenExpireTime),
+      path: '/',
+    });
+    response.cookie('refreshToken', refreshToken, {
+      httpOnly: true,
+      secure: true,
+      sameSite: 'strict',
+      expires: new Date(Date.now() + refreshTokenExpireTime),
+      path: '/auth',
+    });
+    return {
+      accessToken,
+    };
   }
 }

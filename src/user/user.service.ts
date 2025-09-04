@@ -31,7 +31,10 @@ import {
   generateRegistrationOptions,
   verifyRegistrationResponse,
 } from '@simplewebauthn/server';
-import { RegistrationResponseJSON } from '@simplewebauthn/types';
+import {
+  PublicKeyCredentialCreationOptionsJSON,
+  RegistrationResponseJSON,
+} from '@simplewebauthn/types';
 import { RedisService } from '@lib/redis';
 
 @Loggable()

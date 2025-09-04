@@ -45,6 +45,7 @@ import {
   UserResDto,
 } from './dto/res.dto';
 import { UserService } from './user.service';
+import { PublicKeyCredentialRequestOptionsJSON } from '@simplewebauthn/types';
 
 @ApiTags('user')
 @Controller('user')

@@ -20,7 +20,10 @@ import {
   generateAuthenticationOptions,
   verifyAuthenticationResponse,
 } from '@simplewebauthn/server';
-import { AuthenticationResponseJSON } from '@simplewebauthn/types';
+import {
+  AuthenticationResponseJSON,
+  PublicKeyCredentialRequestOptionsJSON,
+} from '@simplewebauthn/types';
 
 @Injectable()
 @Loggable()
