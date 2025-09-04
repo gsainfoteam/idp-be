@@ -231,7 +231,7 @@ export class UserService {
       userID: Buffer.from(user.uuid),
       userName: user.name,
       excludeCredentials: user.authenticators.map((auth) => ({
-        id: auth.credentialId.toString(),
+        id: auth.credentialId,
         type: 'public-key',
       })),
     });
@@ -266,6 +266,8 @@ export class UserService {
     if (!verified || !registrationInfo) {
       throw new UnauthorizedException();
     }
+
+    await this.redisService.del(user.uuid, { prefix: this.passkeyPrefix });
 
     const { id, publicKey, counter } = registrationInfo.credential;
 

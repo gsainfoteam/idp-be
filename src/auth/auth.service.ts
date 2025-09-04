@@ -57,23 +57,7 @@ export class AuthService {
       throw new UnauthorizedException();
     }
 
-    const refreshToken: string = this.generateOpaqueToken();
-    await this.redisService.set<Pick<User, 'uuid'>>(
-      refreshToken,
-      {
-        uuid: user.uuid,
-      },
-      {
-        prefix: this.refreshTokenPrefix,
-        ttl: this.refreshTokenExpireTime,
-      },
-    );
-    return {
-      accessToken: this.jwtService.sign({}, { subject: user.uuid }),
-      refreshToken,
-      accessTokenExpireTime: this.accessTokenExpireTime,
-      refreshTokenExpireTime: this.refreshTokenExpireTime,
-    };
+    return this.issueTokens(user.uuid);
   }
 
   async logout(refreshToken: string): Promise<void> {
@@ -132,7 +116,7 @@ export class AuthService {
     const options = await generateAuthenticationOptions({
       rpID: this.passkeyRpId,
       allowCredentials: user.authenticators.map((auth) => ({
-        id: Buffer.from(auth.credentialId).toString(),
+        id: auth.credentialId,
         type: 'public-key',
       })),
     });
@@ -160,6 +144,8 @@ export class AuthService {
     );
     if (!expectedChallenge) throw new UnauthorizedException();
 
+    await this.redisService.del(user.uuid, { prefix: this.passkeyPrefix });
+
     const authenticator = await this.authRepository.findAuthenticator(
       response.id,
     );
@@ -172,7 +158,7 @@ export class AuthService {
         expectedRPID: this.passkeyRpId,
         credential: {
           ...authenticator,
-          id: authenticator.credentialId.toString(),
+          id: authenticator.credentialId,
         },
         requireUserVerification: true,
       },
@@ -187,23 +173,7 @@ export class AuthService {
       authenticationInfo.newCounter,
     );
 
-    const refreshToken: string = this.generateOpaqueToken();
-    await this.redisService.set<Pick<User, 'uuid'>>(
-      refreshToken,
-      {
-        uuid: user.uuid,
-      },
-      {
-        prefix: this.refreshTokenPrefix,
-        ttl: this.refreshTokenExpireTime,
-      },
-    );
-    return {
-      accessToken: this.jwtService.sign({}, { subject: user.uuid }),
-      refreshToken,
-      accessTokenExpireTime: this.accessTokenExpireTime,
-      refreshTokenExpireTime: this.refreshTokenExpireTime,
-    };
+    return this.issueTokens(user.uuid);
   }
 
   /**
@@ -215,5 +185,25 @@ export class AuthService {
       .randomBytes(32)
       .toString('base64')
       .replace(/[+//=]/g, '');
+  }
+
+  private async issueTokens(uuid: string): Promise<LoginResultType> {
+    const refreshToken: string = this.generateOpaqueToken();
+    await this.redisService.set<Pick<User, 'uuid'>>(
+      refreshToken,
+      {
+        uuid,
+      },
+      {
+        prefix: this.refreshTokenPrefix,
+        ttl: this.refreshTokenExpireTime,
+      },
+    );
+    return {
+      accessToken: this.jwtService.sign({}, { subject: uuid }),
+      refreshToken,
+      accessTokenExpireTime: this.accessTokenExpireTime,
+      refreshTokenExpireTime: this.refreshTokenExpireTime,
+    };
   }
 }

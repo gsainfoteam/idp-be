@@ -7,7 +7,7 @@ import {
 } from '@nestjs/common';
 import { Authenticator, User } from '@prisma/client';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
-import { UserWithAuthenticators } from './types/userWithAuthenticators';
+import { UserWithAuthenticators } from 'src/user/types/userWithAuthenticators';
 
 @Injectable()
 export class AuthRepository {
