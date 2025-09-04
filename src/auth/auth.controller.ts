@@ -166,7 +166,7 @@ export class AuthController {
     description: '패스키를 사용해 로그인합니다.',
   })
   @Post('passkey/login')
-  async loginPasskey(
+  async authenticateOptions(
     @Body() { email }: PasskeyDto,
   ): Promise<PublicKeyCredentialRequestOptionsJSON> {
     return this.authService.authenticateOptions(email);
@@ -177,7 +177,7 @@ export class AuthController {
     description: '패스키를 인증합니다.',
   })
   @Post('passkey/login/verify')
-  async verifyPasskey(
+  async verifyAuthentication(
     @Body() { email, authenticationResponse }: VerifyPasskeyAuthenticationDto,
   ): Promise<LoginResultType> {
     return this.authService.verifyAuthentication(email, authenticationResponse);

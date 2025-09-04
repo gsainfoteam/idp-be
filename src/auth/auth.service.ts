@@ -245,7 +245,6 @@ export class AuthService {
     const authenticator = await this.authRepository.findAuthenticator(
       Buffer.from(response.id),
     );
-    if (!user.authenticators) throw new UnauthorizedException();
 
     const { verified, authenticationInfo } = await verifyAuthenticationResponse(
       {
