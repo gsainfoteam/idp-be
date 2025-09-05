@@ -2,9 +2,17 @@ import { IsGistEmail } from '@lib/global';
 import { IsStudentId } from '@lib/global/validator/studentId.validator';
 import { BadRequestException } from '@nestjs/common';
 import { ApiProperty } from '@nestjs/swagger';
-import { RegistrationResponseJSON } from '@simplewebauthn/types';
-import { Transform } from 'class-transformer';
-import { IsEmail, IsJWT, IsObject, IsString, MaxLength } from 'class-validator';
+import { Transform, Type } from 'class-transformer';
+import {
+  IsBoolean,
+  IsEmail,
+  IsJWT,
+  IsObject,
+  IsOptional,
+  IsString,
+  MaxLength,
+  ValidateNested,
+} from 'class-validator';
 
 export class ChangePasswordDto {
   @ApiProperty({
@@ -100,6 +108,67 @@ export class DeleteUserReqDto {
   password: string;
 }
 
+class RegistrationResponseObjectDto {
+  @ApiProperty({ example: 'eyJ0eXBlIjoid2ViYXV0aG...' })
+  @IsString()
+  clientDataJSON: string;
+
+  @ApiProperty({ example: 'o2NmbXRkbm9uZWdhdHRTdG...' })
+  @IsString()
+  attestationObject: string;
+}
+
+class CredentialPropDto {
+  @ApiProperty()
+  @IsOptional()
+  @IsBoolean()
+  rk?: boolean | undefined;
+}
+
+class ClientExtensionResultDto {
+  @ApiProperty()
+  @IsOptional()
+  @IsBoolean()
+  appid?: boolean | undefined;
+
+  @ApiProperty()
+  @IsOptional()
+  @IsObject()
+  @ValidateNested()
+  @Type(() => CredentialPropDto)
+  credProps?: CredentialPropDto | undefined;
+
+  @ApiProperty()
+  @IsOptional()
+  @IsBoolean()
+  hmacCreateSecret?: boolean | undefined;
+}
+
+class RegistrationResponseDto {
+  @ApiProperty({ example: 'CqSzhuX99amkiIsvM6jWkQ' })
+  @IsString()
+  id: string;
+
+  @ApiProperty({ example: 'CqSzhuX99amkiIsvM6jWkQ' })
+  @IsString()
+  rawId: string;
+
+  @ApiProperty({ example: 'public-key' })
+  @IsString()
+  type: 'public-key';
+
+  @ApiProperty()
+  @IsObject()
+  @ValidateNested()
+  @Type(() => RegistrationResponseObjectDto)
+  response: RegistrationResponseObjectDto;
+
+  @ApiProperty()
+  @IsOptional()
+  @IsObject()
+  clientExtensionResults: ClientExtensionResultDto;
+}
+
 export class VerifyPasskeyRegistrationDto {
   @ApiProperty({
     example: 'JohbDoe@gm.gist.ac.kr',
@@ -119,5 +188,7 @@ export class VerifyPasskeyRegistrationDto {
     description: '유저의 패스키 등록 응답',
   })
   @IsObject()
-  registrationResponse: RegistrationResponseJSON;
+  @ValidateNested()
+  @Type(() => RegistrationResponseDto)
+  registrationResponse: RegistrationResponseDto;
 }

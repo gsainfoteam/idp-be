@@ -1,9 +1,15 @@
 import { IsGistEmail } from '@lib/global';
 import { BadRequestException } from '@nestjs/common';
 import { ApiProperty } from '@nestjs/swagger';
-import { AuthenticationResponseJSON } from '@simplewebauthn/types';
-import { Transform } from 'class-transformer';
-import { IsEmail, IsObject, IsString } from 'class-validator';
+import { Transform, Type } from 'class-transformer';
+import {
+  IsBoolean,
+  IsEmail,
+  IsObject,
+  IsOptional,
+  IsString,
+  ValidateNested,
+} from 'class-validator';
 
 export class LoginDto {
   @ApiProperty({
@@ -44,6 +50,78 @@ export class PasskeyDto {
   email: string;
 }
 
+class AuthenticationResponseObjectDto {
+  @ApiProperty()
+  @IsString()
+  clientDataJSON: string;
+
+  @ApiProperty()
+  @IsString()
+  authenticatorData: string;
+
+  @ApiProperty()
+  @IsString()
+  signature: string;
+
+  @ApiProperty()
+  @IsOptional()
+  @IsString()
+  userHandle?: string | undefined;
+}
+
+class CredentialPropDto {
+  @ApiProperty()
+  @IsOptional()
+  @IsBoolean()
+  rk?: boolean | undefined;
+}
+
+class ClientExtensionResultDto {
+  @ApiProperty()
+  @IsOptional()
+  @IsBoolean()
+  appid?: boolean | undefined;
+
+  @ApiProperty()
+  @IsOptional()
+  @IsObject()
+  @ValidateNested()
+  @Type(() => CredentialPropDto)
+  credProps?: CredentialPropDto | undefined;
+
+  @ApiProperty()
+  @IsOptional()
+  @IsBoolean()
+  hmacCreateSecret?: boolean | undefined;
+}
+
+class AuthenticationResponseDto {
+  @ApiProperty()
+  @IsString()
+  id: string;
+
+  @ApiProperty()
+  @IsString()
+  rawId: string;
+
+  @ApiProperty()
+  @IsString()
+  type: 'public-key';
+
+  @ApiProperty()
+  @IsObject()
+  @ValidateNested()
+  @Type(() => AuthenticationResponseObjectDto)
+  response: AuthenticationResponseObjectDto;
+
+  @ApiProperty()
+  @IsOptional()
+  @IsObject()
+  @ValidateNested()
+  @Type(() => ClientExtensionResultDto)
+  clientExtensionResults: ClientExtensionResultDto;
+}
+
 export class VerifyPasskeyAuthenticationDto {
   @ApiProperty({
     example: 'JohbDoe@gm.gist.ac.kr',
@@ -63,5 +141,7 @@ export class VerifyPasskeyAuthenticationDto {
     description: '유저의 패스키 인증 응답',
   })
   @IsObject()
-  authenticationResponse: AuthenticationResponseJSON;
+  @ValidateNested()
+  @Type(() => AuthenticationResponseDto)
+  authenticationResponse: AuthenticationResponseDto;
 }

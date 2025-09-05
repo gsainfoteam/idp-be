@@ -47,7 +47,7 @@ export class UserService {
   private readonly template = Handlebars.compile(
     fs.readFileSync(path.join(__dirname, '../templates', 'email.html'), 'utf8'),
   );
-  private readonly passkeyPrefix = 'passkey';
+  private readonly passkeyPrefix = 'passkeyRegister';
   private readonly passkeyRpOrigin: string;
   private readonly passkeyRpId: string;
 
