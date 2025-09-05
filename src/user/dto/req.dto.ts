@@ -1,9 +1,10 @@
 import { IsGistEmail } from '@lib/global';
 import { IsStudentId } from '@lib/global/validator/studentId.validator';
 import { BadRequestException } from '@nestjs/common';
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Transform, Type } from 'class-transformer';
 import {
+  Equals,
   IsBoolean,
   IsEmail,
   IsJWT,
@@ -113,32 +114,32 @@ class RegistrationResponseObjectDto {
   @IsString()
   clientDataJSON: string;
 
-  @ApiProperty({ example: 'o2NmbXRkbm9uZWdhdHRTdG...' })
+  @ApiProperty({ example: 'CqSzhuX99amkiIsvM6jWkQ...' })
   @IsString()
   attestationObject: string;
 }
 
 class CredentialPropDto {
-  @ApiProperty()
+  @ApiPropertyOptional({ example: true })
   @IsOptional()
   @IsBoolean()
   rk?: boolean | undefined;
 }
 
 class ClientExtensionResultDto {
-  @ApiProperty()
+  @ApiPropertyOptional({ example: true })
   @IsOptional()
   @IsBoolean()
   appid?: boolean | undefined;
 
-  @ApiProperty()
+  @ApiPropertyOptional()
   @IsOptional()
   @IsObject()
   @ValidateNested()
   @Type(() => CredentialPropDto)
   credProps?: CredentialPropDto | undefined;
 
-  @ApiProperty()
+  @ApiPropertyOptional({ example: true })
   @IsOptional()
   @IsBoolean()
   hmacCreateSecret?: boolean | undefined;
@@ -154,7 +155,7 @@ class RegistrationResponseDto {
   rawId: string;
 
   @ApiProperty({ example: 'public-key' })
-  @IsString()
+  @Equals('public-key')
   type: 'public-key';
 
   @ApiProperty()
@@ -166,6 +167,8 @@ class RegistrationResponseDto {
   @ApiProperty()
   @IsOptional()
   @IsObject()
+  @ValidateNested()
+  @Type(() => ClientExtensionResultDto)
   clientExtensionResults: ClientExtensionResultDto;
 }
 

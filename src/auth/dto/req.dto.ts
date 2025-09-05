@@ -1,8 +1,9 @@
 import { IsGistEmail } from '@lib/global';
 import { BadRequestException } from '@nestjs/common';
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Transform, Type } from 'class-transformer';
 import {
+  Equals,
   IsBoolean,
   IsEmail,
   IsObject,
@@ -51,61 +52,61 @@ export class PasskeyDto {
 }
 
 class AuthenticationResponseObjectDto {
-  @ApiProperty()
+  @ApiProperty({ example: 'eyJ0eXBlIjoid2ViYXV0aG...' })
   @IsString()
   clientDataJSON: string;
 
-  @ApiProperty()
+  @ApiProperty({ example: 'CqSzhuX99amkiIsvM6jWkQ...' })
   @IsString()
   authenticatorData: string;
 
-  @ApiProperty()
+  @ApiProperty({ example: 'CqSzhuX99amkiIsvM6jWkQ...' })
   @IsString()
   signature: string;
 
-  @ApiProperty()
+  @ApiProperty({ example: 'CqSzhuX99amkiIsvM6jWkQ...' })
   @IsOptional()
   @IsString()
   userHandle?: string | undefined;
 }
 
 class CredentialPropDto {
-  @ApiProperty()
+  @ApiPropertyOptional({ example: true })
   @IsOptional()
   @IsBoolean()
   rk?: boolean | undefined;
 }
 
 class ClientExtensionResultDto {
-  @ApiProperty()
+  @ApiPropertyOptional({ example: true })
   @IsOptional()
   @IsBoolean()
   appid?: boolean | undefined;
 
-  @ApiProperty()
+  @ApiPropertyOptional()
   @IsOptional()
   @IsObject()
   @ValidateNested()
   @Type(() => CredentialPropDto)
   credProps?: CredentialPropDto | undefined;
 
-  @ApiProperty()
+  @ApiPropertyOptional({ example: true })
   @IsOptional()
   @IsBoolean()
   hmacCreateSecret?: boolean | undefined;
 }
 
 class AuthenticationResponseDto {
-  @ApiProperty()
+  @ApiProperty({ example: 'CqSzhuX99amkiIsvM6jWkQ' })
   @IsString()
   id: string;
 
-  @ApiProperty()
+  @ApiProperty({ example: 'CqSzhuX99amkiIsvM6jWkQ' })
   @IsString()
   rawId: string;
 
-  @ApiProperty()
-  @IsString()
+  @ApiProperty({ example: 'public-key' })
+  @Equals('public-key')
   type: 'public-key';
 
   @ApiProperty()
@@ -114,7 +115,7 @@ class AuthenticationResponseDto {
   @Type(() => AuthenticationResponseObjectDto)
   response: AuthenticationResponseObjectDto;
 
-  @ApiProperty()
+  @ApiPropertyOptional()
   @IsOptional()
   @IsObject()
   @ValidateNested()
