@@ -1,9 +1,19 @@
 import { IsGistEmail } from '@lib/global';
 import { IsStudentId } from '@lib/global/validator/studentId.validator';
 import { BadRequestException } from '@nestjs/common';
-import { ApiProperty } from '@nestjs/swagger';
-import { Transform } from 'class-transformer';
-import { IsEmail, IsJWT, IsString, MaxLength } from 'class-validator';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { Transform, Type } from 'class-transformer';
+import {
+  Equals,
+  IsBoolean,
+  IsEmail,
+  IsJWT,
+  IsObject,
+  IsOptional,
+  IsString,
+  MaxLength,
+  ValidateNested,
+} from 'class-validator';
 
 export class ChangePasswordDto {
   @ApiProperty({
@@ -21,7 +31,7 @@ export class ChangePasswordDto {
   oldPassword: string;
 }
 
-export class IssuePasswordDto {
+export class IssueUserSecretDto {
   @ApiProperty({
     example: 'JohnDoe@gm.gist.ac.kr',
     description: 'GIST 이메일',
@@ -97,4 +107,91 @@ export class DeleteUserReqDto {
   })
   @IsString()
   password: string;
+}
+
+class RegistrationResponseObjectDto {
+  @ApiProperty({ example: 'eyJ0eXBlIjoid2ViYXV0aG...' })
+  @IsString()
+  clientDataJSON: string;
+
+  @ApiProperty({ example: 'CqSzhuX99amkiIsvM6jWkQ...' })
+  @IsString()
+  attestationObject: string;
+}
+
+class CredentialPropDto {
+  @ApiPropertyOptional({ example: true })
+  @IsOptional()
+  @IsBoolean()
+  rk?: boolean | undefined;
+}
+
+class ClientExtensionResultDto {
+  @ApiPropertyOptional({ example: true })
+  @IsOptional()
+  @IsBoolean()
+  appid?: boolean | undefined;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsObject()
+  @ValidateNested()
+  @Type(() => CredentialPropDto)
+  credProps?: CredentialPropDto | undefined;
+
+  @ApiPropertyOptional({ example: true })
+  @IsOptional()
+  @IsBoolean()
+  hmacCreateSecret?: boolean | undefined;
+}
+
+class RegistrationResponseDto {
+  @ApiProperty({ example: 'CqSzhuX99amkiIsvM6jWkQ' })
+  @IsString()
+  id: string;
+
+  @ApiProperty({ example: 'CqSzhuX99amkiIsvM6jWkQ' })
+  @IsString()
+  rawId: string;
+
+  @ApiProperty({ example: 'public-key' })
+  @Equals('public-key')
+  type: 'public-key';
+
+  @ApiProperty()
+  @IsObject()
+  @ValidateNested()
+  @Type(() => RegistrationResponseObjectDto)
+  response: RegistrationResponseObjectDto;
+
+  @ApiProperty()
+  @IsOptional()
+  @IsObject()
+  @ValidateNested()
+  @Type(() => ClientExtensionResultDto)
+  clientExtensionResults: ClientExtensionResultDto;
+}
+
+export class VerifyPasskeyRegistrationDto {
+  @ApiProperty({
+    example: 'JohbDoe@gm.gist.ac.kr',
+    description: '유저의 이메일 주소',
+  })
+  @IsEmail()
+  @IsGistEmail()
+  @Transform(({ value }) => {
+    if (typeof value === 'string') {
+      return value.toLowerCase();
+    }
+    throw new BadRequestException('이메일 형식이 올바르지 않습니다.');
+  })
+  email: string;
+
+  @ApiProperty({
+    description: '유저의 패스키 등록 응답',
+  })
+  @IsObject()
+  @ValidateNested()
+  @Type(() => RegistrationResponseDto)
+  registrationResponse: RegistrationResponseDto;
 }

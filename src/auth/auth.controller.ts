@@ -20,10 +20,15 @@ import {
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
+import { PublicKeyCredentialRequestOptionsJSON } from '@simplewebauthn/types';
 import { FastifyReply, FastifyRequest } from 'fastify';
 
 import { AuthService } from './auth.service';
-import { LoginDto } from './dto/req.dto';
+import {
+  LoginDto,
+  PasskeyDto,
+  VerifyPasskeyAuthenticationDto,
+} from './dto/req.dto';
 import { LoginResDto } from './dto/res.dto';
 
 @ApiTags('auth')
@@ -122,6 +127,54 @@ export class AuthController {
       path: '/',
     });
     response.cookie('refreshToken', newRefreshToken, {
+      httpOnly: true,
+      secure: true,
+      sameSite: 'strict',
+      expires: new Date(Date.now() + refreshTokenExpireTime),
+      path: '/auth',
+    });
+    return {
+      accessToken,
+    };
+  }
+
+  @ApiOperation({
+    summary: 'get the passkey options',
+    description: '패스키 로그인을 위한 정보를 불러옵니다.',
+  })
+  @Post('passkey')
+  async authenticateOptions(
+    @Body() { email }: PasskeyDto,
+  ): Promise<PublicKeyCredentialRequestOptionsJSON> {
+    return this.authService.authenticateOptions(email);
+  }
+
+  @ApiOperation({
+    summary: 'verify the passkey options',
+    description: '패스키를 인증합니다.',
+  })
+  @Post('passkey/verify')
+  async verifyAuthentication(
+    @Body() { email, authenticationResponse }: VerifyPasskeyAuthenticationDto,
+    @Res({ passthrough: true }) response: FastifyReply,
+  ): Promise<LoginResDto> {
+    const {
+      refreshToken,
+      accessToken,
+      refreshTokenExpireTime,
+      accessTokenExpireTime,
+    } = await this.authService.verifyAuthentication(
+      email,
+      authenticationResponse,
+    );
+    response.cookie('accessToken', accessToken, {
+      httpOnly: true,
+      secure: true,
+      sameSite: 'strict',
+      expires: new Date(Date.now() + accessTokenExpireTime),
+      path: '/',
+    });
+    response.cookie('refreshToken', refreshToken, {
       httpOnly: true,
       secure: true,
       sameSite: 'strict',

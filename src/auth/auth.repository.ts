@@ -5,8 +5,9 @@ import {
   Logger,
   UnauthorizedException,
 } from '@nestjs/common';
-import { User } from '@prisma/client';
+import { Authenticator, User } from '@prisma/client';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
+import { UserWithAuthenticators } from 'src/user/types/userWithAuthenticators';
 
 @Injectable()
 export class AuthRepository {
@@ -36,7 +37,9 @@ export class AuthRepository {
 
   async findUserByEmail(
     email: string,
-  ): Promise<Pick<User, 'uuid' | 'password'>> {
+  ): Promise<
+    Pick<UserWithAuthenticators, 'uuid' | 'password' | 'authenticators'>
+  > {
     return this.prismaService.user
       .findUniqueOrThrow({
         where: {
@@ -45,12 +48,59 @@ export class AuthRepository {
         select: {
           uuid: true,
           password: true,
+          authenticators: true,
         },
       })
       .catch((error) => {
         if (error instanceof PrismaClientKnownRequestError) {
           if (error.code === 'P2025') {
             this.logger.debug(`user not found: ${email}`);
+            throw new UnauthorizedException();
+          }
+          this.logger.error(`prisma error: ${error.message}`);
+          throw new InternalServerErrorException();
+        }
+        this.logger.error(`unknown error: ${error}`);
+        throw new InternalServerErrorException();
+      });
+  }
+
+  async findAuthenticator(credentialId: string): Promise<Authenticator> {
+    return this.prismaService.authenticator
+      .findUniqueOrThrow({
+        where: {
+          credentialId,
+        },
+      })
+      .catch((error) => {
+        if (error instanceof PrismaClientKnownRequestError) {
+          if (error.code === 'P2025') {
+            this.logger.debug(`authenticator not found`);
+            throw new UnauthorizedException();
+          }
+          this.logger.error(`prisma error: ${error.message}`);
+          throw new InternalServerErrorException();
+        }
+        this.logger.error(`unknown error: ${error}`);
+        throw new InternalServerErrorException();
+      });
+  }
+
+  async updatePasskeyCounter(
+    credentialId: string,
+    counter: number,
+  ): Promise<Authenticator> {
+    return this.prismaService.authenticator
+      .update({
+        where: {
+          credentialId,
+        },
+        data: { counter },
+      })
+      .catch((error) => {
+        if (error instanceof PrismaClientKnownRequestError) {
+          if (error.code === 'P2025') {
+            this.logger.debug(`authenticator not found`);
             throw new UnauthorizedException();
           }
           this.logger.error(`prisma error: ${error.message}`);

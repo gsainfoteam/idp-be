@@ -45,9 +45,19 @@ erDiagram
     DateTime updatedAt 
     }
   
+
+  "authenticator" {
+    String user_uuid "🗝️"
+    String credential_id 
+    Bytes public_key 
+    Int counter 
+    String user_uuid 
+    }
+  
     "user" o{--}o "client" : "clients"
     "user" o{--}o "consent" : "consent"
     "user" o{--}o "refresh_token" : "RefreshToken"
+    "user" o{--}o "authenticator" : "authenticators"
     "client" o{--}o "user" : "member"
     "client" o{--}o "consent" : "consent"
     "client" o{--}o "refresh_token" : "RefreshToken"
@@ -55,4 +65,5 @@ erDiagram
     "refresh_token" o|--|| "user" : "user"
     "consent" o|--|| "client" : "client"
     "consent" o|--|| "user" : "user"
+    "authenticator" o|--|| "user" : "user"
 ```

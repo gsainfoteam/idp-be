@@ -1,9 +1,22 @@
 import { Loggable } from '@lib/logger/decorator/loggable';
 import { RedisService } from '@lib/redis';
-import { Injectable, Logger, UnauthorizedException } from '@nestjs/common';
+import {
+  Injectable,
+  Logger,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { User } from '@prisma/client';
+import {
+  generateAuthenticationOptions,
+  verifyAuthenticationResponse,
+} from '@simplewebauthn/server';
+import {
+  AuthenticationResponseJSON,
+  PublicKeyCredentialRequestOptionsJSON,
+} from '@simplewebauthn/types';
 import * as bcrypt from 'bcryptjs';
 import * as crypto from 'crypto';
 import ms, { StringValue } from 'ms';
@@ -19,6 +32,10 @@ export class AuthService {
   private readonly accessTokenExpireTime: number;
   private readonly refreshTokenExpireTime: number;
   private readonly refreshTokenPrefix = 'refreshToken';
+  private readonly passkeyPrefix = 'passkey';
+  private readonly passkeyRpOrigin: string;
+  private readonly passkeyRpId: string;
+
   constructor(
     private readonly authRepository: AuthRepository,
     private readonly configService: ConfigService,
@@ -31,6 +48,9 @@ export class AuthService {
     this.refreshTokenExpireTime = ms(
       configService.getOrThrow<string>('REFRESH_TOKEN_EXPIRE') as StringValue,
     );
+    this.passkeyRpOrigin =
+      this.configService.getOrThrow<string>('PASSKEY_RP_ORIGIN');
+    this.passkeyRpId = this.configService.getOrThrow<string>('PASSKEY_RP_ID');
   }
 
   async login({ email, password }: LoginDto): Promise<LoginResultType> {
@@ -40,23 +60,7 @@ export class AuthService {
       throw new UnauthorizedException();
     }
 
-    const refreshToken: string = this.generateOpaqueToken();
-    await this.redisService.set<Pick<User, 'uuid'>>(
-      refreshToken,
-      {
-        uuid: user.uuid,
-      },
-      {
-        prefix: this.refreshTokenPrefix,
-        ttl: this.refreshTokenExpireTime,
-      },
-    );
-    return {
-      accessToken: this.jwtService.sign({}, { subject: user.uuid }),
-      refreshToken,
-      accessTokenExpireTime: this.accessTokenExpireTime,
-      refreshTokenExpireTime: this.refreshTokenExpireTime,
-    };
+    return this.issueTokens(user.uuid);
   }
 
   async logout(refreshToken: string): Promise<void> {
@@ -103,6 +107,78 @@ export class AuthService {
     return this.authRepository.findUserByUuid(uuid);
   }
 
+  async authenticateOptions(
+    email: string,
+  ): Promise<PublicKeyCredentialRequestOptionsJSON> {
+    const user = await this.authRepository.findUserByEmail(email);
+
+    if (!user || user.authenticators.length === 0) {
+      throw new NotFoundException();
+    }
+
+    const options = await generateAuthenticationOptions({
+      rpID: this.passkeyRpId,
+      allowCredentials: user.authenticators.map((auth) => ({
+        id: auth.credentialId,
+        type: 'public-key',
+      })),
+    });
+
+    await this.redisService.set<string>(user.uuid, options.challenge, {
+      prefix: this.passkeyPrefix,
+      ttl: 10 * 60,
+    });
+
+    return options;
+  }
+
+  async verifyAuthentication(
+    email: string,
+    response: AuthenticationResponseJSON,
+  ): Promise<LoginResultType> {
+    const user = await this.authRepository.findUserByEmail(email);
+    if (!user) throw new NotFoundException();
+
+    const expectedChallenge = await this.redisService.getOrThrow<string>(
+      user.uuid,
+      {
+        prefix: this.passkeyPrefix,
+      },
+    );
+    if (!expectedChallenge) throw new UnauthorizedException();
+
+    await this.redisService.del(user.uuid, { prefix: this.passkeyPrefix });
+
+    const authenticator = await this.authRepository.findAuthenticator(
+      response.id,
+    );
+
+    const { verified, authenticationInfo } = await verifyAuthenticationResponse(
+      {
+        response,
+        expectedChallenge,
+        expectedOrigin: this.passkeyRpOrigin,
+        expectedRPID: this.passkeyRpId,
+        credential: {
+          ...authenticator,
+          id: authenticator.credentialId,
+        },
+        requireUserVerification: true,
+      },
+    );
+
+    if (!verified) {
+      throw new UnauthorizedException();
+    }
+
+    await this.authRepository.updatePasskeyCounter(
+      authenticator.credentialId,
+      authenticationInfo.newCounter,
+    );
+
+    return this.issueTokens(user.uuid);
+  }
+
   /**
    * 유저의 정보와 상관이 없은 토큰을 만들어내는 함수.
    * @returns Opaque token
@@ -112,5 +188,25 @@ export class AuthService {
       .randomBytes(32)
       .toString('base64')
       .replace(/[+//=]/g, '');
+  }
+
+  private async issueTokens(uuid: string): Promise<LoginResultType> {
+    const refreshToken: string = this.generateOpaqueToken();
+    await this.redisService.set<Pick<User, 'uuid'>>(
+      refreshToken,
+      {
+        uuid,
+      },
+      {
+        prefix: this.refreshTokenPrefix,
+        ttl: this.refreshTokenExpireTime,
+      },
+    );
+    return {
+      accessToken: this.jwtService.sign({}, { subject: uuid }),
+      refreshToken,
+      accessTokenExpireTime: this.accessTokenExpireTime,
+      refreshTokenExpireTime: this.refreshTokenExpireTime,
+    };
   }
 }
