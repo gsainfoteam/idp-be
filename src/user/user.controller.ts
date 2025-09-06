@@ -22,13 +22,13 @@ import {
   ApiCreatedResponse,
   ApiForbiddenResponse,
   ApiInternalServerErrorResponse,
+  ApiNotFoundResponse,
   ApiOkResponse,
   ApiOperation,
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { User } from '@prisma/client';
-import { PublicKeyCredentialRequestOptionsJSON } from '@simplewebauthn/types';
 import { GetUser } from 'src/auth/decorator/getUser.decorator';
 import { UserGuard } from 'src/auth/guard/auth.guard';
 
@@ -40,6 +40,7 @@ import {
   VerifyPasskeyRegistrationDto,
 } from './dto/req.dto';
 import {
+  PasskeyOptionResDto,
   UpdateUserPictureResDto,
   UserConsentListResDto,
   UserConsentResDto,
@@ -190,10 +191,16 @@ export class UserController {
     summary: 'register the passkey',
     description: '패스키를 등록을 위한 challenge를 발급합니다.',
   })
+  @ApiOkResponse({
+    description: 'success',
+    type: PasskeyOptionResDto,
+  })
+  @ApiNotFoundResponse({ description: 'Email is not found' })
+  @ApiInternalServerErrorResponse({ description: 'server error' })
   @Post('passkey')
   async registerOptions(
     @Body() { email }: IssueUserSecretDto,
-  ): Promise<PublicKeyCredentialRequestOptionsJSON> {
+  ): Promise<PasskeyOptionResDto> {
     return await this.userService.registerOptions(email);
   }
 
@@ -201,6 +208,10 @@ export class UserController {
     summary: 'verify the registration options',
     description: '패스키 등록합니다.',
   })
+  @ApiOkResponse({ description: 'success', type: Boolean })
+  @ApiUnauthorizedResponse({ description: 'Response is invalid' })
+  @ApiNotFoundResponse({ description: 'Email is not found' })
+  @ApiInternalServerErrorResponse({ description: 'server error' })
   @Post('passkey/verify')
   async verifyRegistration(
     @Body() { email, registrationResponse }: VerifyPasskeyRegistrationDto,

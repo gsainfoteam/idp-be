@@ -1,5 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { User } from '@prisma/client';
+import { AuthenticatorTransportFuture } from '@simplewebauthn/types';
 import { Exclude } from 'class-transformer';
 
 import { UserConsentType } from '../types/userConsent.type';
@@ -153,4 +154,73 @@ export class UserConsentListResDto {
     type: [UserConsentResDto],
   })
   list: UserConsentResDto[];
+}
+
+class AllowCredentialDto {
+  @ApiProperty({
+    description: 'CredentialID of passkey (Base64URL)',
+    example: 'aUF_gprsh...',
+  })
+  id: string;
+
+  @ApiProperty({ description: 'Credential type', example: 'public-key' })
+  type: 'public-key';
+
+  @ApiPropertyOptional({
+    description: 'List of communication method',
+    example: ['internal'],
+  })
+  transports?: AuthenticatorTransportFuture[];
+}
+
+class AuthenticationExtensionsDto {
+  @ApiPropertyOptional({ description: 'appid extension' })
+  appid?: string;
+
+  @ApiPropertyOptional({ description: 'credProps extension' })
+  credProps?: boolean;
+
+  @ApiPropertyOptional({ description: 'hmacCreateSecret extension' })
+  hmacCreateSecret?: boolean;
+
+  @ApiPropertyOptional({ description: 'minPinLength extension' })
+  minPinLength?: boolean;
+}
+
+export class PasskeyOptionResDto {
+  @ApiProperty({
+    description: 'challenge (Base64URL)',
+    example: 'HPv7vydo...',
+  })
+  challenge: string;
+
+  @ApiPropertyOptional({ description: 'request timeout(ms)', example: 60000 })
+  timeout?: number;
+
+  @ApiPropertyOptional({
+    description: 'Relying Party ID',
+    example: 'idp.gistory.me',
+  })
+  rpId?: string;
+
+  @ApiPropertyOptional({
+    example: [AllowCredentialDto],
+    description: 'Passkey list',
+    type: [AllowCredentialDto],
+  })
+  allowCredentials?: AllowCredentialDto[];
+
+  @ApiPropertyOptional({
+    description: 'User verification policy',
+    example: 'preferred',
+    enum: ['required', 'discouraged', 'preferred'],
+  })
+  userVerification?: 'required' | 'discouraged' | 'preferred';
+
+  @ApiPropertyOptional({
+    example: [AuthenticationExtensionsDto],
+    description: 'WebAuthn extensions',
+    type: [AuthenticationExtensionsDto],
+  })
+  extensions?: AuthenticationExtensionsDto;
 }
