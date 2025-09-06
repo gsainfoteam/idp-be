@@ -218,9 +218,9 @@ export class PasskeyOptionResDto {
   userVerification?: 'required' | 'discouraged' | 'preferred';
 
   @ApiPropertyOptional({
-    example: [AuthenticationExtensionsDto],
+    example: AuthenticationExtensionsDto,
     description: 'WebAuthn extensions',
-    type: [AuthenticationExtensionsDto],
+    type: AuthenticationExtensionsDto,
   })
   extensions?: AuthenticationExtensionsDto;
 }
