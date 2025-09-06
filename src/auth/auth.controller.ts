@@ -15,13 +15,14 @@ import {
 import {
   ApiCreatedResponse,
   ApiInternalServerErrorResponse,
+  ApiNotFoundResponse,
   ApiOkResponse,
   ApiOperation,
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
-import { PublicKeyCredentialRequestOptionsJSON } from '@simplewebauthn/types';
 import { FastifyReply, FastifyRequest } from 'fastify';
+import { PasskeyOptionResDto } from 'src/user/dto/res.dto';
 
 import { AuthService } from './auth.service';
 import {
@@ -142,10 +143,16 @@ export class AuthController {
     summary: 'get the passkey options',
     description: '패스키 로그인을 위한 정보를 불러옵니다.',
   })
+  @ApiOkResponse({
+    description: 'success',
+    type: PasskeyOptionResDto,
+  })
+  @ApiNotFoundResponse({ description: 'Email is not found' })
+  @ApiInternalServerErrorResponse({ description: 'server error' })
   @Post('passkey')
   async authenticateOptions(
     @Body() { email }: PasskeyDto,
-  ): Promise<PublicKeyCredentialRequestOptionsJSON> {
+  ): Promise<PasskeyOptionResDto> {
     return this.authService.authenticateOptions(email);
   }
 
@@ -153,6 +160,10 @@ export class AuthController {
     summary: 'verify the passkey options',
     description: '패스키를 인증합니다.',
   })
+  @ApiCreatedResponse({ description: 'success', type: LoginResDto })
+  @ApiUnauthorizedResponse({ description: 'Response is invalid' })
+  @ApiNotFoundResponse({ description: 'Email is not found' })
+  @ApiInternalServerErrorResponse({ description: 'server error' })
   @Post('passkey/verify')
   async verifyAuthentication(
     @Body() { email, authenticationResponse }: VerifyPasskeyAuthenticationDto,
