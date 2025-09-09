@@ -40,7 +40,7 @@ import {
   VerifyPasskeyRegistrationDto,
 } from './dto/req.dto';
 import {
-  PasskeyOptionResDto,
+  PasskeyRegisterOptionResDto,
   UpdateUserPictureResDto,
   UserConsentListResDto,
   UserConsentResDto,
@@ -193,14 +193,14 @@ export class UserController {
   })
   @ApiOkResponse({
     description: 'success',
-    type: PasskeyOptionResDto,
+    type: PasskeyRegisterOptionResDto,
   })
   @ApiNotFoundResponse({ description: 'Email is not found' })
   @ApiInternalServerErrorResponse({ description: 'server error' })
   @Post('passkey')
   async registerOptions(
     @Body() { email }: IssueUserSecretDto,
-  ): Promise<PasskeyOptionResDto> {
+  ): Promise<PasskeyRegisterOptionResDto> {
     return await this.userService.registerOptions(email);
   }
 

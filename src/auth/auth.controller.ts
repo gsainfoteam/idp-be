@@ -22,7 +22,6 @@ import {
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { FastifyReply, FastifyRequest } from 'fastify';
-import { PasskeyOptionResDto } from 'src/user/dto/res.dto';
 
 import { AuthService } from './auth.service';
 import {
@@ -30,7 +29,7 @@ import {
   PasskeyDto,
   VerifyPasskeyAuthenticationDto,
 } from './dto/req.dto';
-import { LoginResDto } from './dto/res.dto';
+import { LoginResDto, PasskeyAuthOptionResDto } from './dto/res.dto';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -145,14 +144,14 @@ export class AuthController {
   })
   @ApiOkResponse({
     description: 'success',
-    type: PasskeyOptionResDto,
+    type: PasskeyAuthOptionResDto,
   })
   @ApiNotFoundResponse({ description: 'Email is not found' })
   @ApiInternalServerErrorResponse({ description: 'server error' })
   @Post('passkey')
   async authenticateOptions(
     @Body() { email }: PasskeyDto,
-  ): Promise<PasskeyOptionResDto> {
+  ): Promise<PasskeyAuthOptionResDto> {
     return this.authService.authenticateOptions(email);
   }
 
