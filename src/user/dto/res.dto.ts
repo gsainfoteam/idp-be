@@ -1,6 +1,10 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { User } from '@prisma/client';
-import { AuthenticatorTransportFuture } from '@simplewebauthn/types';
+import {
+  AttestationConveyancePreference,
+  AuthenticatorAttachment,
+  AuthenticatorTransportFuture,
+} from '@simplewebauthn/types';
 import { Exclude } from 'class-transformer';
 
 import { UserConsentType } from '../types/userConsent.type';
@@ -156,7 +160,7 @@ export class UserConsentListResDto {
   list: UserConsentResDto[];
 }
 
-class AllowCredentialDto {
+class ExcludeCredentialDto {
   @ApiProperty({
     description: 'CredentialID of passkey (Base64URL)',
     example: 'aUF_gprsh...',
@@ -187,7 +191,48 @@ class AuthenticationExtensionsDto {
   minPinLength?: boolean;
 }
 
-export class PasskeyOptionResDto {
+class RpDto {
+  @ApiPropertyOptional({ description: 'rp id' })
+  id?: string;
+
+  @ApiProperty({ description: 'rp name' })
+  name?: string;
+}
+
+class PasskeyUserDto {
+  @ApiProperty({ description: 'user id' })
+  id: string;
+
+  @ApiProperty({ description: 'user name' })
+  name: string;
+
+  @ApiPropertyOptional({ description: 'user display' })
+  displayName: string;
+}
+
+class PubKeyCredParamsDto {
+  @ApiProperty({ description: 'public key credential alg' })
+  alg: number;
+
+  @ApiProperty({ description: 'public key credential type' })
+  type: 'public-key';
+}
+
+class AuthSelectionDto {
+  @ApiPropertyOptional({ description: 'authenticator attachment' })
+  authenticatorAttachment?: AuthenticatorAttachment;
+
+  @ApiPropertyOptional({ description: 'require resident key' })
+  requireResidentKey?: boolean;
+
+  @ApiPropertyOptional({ description: 'resident key' })
+  residentKey?: 'required' | 'discouraged' | 'preferred';
+
+  @ApiPropertyOptional({ description: 'user verification' })
+  userVerification?: 'required' | 'discouraged' | 'preferred';
+}
+
+export class PasskeyRegisterOptionResDto {
   @ApiProperty({
     description: 'challenge (Base64URL)',
     example: 'HPv7vydo...',
@@ -197,25 +242,47 @@ export class PasskeyOptionResDto {
   @ApiPropertyOptional({ description: 'request timeout(ms)', example: 60000 })
   timeout?: number;
 
-  @ApiPropertyOptional({
-    description: 'Relying Party ID',
-    example: 'idp.gistory.me',
+  @ApiProperty({
+    example: RpDto,
+    description: 'Relying Party',
+    type: RpDto,
   })
-  rpId?: string;
+  rp: RpDto;
+
+  @ApiProperty({
+    example: PasskeyUserDto,
+    description: 'Passkey user',
+    type: PasskeyUserDto,
+  })
+  user: PasskeyUserDto;
+
+  @ApiProperty({
+    example: PubKeyCredParamsDto,
+    description: 'public key credential parameters',
+    type: PubKeyCredParamsDto,
+  })
+  pubKeyCredParams: PubKeyCredParamsDto[];
 
   @ApiPropertyOptional({
-    example: [AllowCredentialDto],
-    description: 'Passkey list',
-    type: [AllowCredentialDto],
+    example: [ExcludeCredentialDto],
+    description: 'exclude credential list',
+    type: [ExcludeCredentialDto],
   })
-  allowCredentials?: AllowCredentialDto[];
+  excludeCredentials?: ExcludeCredentialDto[];
 
   @ApiPropertyOptional({
-    description: 'User verification policy',
-    example: 'preferred',
-    enum: ['required', 'discouraged', 'preferred'],
+    example: [AuthSelectionDto],
+    description: 'authenticator selection',
+    type: [AuthSelectionDto],
   })
-  userVerification?: 'required' | 'discouraged' | 'preferred';
+  authenticatorSelection?: AuthSelectionDto;
+
+  @ApiPropertyOptional({
+    description: 'attenstaion',
+    example: 'none',
+    enum: ['direct', 'enterprise', 'indirect', 'none'],
+  })
+  attestation?: AttestationConveyancePreference;
 
   @ApiPropertyOptional({
     example: AuthenticationExtensionsDto,
