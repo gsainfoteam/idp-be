@@ -196,7 +196,7 @@ class RpDto {
   id?: string;
 
   @ApiProperty({ description: 'rp name' })
-  name?: string;
+  name: string;
 }
 
 class PasskeyUserDto {
@@ -206,7 +206,7 @@ class PasskeyUserDto {
   @ApiProperty({ description: 'user name' })
   name: string;
 
-  @ApiPropertyOptional({ description: 'user display' })
+  @ApiProperty({ description: 'user display' })
   displayName: string;
 }
 
@@ -257,9 +257,9 @@ export class PasskeyRegisterOptionResDto {
   user: PasskeyUserDto;
 
   @ApiProperty({
-    example: PubKeyCredParamsDto,
+    example: [PubKeyCredParamsDto],
     description: 'public key credential parameters',
-    type: PubKeyCredParamsDto,
+    type: [PubKeyCredParamsDto],
   })
   pubKeyCredParams: PubKeyCredParamsDto[];
 
@@ -271,16 +271,16 @@ export class PasskeyRegisterOptionResDto {
   excludeCredentials?: ExcludeCredentialDto[];
 
   @ApiPropertyOptional({
-    example: [AuthSelectionDto],
+    example: AuthSelectionDto,
     description: 'authenticator selection',
-    type: [AuthSelectionDto],
+    type: AuthSelectionDto,
   })
   authenticatorSelection?: AuthSelectionDto;
 
   @ApiPropertyOptional({
     description: 'attenstaion',
     example: 'none',
-    enum: ['direct', 'enterprise', 'indirect', 'none'],
+    enum: ['none', 'direct', 'enterprise', 'indirect'],
   })
   attestation?: AttestationConveyancePreference;
 
