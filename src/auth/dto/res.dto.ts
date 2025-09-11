@@ -17,12 +17,18 @@ class AllowCredentialDto {
   })
   id: string;
 
-  @ApiProperty({ description: 'Credential type', example: 'public-key' })
+  @ApiProperty({
+    description: 'Credential type',
+    example: 'public-key',
+    enum: ['public-key'],
+  })
   type: 'public-key';
 
   @ApiPropertyOptional({
     description: 'List of communication method',
     example: ['internal'],
+    type: [String],
+    enum: ['internal', 'ble', 'cable', 'hybrid', 'nfc', 'smart-card', 'usb'],
   })
   transports?: AuthenticatorTransportFuture[];
 }
@@ -74,7 +80,6 @@ export class PasskeyAuthOptionResDto {
   @ApiPropertyOptional({
     example: AuthenticationExtensionsDto,
     description: 'WebAuthn extensions',
-    type: AuthenticationExtensionsDto,
   })
   extensions?: AuthenticationExtensionsDto;
 }
