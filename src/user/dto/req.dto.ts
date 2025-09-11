@@ -5,9 +5,12 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Transform, Type } from 'class-transformer';
 import {
   Equals,
+  IsArray,
   IsBoolean,
   IsEmail,
+  IsIn,
   IsJWT,
+  IsNumber,
   IsObject,
   IsOptional,
   IsString,
@@ -117,32 +120,68 @@ class RegistrationResponseObjectDto {
   @ApiProperty({ example: 'CqSzhuX99amkiIsvM6jWkQ...' })
   @IsString()
   attestationObject: string;
+
+  @ApiPropertyOptional({ example: 'CqSzhuX99amkiIsvM6jWkQ...' })
+  @IsOptional()
+  @IsString()
+  authenticatorData?: string;
+
+  @ApiPropertyOptional({
+    example: 'internal',
+    type: [String],
+    enum: ['internal', 'ble', 'cable', 'hybrid', 'nfc', 'smart-card', 'usb'],
+  })
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  @IsIn(['internal', 'ble', 'cable', 'hybrid', 'nfc', 'smart-card', 'usb'], {
+    each: true,
+  })
+  transports?: (
+    | 'internal'
+    | 'ble'
+    | 'cable'
+    | 'hybrid'
+    | 'nfc'
+    | 'smart-card'
+    | 'usb'
+  )[];
+
+  @ApiPropertyOptional({ example: '-7' })
+  @IsOptional()
+  @IsNumber()
+  publicKeyAlgorithm?: number;
+
+  @ApiPropertyOptional({ example: 'CqSzhuX99amkiIsvM6jWkQ...' })
+  @IsOptional()
+  @IsString()
+  publicKey?: string;
 }
 
 class CredentialPropDto {
   @ApiPropertyOptional({ example: true })
   @IsOptional()
   @IsBoolean()
-  rk?: boolean | undefined;
+  rk?: boolean;
 }
 
 class ClientExtensionResultDto {
   @ApiPropertyOptional({ example: true })
   @IsOptional()
   @IsBoolean()
-  appid?: boolean | undefined;
+  appid?: boolean;
 
   @ApiPropertyOptional()
   @IsOptional()
   @IsObject()
   @ValidateNested()
   @Type(() => CredentialPropDto)
-  credProps?: CredentialPropDto | undefined;
+  credProps?: CredentialPropDto;
 
   @ApiPropertyOptional({ example: true })
   @IsOptional()
   @IsBoolean()
-  hmacCreateSecret?: boolean | undefined;
+  hmacCreateSecret?: boolean;
 }
 
 class RegistrationResponseDto {
@@ -154,7 +193,7 @@ class RegistrationResponseDto {
   @IsString()
   rawId: string;
 
-  @ApiProperty({ example: 'public-key' })
+  @ApiProperty({ example: 'public-key', enum: ['public-key'] })
   @Equals('public-key')
   type: 'public-key';
 
@@ -163,6 +202,15 @@ class RegistrationResponseDto {
   @ValidateNested()
   @Type(() => RegistrationResponseObjectDto)
   response: RegistrationResponseObjectDto;
+
+  @ApiPropertyOptional({
+    example: 'platform',
+    enum: ['cross-platform', 'platform'],
+  })
+  @IsOptional()
+  @IsString()
+  @IsIn(['cross-platform', 'platform'])
+  authenticatorAttachment?: 'cross-platform' | 'platform';
 
   @ApiProperty()
   @IsOptional()

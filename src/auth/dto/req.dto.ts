@@ -64,36 +64,36 @@ class AuthenticationResponseObjectDto {
   @IsString()
   signature: string;
 
-  @ApiProperty({ example: 'CqSzhuX99amkiIsvM6jWkQ...' })
+  @ApiPropertyOptional({ example: 'CqSzhuX99amkiIsvM6jWkQ...' })
   @IsOptional()
   @IsString()
-  userHandle?: string | undefined;
+  userHandle?: string;
 }
 
 class CredentialPropDto {
   @ApiPropertyOptional({ example: true })
   @IsOptional()
   @IsBoolean()
-  rk?: boolean | undefined;
+  rk?: boolean;
 }
 
 class ClientExtensionResultDto {
   @ApiPropertyOptional({ example: true })
   @IsOptional()
   @IsBoolean()
-  appid?: boolean | undefined;
+  appid?: boolean;
 
   @ApiPropertyOptional()
   @IsOptional()
   @IsObject()
   @ValidateNested()
   @Type(() => CredentialPropDto)
-  credProps?: CredentialPropDto | undefined;
+  credProps?: CredentialPropDto;
 
   @ApiPropertyOptional({ example: true })
   @IsOptional()
   @IsBoolean()
-  hmacCreateSecret?: boolean | undefined;
+  hmacCreateSecret?: boolean;
 }
 
 class AuthenticationResponseDto {
@@ -105,7 +105,7 @@ class AuthenticationResponseDto {
   @IsString()
   rawId: string;
 
-  @ApiProperty({ example: 'public-key' })
+  @ApiProperty({ example: 'public-key', enum: ['public-key'] })
   @Equals('public-key')
   type: 'public-key';
 

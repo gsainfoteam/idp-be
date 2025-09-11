@@ -167,12 +167,18 @@ class ExcludeCredentialDto {
   })
   id: string;
 
-  @ApiProperty({ description: 'Credential type', example: 'public-key' })
+  @ApiProperty({
+    description: 'Credential type',
+    example: 'public-key',
+    enum: ['public-key'],
+  })
   type: 'public-key';
 
   @ApiPropertyOptional({
     description: 'List of communication method',
     example: ['internal'],
+    type: [String],
+    enum: ['ble', 'cable', 'hybrid', 'internal', 'nfc', 'smart-card', 'usb'],
   })
   transports?: AuthenticatorTransportFuture[];
 }
@@ -214,21 +220,33 @@ class PubKeyCredParamsDto {
   @ApiProperty({ description: 'public key credential alg' })
   alg: number;
 
-  @ApiProperty({ description: 'public key credential type' })
+  @ApiProperty({
+    description: 'public key credential type',
+    enum: ['public-key'],
+  })
   type: 'public-key';
 }
 
 class AuthSelectionDto {
-  @ApiPropertyOptional({ description: 'authenticator attachment' })
+  @ApiPropertyOptional({
+    description: 'authenticator attachment',
+    enum: ['cross-platform', 'platform'],
+  })
   authenticatorAttachment?: AuthenticatorAttachment;
 
   @ApiPropertyOptional({ description: 'require resident key' })
   requireResidentKey?: boolean;
 
-  @ApiPropertyOptional({ description: 'resident key' })
+  @ApiPropertyOptional({
+    description: 'resident key',
+    enum: ['required', 'discouraged', 'preferred'],
+  })
   residentKey?: 'required' | 'discouraged' | 'preferred';
 
-  @ApiPropertyOptional({ description: 'user verification' })
+  @ApiPropertyOptional({
+    description: 'user verification',
+    enum: ['required', 'discouraged', 'preferred'],
+  })
   userVerification?: 'required' | 'discouraged' | 'preferred';
 }
 
@@ -245,14 +263,12 @@ export class PasskeyRegisterOptionResDto {
   @ApiProperty({
     example: RpDto,
     description: 'Relying Party',
-    type: RpDto,
   })
   rp: RpDto;
 
   @ApiProperty({
     example: PasskeyUserDto,
     description: 'Passkey user',
-    type: PasskeyUserDto,
   })
   user: PasskeyUserDto;
 
@@ -273,7 +289,6 @@ export class PasskeyRegisterOptionResDto {
   @ApiPropertyOptional({
     example: AuthSelectionDto,
     description: 'authenticator selection',
-    type: AuthSelectionDto,
   })
   authenticatorSelection?: AuthSelectionDto;
 
@@ -287,7 +302,6 @@ export class PasskeyRegisterOptionResDto {
   @ApiPropertyOptional({
     example: AuthenticationExtensionsDto,
     description: 'WebAuthn extensions',
-    type: AuthenticationExtensionsDto,
   })
   extensions?: AuthenticationExtensionsDto;
 }
