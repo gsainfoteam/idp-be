@@ -128,6 +128,7 @@ class RegistrationResponseObjectDto {
 
   @ApiPropertyOptional({
     example: 'internal',
+    type: [String],
     enum: ['internal', 'ble', 'cable', 'hybrid', 'nfc', 'smart-card', 'usb'],
   })
   @IsOptional()
