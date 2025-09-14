@@ -289,11 +289,23 @@ export class UserService {
     return true;
   }
 
-  async updatePasskey(id: string, name: string): Promise<BasicPasskeyDto> {
+  async updatePasskey(
+    id: string,
+    name: string,
+    userUuid: string,
+  ): Promise<BasicPasskeyDto> {
+    const auth = await this.userRepository.getAuthenticator(id);
+
+    if (auth.userUuid !== userUuid) throw new UnauthorizedException();
+
     return await this.userRepository.updatePasskey(id, name);
   }
 
-  async deletePasskey(id: string): Promise<void> {
+  async deletePasskey(id: string, userUuid: string): Promise<void> {
+    const auth = await this.userRepository.getAuthenticator(id);
+
+    if (auth.userUuid !== userUuid) throw new UnauthorizedException();
+
     return await this.userRepository.deletePasskey(id);
   }
 }

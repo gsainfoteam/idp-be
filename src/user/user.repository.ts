@@ -242,6 +242,24 @@ export class UserRepository {
     });
   }
 
+  async getAuthenticator(id: string): Promise<Authenticator> {
+    return await this.prismaService.authenticator
+      .findUniqueOrThrow({
+        where: { id },
+      })
+      .catch((error) => {
+        if (
+          error instanceof PrismaClientKnownRequestError &&
+          error.code === 'P2025'
+        ) {
+          this.logger.debug(`user not found with uuid: ${id}`);
+          throw new ForbiddenException('user not found');
+        }
+        this.logger.error(`find user by uuid error: ${error}`);
+        throw new InternalServerErrorException();
+      });
+  }
+
   async saveAuthenticator(
     name: string,
     authenticator: {

@@ -262,10 +262,11 @@ export class UserController {
   @UseGuards(UserGuard)
   @Patch('passkey/:id')
   async updatePasskey(
+    @GetUser() user: User,
     @Param('id', ParseUUIDPipe) id: string,
     @Body() { name }: ChangePasskeyNameDto,
   ): Promise<BasicPasskeyDto> {
-    return await this.userService.updatePasskey(id, name);
+    return await this.userService.updatePasskey(id, name, user.uuid);
   }
 
   @ApiOperation({
@@ -279,7 +280,10 @@ export class UserController {
   @ApiInternalServerErrorResponse({ description: 'server error' })
   @UseGuards(UserGuard)
   @Delete('passkey/:id')
-  async deletePasskey(@Param('id', ParseUUIDPipe) id: string): Promise<void> {
-    return await this.userService.deletePasskey(id);
+  async deletePasskey(
+    @GetUser() user: User,
+    @Param('id', ParseUUIDPipe) id: string,
+  ): Promise<void> {
+    return await this.userService.deletePasskey(id, user.uuid);
   }
 }
