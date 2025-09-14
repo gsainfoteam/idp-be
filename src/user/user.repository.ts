@@ -231,14 +231,27 @@ export class UserRepository {
       });
   }
 
-  async saveAuthenticator(authenticator: {
-    credentialId: string;
-    publicKey: Uint8Array;
-    counter: number;
-    userUuid: string;
-  }): Promise<Authenticator> {
+  async getPasskeyList(userUuid: string) {
+    return await this.prismaService.authenticator.findMany({
+      where: { userUuid },
+      select: {
+        id: true,
+        name: true,
+      },
+    });
+  }
+
+  async saveAuthenticator(
+    name: string,
+    authenticator: {
+      credentialId: string;
+      publicKey: Uint8Array;
+      counter: number;
+      userUuid: string;
+    },
+  ): Promise<Authenticator> {
     return this.prismaService.authenticator.create({
-      data: authenticator,
+      data: { ...authenticator, name },
     });
   }
 }

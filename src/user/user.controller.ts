@@ -188,6 +188,22 @@ export class UserController {
   }
 
   @ApiOperation({
+    summary: 'get the passkey list of user',
+    description: '사용자의 패스키 목록을 불러옵니다',
+  })
+  @ApiOkResponse({
+    description: 'success',
+    type: PasskeyRegisterOptionResDto,
+  })
+  @ApiUnauthorizedResponse({ description: 'token not valid' })
+  @ApiInternalServerErrorResponse({ description: 'server error' })
+  @UseGuards(UserGuard)
+  @Get('passkey')
+  async getPasskeyList(@GetUser() user: User) {
+    return await this.userService.getPasskeyList(user.uuid);
+  }
+
+  @ApiOperation({
     summary: 'register the passkey',
     description: '패스키를 등록을 위한 challenge를 발급합니다.',
   })
@@ -214,10 +230,11 @@ export class UserController {
   @ApiInternalServerErrorResponse({ description: 'server error' })
   @Post('passkey/verify')
   async verifyRegistration(
-    @Body() { email, registrationResponse }: VerifyPasskeyRegistrationDto,
+    @Body() { email, name, registrationResponse }: VerifyPasskeyRegistrationDto,
   ): Promise<boolean> {
     return await this.userService.verifyRegistration(
       email,
+      name,
       registrationResponse,
     );
   }

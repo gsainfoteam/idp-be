@@ -223,6 +223,10 @@ export class UserService {
     await this.objectService.deleteObject(`user/${userUuid}/profile.webp`);
   }
 
+  async getPasskeyList(userUuid: string) {
+    return await this.userRepository.getPasskeyList(userUuid);
+  }
+
   async registerOptions(
     email: string,
   ): Promise<PublicKeyCredentialCreationOptionsJSON> {
@@ -249,6 +253,7 @@ export class UserService {
 
   async verifyRegistration(
     email: string,
+    name: string,
     response: RegistrationResponseJSON,
   ): Promise<boolean> {
     const user = await this.userRepository.findUserByEmail(email);
@@ -274,7 +279,7 @@ export class UserService {
 
     const { id, publicKey, counter } = registrationInfo.credential;
 
-    await this.userRepository.saveAuthenticator({
+    await this.userRepository.saveAuthenticator(name, {
       credentialId: id,
       publicKey,
       counter,

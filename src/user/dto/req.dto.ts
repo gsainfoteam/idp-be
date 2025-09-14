@@ -236,6 +236,13 @@ export class VerifyPasskeyRegistrationDto {
   email: string;
 
   @ApiProperty({
+    example: 'Passkey Name',
+    description: '패스키 이름',
+  })
+  @IsString()
+  name: string;
+
+  @ApiProperty({
     description: '유저의 패스키 등록 응답',
   })
   @IsObject()

@@ -88,6 +88,7 @@ model Consent {
 
 model Authenticator {
   id            String  @id @default(uuid())
+  name          String
   credentialId  String  @unique @map("credential_id")
   publicKey     Bytes   @map("public_key")
   counter       Int
