@@ -292,4 +292,8 @@ export class UserService {
   async updatePasskey(id: string, name: string) {
     return await this.userRepository.updatePasskey(id, name);
   }
+
+  async deletePasskey(id: string) {
+    return await this.userRepository.deletePasskey(id);
+  }
 }

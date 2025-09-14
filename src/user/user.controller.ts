@@ -194,6 +194,7 @@ export class UserController {
     summary: 'get the passkey list of user',
     description: '사용자의 패스키 목록을 불러옵니다',
   })
+  @ApiBearerAuth('user:jwt')
   @ApiOkResponse({
     description: 'success',
     type: PasskeyRegisterOptionResDto,
@@ -210,10 +211,12 @@ export class UserController {
     summary: 'register the passkey',
     description: '패스키를 등록을 위한 challenge를 발급합니다.',
   })
+  @ApiBearerAuth('user:jwt')
   @ApiOkResponse({
     description: 'success',
     type: PasskeyRegisterOptionResDto,
   })
+  @ApiUnauthorizedResponse({ description: 'token not valid' })
   @ApiNotFoundResponse({ description: 'Email is not found' })
   @ApiInternalServerErrorResponse({ description: 'server error' })
   @UseGuards(UserGuard)
@@ -228,8 +231,9 @@ export class UserController {
     summary: 'verify the registration options',
     description: '패스키 등록합니다.',
   })
+  @ApiBearerAuth('user:jwt')
   @ApiOkResponse({ description: 'success', type: Boolean })
-  @ApiUnauthorizedResponse({ description: 'Response is invalid' })
+  @ApiUnauthorizedResponse({ description: 'token not valid' })
   @ApiNotFoundResponse({ description: 'Email is not found' })
   @ApiInternalServerErrorResponse({ description: 'server error' })
   @UseGuards(UserGuard)
@@ -249,9 +253,10 @@ export class UserController {
     summary: 'update name of passkey',
     description: '패스키의 이름을 수정합니다.',
   })
+  @ApiBearerAuth('user:jwt')
   @ApiOkResponse({ description: 'success', type: Boolean })
-  @ApiUnauthorizedResponse({ description: 'Response is invalid' })
-  @ApiNotFoundResponse({ description: 'Email is not found' })
+  @ApiUnauthorizedResponse({ description: 'token not valid' })
+  @ApiNotFoundResponse({ description: 'Id is not found' })
   @ApiInternalServerErrorResponse({ description: 'server error' })
   @UseGuards(UserGuard)
   @Patch('passkey/:id')
@@ -260,5 +265,20 @@ export class UserController {
     @Body() { name }: ChangePasskeyNameDto,
   ) {
     return await this.userService.updatePasskey(id, name);
+  }
+
+  @ApiOperation({
+    summary: 'delete passkey',
+    description: '패스키를 삭제합니다.',
+  })
+  @ApiBearerAuth('user:jwt')
+  @ApiOkResponse({ description: 'success' })
+  @ApiUnauthorizedResponse({ description: 'token not valid' })
+  @ApiNotFoundResponse({ description: 'Id is not found' })
+  @ApiInternalServerErrorResponse({ description: 'server error' })
+  @UseGuards(UserGuard)
+  @Delete('passkey/:id')
+  async deletePasskey(@Param('id', ParseUUIDPipe) id: string) {
+    return await this.userService.deletePasskey(id);
   }
 }

@@ -265,4 +265,10 @@ export class UserRepository {
       },
     });
   }
+
+  async deletePasskey(id: string) {
+    return await this.prismaService.authenticator.delete({
+      where: { id },
+    });
+  }
 }
