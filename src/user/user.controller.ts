@@ -43,6 +43,7 @@ import {
   VerifyPasskeyRegistrationDto,
 } from './dto/req.dto';
 import {
+  BasicPasskeyDto,
   PasskeyRegisterOptionResDto,
   UpdateUserPictureResDto,
   UserConsentListResDto,
@@ -197,13 +198,13 @@ export class UserController {
   @ApiBearerAuth('user:jwt')
   @ApiOkResponse({
     description: 'success',
-    type: PasskeyRegisterOptionResDto,
+    type: [BasicPasskeyDto],
   })
   @ApiUnauthorizedResponse({ description: 'token not valid' })
   @ApiInternalServerErrorResponse({ description: 'server error' })
   @UseGuards(UserGuard)
   @Get('passkey')
-  async getPasskeyList(@GetUser() user: User) {
+  async getPasskeyList(@GetUser() user: User): Promise<BasicPasskeyDto[]> {
     return await this.userService.getPasskeyList(user.uuid);
   }
 
@@ -254,7 +255,7 @@ export class UserController {
     description: '패스키의 이름을 수정합니다.',
   })
   @ApiBearerAuth('user:jwt')
-  @ApiOkResponse({ description: 'success', type: Boolean })
+  @ApiOkResponse({ description: 'success', type: BasicPasskeyDto })
   @ApiUnauthorizedResponse({ description: 'token not valid' })
   @ApiNotFoundResponse({ description: 'Id is not found' })
   @ApiInternalServerErrorResponse({ description: 'server error' })
@@ -263,7 +264,7 @@ export class UserController {
   async updatePasskey(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() { name }: ChangePasskeyNameDto,
-  ) {
+  ): Promise<BasicPasskeyDto> {
     return await this.userService.updatePasskey(id, name);
   }
 
@@ -278,7 +279,7 @@ export class UserController {
   @ApiInternalServerErrorResponse({ description: 'server error' })
   @UseGuards(UserGuard)
   @Delete('passkey/:id')
-  async deletePasskey(@Param('id', ParseUUIDPipe) id: string) {
+  async deletePasskey(@Param('id', ParseUUIDPipe) id: string): Promise<void> {
     return await this.userService.deletePasskey(id);
   }
 }

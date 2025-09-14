@@ -10,6 +10,7 @@ import {
 import { Authenticator, User } from '@prisma/client';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 
+import { BasicPasskeyDto } from './dto/res.dto';
 import { UserConsentType } from './types/userConsent.type';
 import { UserWithAuthenticators } from './types/userWithAuthenticators';
 
@@ -231,7 +232,7 @@ export class UserRepository {
       });
   }
 
-  async getPasskeyList(userUuid: string) {
+  async getPasskeyList(userUuid: string): Promise<BasicPasskeyDto[]> {
     return await this.prismaService.authenticator.findMany({
       where: { userUuid },
       select: {
@@ -255,7 +256,7 @@ export class UserRepository {
     });
   }
 
-  async updatePasskey(id: string, name: string) {
+  async updatePasskey(id: string, name: string): Promise<BasicPasskeyDto> {
     return await this.prismaService.authenticator
       .update({
         where: { id },
@@ -279,8 +280,8 @@ export class UserRepository {
       });
   }
 
-  async deletePasskey(id: string) {
-    return await this.prismaService.authenticator
+  async deletePasskey(id: string): Promise<void> {
+    await this.prismaService.authenticator
       .delete({
         where: { id },
       })

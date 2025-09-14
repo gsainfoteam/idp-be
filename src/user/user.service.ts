@@ -33,7 +33,7 @@ import {
   IssueUserSecretDto,
   RegisterDto,
 } from './dto/req.dto';
-import { UpdateUserPictureResDto } from './dto/res.dto';
+import { BasicPasskeyDto, UpdateUserPictureResDto } from './dto/res.dto';
 import { UserConsentType } from './types/userConsent.type';
 import { UserRepository } from './user.repository';
 
@@ -223,7 +223,7 @@ export class UserService {
     await this.objectService.deleteObject(`user/${userUuid}/profile.webp`);
   }
 
-  async getPasskeyList(userUuid: string) {
+  async getPasskeyList(userUuid: string): Promise<BasicPasskeyDto[]> {
     return await this.userRepository.getPasskeyList(userUuid);
   }
 
@@ -289,11 +289,11 @@ export class UserService {
     return true;
   }
 
-  async updatePasskey(id: string, name: string) {
+  async updatePasskey(id: string, name: string): Promise<BasicPasskeyDto> {
     return await this.userRepository.updatePasskey(id, name);
   }
 
-  async deletePasskey(id: string) {
+  async deletePasskey(id: string): Promise<void> {
     return await this.userRepository.deletePasskey(id);
   }
 }
