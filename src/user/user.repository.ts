@@ -256,19 +256,44 @@ export class UserRepository {
   }
 
   async updatePasskey(id: string, name: string) {
-    return await this.prismaService.authenticator.update({
-      where: { id },
-      data: { name },
-      select: {
-        id: true,
-        name: true,
-      },
-    });
+    return await this.prismaService.authenticator
+      .update({
+        where: { id },
+        data: { name },
+        select: {
+          id: true,
+          name: true,
+        },
+      })
+      .catch((error) => {
+        if (error instanceof PrismaClientKnownRequestError) {
+          if (error.code === 'P2025' || error.code === 'P2002') {
+            this.logger.debug(`user not found with uuid: ${id}`);
+            throw new ForbiddenException('user not found');
+          }
+          this.logger.debug(`prisma error occurred: ${error.code}`);
+          throw new InternalServerErrorException();
+        }
+        this.logger.error(`update user password error: ${error}`);
+        throw new InternalServerErrorException();
+      });
   }
 
   async deletePasskey(id: string) {
-    return await this.prismaService.authenticator.delete({
-      where: { id },
-    });
+    return await this.prismaService.authenticator
+      .delete({
+        where: { id },
+      })
+      .catch((error) => {
+        if (
+          error instanceof PrismaClientKnownRequestError &&
+          error.code === 'P2025'
+        ) {
+          this.logger.debug(`user not found with uuid: ${id}`);
+          throw new ForbiddenException('user not found');
+        }
+        this.logger.error(`delete user error: ${error}`);
+        throw new InternalServerErrorException();
+      });
   }
 }
