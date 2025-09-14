@@ -213,11 +213,12 @@ export class UserController {
   })
   @ApiNotFoundResponse({ description: 'Email is not found' })
   @ApiInternalServerErrorResponse({ description: 'server error' })
+  @UseGuards(UserGuard)
   @Post('passkey')
   async registerOptions(
-    @Body() { email }: IssueUserSecretDto,
+    @GetUser() user: User,
   ): Promise<PasskeyRegisterOptionResDto> {
-    return await this.userService.registerOptions(email);
+    return await this.userService.registerOptions(user.email);
   }
 
   @ApiOperation({
@@ -228,12 +229,14 @@ export class UserController {
   @ApiUnauthorizedResponse({ description: 'Response is invalid' })
   @ApiNotFoundResponse({ description: 'Email is not found' })
   @ApiInternalServerErrorResponse({ description: 'server error' })
+  @UseGuards(UserGuard)
   @Post('passkey/verify')
   async verifyRegistration(
-    @Body() { email, name, registrationResponse }: VerifyPasskeyRegistrationDto,
+    @GetUser() user: User,
+    @Body() { name, registrationResponse }: VerifyPasskeyRegistrationDto,
   ): Promise<boolean> {
     return await this.userService.verifyRegistration(
-      email,
+      user.email,
       name,
       registrationResponse,
     );
