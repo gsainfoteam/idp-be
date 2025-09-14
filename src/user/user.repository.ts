@@ -254,4 +254,15 @@ export class UserRepository {
       data: { ...authenticator, name },
     });
   }
+
+  async updatePasskey(id: string, name: string) {
+    return await this.prismaService.authenticator.update({
+      where: { id },
+      data: { name },
+      select: {
+        id: true,
+        name: true,
+      },
+    });
+  }
 }

@@ -236,3 +236,12 @@ export class VerifyPasskeyRegistrationDto {
   @Type(() => RegistrationResponseDto)
   registrationResponse: RegistrationResponseDto;
 }
+
+export class ChangePasskeyNameDto {
+  @ApiProperty({
+    example: 'Passkey Name',
+    description: '패스키 이름',
+  })
+  @IsString()
+  name: string;
+}

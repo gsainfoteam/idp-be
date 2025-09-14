@@ -5,7 +5,9 @@ import {
   Controller,
   Delete,
   Get,
+  Param,
   ParseIntPipe,
+  ParseUUIDPipe,
   Patch,
   Post,
   Query,
@@ -33,6 +35,7 @@ import { GetUser } from 'src/auth/decorator/getUser.decorator';
 import { UserGuard } from 'src/auth/guard/auth.guard';
 
 import {
+  ChangePasskeyNameDto,
   ChangePasswordDto,
   DeleteUserReqDto,
   IssueUserSecretDto,
@@ -240,5 +243,22 @@ export class UserController {
       name,
       registrationResponse,
     );
+  }
+
+  @ApiOperation({
+    summary: 'update name of passkey',
+    description: '패스키의 이름을 수정합니다.',
+  })
+  @ApiOkResponse({ description: 'success', type: Boolean })
+  @ApiUnauthorizedResponse({ description: 'Response is invalid' })
+  @ApiNotFoundResponse({ description: 'Email is not found' })
+  @ApiInternalServerErrorResponse({ description: 'server error' })
+  @UseGuards(UserGuard)
+  @Patch('passkey/:id')
+  async updatePasskey(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() { name }: ChangePasskeyNameDto,
+  ) {
+    return await this.userService.updatePasskey(id, name);
   }
 }

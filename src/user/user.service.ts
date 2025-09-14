@@ -288,4 +288,8 @@ export class UserService {
 
     return true;
   }
+
+  async updatePasskey(id: string, name: string) {
+    return await this.userRepository.updatePasskey(id, name);
+  }
 }
