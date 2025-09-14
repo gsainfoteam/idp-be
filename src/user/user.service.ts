@@ -296,7 +296,7 @@ export class UserService {
   ): Promise<BasicPasskeyDto> {
     const auth = await this.userRepository.getAuthenticator(id);
 
-    if (auth.userUuid !== userUuid) throw new UnauthorizedException();
+    if (auth.userUuid !== userUuid) throw new ForbiddenException();
 
     return await this.userRepository.updatePasskey(id, name);
   }
@@ -304,7 +304,7 @@ export class UserService {
   async deletePasskey(id: string, userUuid: string): Promise<void> {
     const auth = await this.userRepository.getAuthenticator(id);
 
-    if (auth.userUuid !== userUuid) throw new UnauthorizedException();
+    if (auth.userUuid !== userUuid) throw new ForbiddenException();
 
     return await this.userRepository.deletePasskey(id);
   }
