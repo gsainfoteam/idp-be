@@ -236,7 +236,6 @@ export class UserController {
   @ApiOkResponse({ description: 'success', type: Boolean })
   @ApiUnauthorizedResponse({ description: 'token not valid' })
   @ApiNotFoundResponse({ description: 'Email is not found' })
-  @ApiConflictResponse({ description: 'Credential id conflict' })
   @ApiInternalServerErrorResponse({ description: 'server error' })
   @UseGuards(UserGuard)
   @Post('passkey/verify')

@@ -269,24 +269,9 @@ export class UserRepository {
       userUuid: string;
     },
   ): Promise<Authenticator> {
-    return this.prismaService.authenticator
-      .create({
-        data: { ...authenticator, name },
-      })
-      .catch((error) => {
-        if (error instanceof PrismaClientKnownRequestError) {
-          if (error.code === 'P2002') {
-            this.logger.debug(
-              `conflict credentialId: ${authenticator.credentialId}`,
-            );
-            throw new ConflictException('conflict credentialId');
-          }
-          this.logger.debug(`prisma error occurred: ${error.code}`);
-          throw new InternalServerErrorException();
-        }
-        this.logger.error(`update user password error: ${error}`);
-        throw new InternalServerErrorException();
-      });
+    return this.prismaService.authenticator.create({
+      data: { ...authenticator, name },
+    });
   }
 
   async updatePasskey(id: string, name: string): Promise<BasicPasskeyDto> {
