@@ -10,6 +10,7 @@ import {
 import { Authenticator, User } from '@prisma/client';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 
+import { BasicPasskeyDto } from './dto/res.dto';
 import { UserConsentType } from './types/userConsent.type';
 import { UserWithAuthenticators } from './types/userWithAuthenticators';
 
@@ -231,14 +232,87 @@ export class UserRepository {
       });
   }
 
-  async saveAuthenticator(authenticator: {
-    credentialId: string;
-    publicKey: Uint8Array;
-    counter: number;
-    userUuid: string;
-  }): Promise<Authenticator> {
-    return this.prismaService.authenticator.create({
-      data: authenticator,
+  async getPasskeyList(userUuid: string): Promise<BasicPasskeyDto[]> {
+    return await this.prismaService.authenticator.findMany({
+      where: { userUuid },
+      select: {
+        id: true,
+        name: true,
+      },
     });
+  }
+
+  async getAuthenticator(id: string): Promise<Authenticator> {
+    return await this.prismaService.authenticator
+      .findUniqueOrThrow({
+        where: { id },
+      })
+      .catch((error) => {
+        if (
+          error instanceof PrismaClientKnownRequestError &&
+          error.code === 'P2025'
+        ) {
+          this.logger.debug(`passkey not found with uuid: ${id}`);
+          throw new ForbiddenException('user not found');
+        }
+        this.logger.error(`find passkey by uuid error: ${error}`);
+        throw new InternalServerErrorException();
+      });
+  }
+
+  async saveAuthenticator(
+    name: string,
+    authenticator: {
+      credentialId: string;
+      publicKey: Uint8Array;
+      counter: number;
+      userUuid: string;
+    },
+  ): Promise<Authenticator> {
+    return this.prismaService.authenticator.create({
+      data: { ...authenticator, name },
+    });
+  }
+
+  async updatePasskey(id: string, name: string): Promise<BasicPasskeyDto> {
+    return await this.prismaService.authenticator
+      .update({
+        where: { id },
+        data: { name },
+        select: {
+          id: true,
+          name: true,
+        },
+      })
+      .catch((error) => {
+        if (error instanceof PrismaClientKnownRequestError) {
+          if (error.code === 'P2025' || error.code === 'P2002') {
+            this.logger.debug(`passkey not found with uuid: ${id}`);
+            throw new ForbiddenException('passkey not found');
+          }
+          this.logger.debug(`prisma error occurred: ${error.code}`);
+          throw new InternalServerErrorException();
+        }
+        this.logger.error(`update passkey name error: ${error}`);
+        throw new InternalServerErrorException();
+      });
+  }
+
+  async deletePasskey(id: string): Promise<void> {
+    await this.prismaService.authenticator
+      .delete({
+        where: { id },
+      })
+      .catch((error) => {
+        if (
+          error instanceof PrismaClientKnownRequestError &&
+          error.code === 'P2025'
+        ) {
+          this.logger.debug(`passkey not found with uuid: ${id}`);
+          throw new ForbiddenException('passkey not found');
+        }
+        this.logger.error(`delete passkey error: ${error}`);
+        throw new InternalServerErrorException();
+      });
   }
 }

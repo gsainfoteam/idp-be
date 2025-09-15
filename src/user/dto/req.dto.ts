@@ -222,18 +222,11 @@ class RegistrationResponseDto {
 
 export class VerifyPasskeyRegistrationDto {
   @ApiProperty({
-    example: 'JohbDoe@gm.gist.ac.kr',
-    description: '유저의 이메일 주소',
+    example: 'Passkey Name',
+    description: '패스키 이름',
   })
-  @IsEmail()
-  @IsGistEmail()
-  @Transform(({ value }) => {
-    if (typeof value === 'string') {
-      return value.toLowerCase();
-    }
-    throw new BadRequestException('이메일 형식이 올바르지 않습니다.');
-  })
-  email: string;
+  @IsString()
+  name: string;
 
   @ApiProperty({
     description: '유저의 패스키 등록 응답',
@@ -242,4 +235,13 @@ export class VerifyPasskeyRegistrationDto {
   @ValidateNested()
   @Type(() => RegistrationResponseDto)
   registrationResponse: RegistrationResponseDto;
+}
+
+export class ChangePasskeyNameDto {
+  @ApiProperty({
+    example: 'Passkey Name',
+    description: '패스키 이름',
+  })
+  @IsString()
+  name: string;
 }

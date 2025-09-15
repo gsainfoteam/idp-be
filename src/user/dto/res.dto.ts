@@ -305,3 +305,17 @@ export class PasskeyRegisterOptionResDto {
   })
   extensions?: AuthenticationExtensionsDto;
 }
+
+export class BasicPasskeyDto {
+  @ApiProperty({
+    example: 'ff0e6d1b-c2a4-44fb-aa0e-c20b6a721741',
+    description: 'Passkey id',
+  })
+  id: string;
+
+  @ApiProperty({
+    example: 'passkey-name',
+    description: 'Passkey name',
+  })
+  name: string;
+}

@@ -33,7 +33,7 @@ import {
   IssueUserSecretDto,
   RegisterDto,
 } from './dto/req.dto';
-import { UpdateUserPictureResDto } from './dto/res.dto';
+import { BasicPasskeyDto, UpdateUserPictureResDto } from './dto/res.dto';
 import { UserConsentType } from './types/userConsent.type';
 import { UserRepository } from './user.repository';
 
@@ -223,6 +223,10 @@ export class UserService {
     await this.objectService.deleteObject(`user/${userUuid}/profile.webp`);
   }
 
+  async getPasskeyList(userUuid: string): Promise<BasicPasskeyDto[]> {
+    return await this.userRepository.getPasskeyList(userUuid);
+  }
+
   async registerOptions(
     email: string,
   ): Promise<PublicKeyCredentialCreationOptionsJSON> {
@@ -249,6 +253,7 @@ export class UserService {
 
   async verifyRegistration(
     email: string,
+    name: string,
     response: RegistrationResponseJSON,
   ): Promise<boolean> {
     const user = await this.userRepository.findUserByEmail(email);
@@ -274,7 +279,7 @@ export class UserService {
 
     const { id, publicKey, counter } = registrationInfo.credential;
 
-    await this.userRepository.saveAuthenticator({
+    await this.userRepository.saveAuthenticator(name, {
       credentialId: id,
       publicKey,
       counter,
@@ -282,5 +287,25 @@ export class UserService {
     });
 
     return true;
+  }
+
+  async updatePasskey(
+    id: string,
+    name: string,
+    userUuid: string,
+  ): Promise<BasicPasskeyDto> {
+    const auth = await this.userRepository.getAuthenticator(id);
+
+    if (auth.userUuid !== userUuid) throw new ForbiddenException();
+
+    return await this.userRepository.updatePasskey(id, name);
+  }
+
+  async deletePasskey(id: string, userUuid: string): Promise<void> {
+    const auth = await this.userRepository.getAuthenticator(id);
+
+    if (auth.userUuid !== userUuid) throw new ForbiddenException();
+
+    return await this.userRepository.deletePasskey(id);
   }
 }

@@ -5,7 +5,9 @@ import {
   Controller,
   Delete,
   Get,
+  Param,
   ParseIntPipe,
+  ParseUUIDPipe,
   Patch,
   Post,
   Query,
@@ -33,6 +35,7 @@ import { GetUser } from 'src/auth/decorator/getUser.decorator';
 import { UserGuard } from 'src/auth/guard/auth.guard';
 
 import {
+  ChangePasskeyNameDto,
   ChangePasswordDto,
   DeleteUserReqDto,
   IssueUserSecretDto,
@@ -40,6 +43,7 @@ import {
   VerifyPasskeyRegistrationDto,
 } from './dto/req.dto';
 import {
+  BasicPasskeyDto,
   PasskeyRegisterOptionResDto,
   UpdateUserPictureResDto,
   UserConsentListResDto,
@@ -188,37 +192,100 @@ export class UserController {
   }
 
   @ApiOperation({
+    summary: 'get the passkey list of user',
+    description: '사용자의 패스키 목록을 불러옵니다',
+  })
+  @ApiBearerAuth('user:jwt')
+  @ApiOkResponse({
+    description: 'success',
+    type: [BasicPasskeyDto],
+  })
+  @ApiUnauthorizedResponse({ description: 'token not valid' })
+  @ApiInternalServerErrorResponse({ description: 'server error' })
+  @UseGuards(UserGuard)
+  @Get('passkey')
+  async getPasskeyList(@GetUser() user: User): Promise<BasicPasskeyDto[]> {
+    return await this.userService.getPasskeyList(user.uuid);
+  }
+
+  @ApiOperation({
     summary: 'register the passkey',
     description: '패스키를 등록을 위한 challenge를 발급합니다.',
   })
+  @ApiBearerAuth('user:jwt')
   @ApiOkResponse({
     description: 'success',
     type: PasskeyRegisterOptionResDto,
   })
+  @ApiUnauthorizedResponse({ description: 'token not valid' })
   @ApiNotFoundResponse({ description: 'Email is not found' })
   @ApiInternalServerErrorResponse({ description: 'server error' })
+  @UseGuards(UserGuard)
   @Post('passkey')
   async registerOptions(
-    @Body() { email }: IssueUserSecretDto,
+    @GetUser() user: User,
   ): Promise<PasskeyRegisterOptionResDto> {
-    return await this.userService.registerOptions(email);
+    return await this.userService.registerOptions(user.email);
   }
 
   @ApiOperation({
     summary: 'verify the registration options',
     description: '패스키 등록합니다.',
   })
+  @ApiBearerAuth('user:jwt')
   @ApiOkResponse({ description: 'success', type: Boolean })
-  @ApiUnauthorizedResponse({ description: 'Response is invalid' })
+  @ApiUnauthorizedResponse({ description: 'token not valid' })
   @ApiNotFoundResponse({ description: 'Email is not found' })
   @ApiInternalServerErrorResponse({ description: 'server error' })
+  @UseGuards(UserGuard)
   @Post('passkey/verify')
   async verifyRegistration(
-    @Body() { email, registrationResponse }: VerifyPasskeyRegistrationDto,
+    @GetUser() user: User,
+    @Body() { name, registrationResponse }: VerifyPasskeyRegistrationDto,
   ): Promise<boolean> {
     return await this.userService.verifyRegistration(
-      email,
+      user.email,
+      name,
       registrationResponse,
     );
+  }
+
+  @ApiOperation({
+    summary: 'update name of passkey',
+    description: '패스키의 이름을 수정합니다.',
+  })
+  @ApiBearerAuth('user:jwt')
+  @ApiOkResponse({ description: 'success', type: BasicPasskeyDto })
+  @ApiUnauthorizedResponse({ description: 'token not valid' })
+  @ApiForbiddenResponse({ description: 'Invalid user or token' })
+  @ApiNotFoundResponse({ description: 'Id is not found' })
+  @ApiInternalServerErrorResponse({ description: 'server error' })
+  @UseGuards(UserGuard)
+  @Patch('passkey/:id')
+  async updatePasskey(
+    @GetUser() user: User,
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() { name }: ChangePasskeyNameDto,
+  ): Promise<BasicPasskeyDto> {
+    return await this.userService.updatePasskey(id, name, user.uuid);
+  }
+
+  @ApiOperation({
+    summary: 'delete passkey',
+    description: '패스키를 삭제합니다.',
+  })
+  @ApiBearerAuth('user:jwt')
+  @ApiOkResponse({ description: 'success' })
+  @ApiUnauthorizedResponse({ description: 'token not valid' })
+  @ApiForbiddenResponse({ description: 'Invalid user or token' })
+  @ApiNotFoundResponse({ description: 'Id is not found' })
+  @ApiInternalServerErrorResponse({ description: 'server error' })
+  @UseGuards(UserGuard)
+  @Delete('passkey/:id')
+  async deletePasskey(
+    @GetUser() user: User,
+    @Param('id', ParseUUIDPipe) id: string,
+  ): Promise<void> {
+    return await this.userService.deletePasskey(id, user.uuid);
   }
 }
