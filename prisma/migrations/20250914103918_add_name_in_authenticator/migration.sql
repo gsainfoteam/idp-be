@@ -8,6 +8,4 @@
 DROP INDEX "authenticator_credential_id_key";
 
 -- AlterTable
-ALTER TABLE "authenticator" ADD COLUMN     "name" TEXT;
-UPDATE "authenticator" SET "name" = 'Unnamed' WHERE "name" IS NULL;
-ALTER TABLE "authenticator" ALTER COLUMN "name" SET NOT NULL;
+ALTER TABLE "authenticator" ADD COLUMN     "name" TEXT NOT NULL;
