@@ -6,6 +6,7 @@ import {
   Injectable,
   InternalServerErrorException,
   Logger,
+  NotFoundException,
 } from '@nestjs/common';
 import { Client } from '@prisma/client';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
@@ -19,9 +20,9 @@ export class ClientRepository {
   async findClientListByUserUuid(userUuid: string): Promise<Client[]> {
     return this.prismaService.client.findMany({
       where: {
-        member: {
+        userLinks: {
           some: {
-            uuid: userUuid,
+            userUuid: userUuid,
           },
         },
       },
@@ -56,9 +57,9 @@ export class ClientRepository {
       .findUniqueOrThrow({
         where: {
           uuid,
-          member: {
+          userLinks: {
             some: {
-              uuid: userUuid,
+              userUuid: userUuid,
             },
           },
         },
@@ -92,9 +93,10 @@ export class ClientRepository {
           name,
           urls,
           secret,
-          member: {
-            connect: {
-              uuid: userUuid,
+          userLinks: {
+            create: {
+              userUuid: userUuid,
+              role: 'ADMIN',
             },
           },
         },
@@ -120,9 +122,9 @@ export class ClientRepository {
       .update({
         where: {
           uuid,
-          member: {
+          userLinks: {
             some: {
-              uuid: userUuid,
+              userUuid: userUuid,
             },
           },
         },
@@ -164,9 +166,9 @@ export class ClientRepository {
       .update({
         where: {
           uuid,
-          member: {
+          userLinks: {
             some: {
-              uuid: userUuid,
+              userUuid: userUuid,
             },
           },
         },
@@ -191,6 +193,39 @@ export class ClientRepository {
       });
   }
 
+  async addMemberToClient(uuid: string, memberEmail: string): Promise<void> {
+    const member = await this.prismaService.user.findUnique({
+      where: { email: memberEmail },
+    });
+    if (!member) throw new NotFoundException('User not found');
+
+    try {
+      await this.prismaService.client.update({
+        where: {
+          uuid: uuid,
+        },
+        data: {
+          userLinks: {
+            create: {
+              userUuid: member.uuid,
+              role: 'MEMBER',
+            },
+          },
+        },
+      });
+    } catch (error) {
+      if (
+        error instanceof PrismaClientKnownRequestError &&
+        error.code === 'P2025'
+      ) {
+        this.logger.debug(`addMemberToClient error: ${error.stack}`);
+        throw new ForbiddenException();
+      }
+      this.logger.error(`addMemberToClient error: ${error}`);
+      throw new InternalServerErrorException();
+    }
+  }
+
   async updateClientPicture(
     picture: string,
     uuid: string,
@@ -200,9 +235,9 @@ export class ClientRepository {
       .update({
         where: {
           uuid,
-          member: {
+          userLinks: {
             some: {
-              uuid: userUuid,
+              userUuid: userUuid,
             },
           },
         },
@@ -228,9 +263,9 @@ export class ClientRepository {
       .update({
         where: {
           uuid,
-          member: {
+          userLinks: {
             some: {
-              uuid: userUuid,
+              userUuid: userUuid,
             },
           },
         },
@@ -251,14 +286,54 @@ export class ClientRepository {
       });
   }
 
+  async removeMemberFromClient(
+    uuid: string,
+    memberEmail: string,
+  ): Promise<void> {
+    const member = await this.prismaService.user.findFirst({
+      where: {
+        email: memberEmail,
+      },
+    });
+    if (!member) throw new NotFoundException('User not found');
+
+    try {
+      await this.prismaService.client.update({
+        where: {
+          uuid: uuid,
+        },
+        data: {
+          userLinks: {
+            delete: {
+              userUuid_clientUuid: {
+                userUuid: member.uuid,
+                clientUuid: uuid,
+              },
+            },
+          },
+        },
+      });
+    } catch (error) {
+      if (
+        error instanceof PrismaClientKnownRequestError &&
+        error.code === 'P2025'
+      ) {
+        this.logger.debug(`removeMemberFromClient error: ${error.stack}`);
+        throw new ForbiddenException();
+      }
+      this.logger.error(`removeMemberFromClient error: ${error}`);
+      throw new InternalServerErrorException();
+    }
+  }
+
   async deleteClientPicture(uuid: string, userUuid: string): Promise<void> {
     await this.prismaService.client
       .update({
         where: {
           uuid,
-          member: {
+          userLinks: {
             some: {
-              uuid: userUuid,
+              userUuid: userUuid,
             },
           },
         },

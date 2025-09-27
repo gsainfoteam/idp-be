@@ -31,11 +31,10 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  clients            Client[]             @relation("ClientToUser")
-  consent            Consent[]
-  RefreshToken       RefreshToken[]
-  authenticators     Authenticator[]
-  UserClientRelation UserClientRelation[]
+  memberships    UserClientRelation[] //role-aware
+  consent        Consent[]
+  RefreshToken   RefreshToken[]
+  authenticators Authenticator[]
 
   @@map("user")
 }
@@ -55,25 +54,24 @@ model Client {
   scopes         String[]
   optionalScopes String[] @map("optional_scopes")
 
-  member             User[]               @relation("ClientToUser")
-  ClientUserRelation UserClientRelation[]
-  consent            Consent[]
-  RefreshToken       RefreshToken[]
+  userLinks    UserClientRelation[] //role-aware
+  consent      Consent[]
+  RefreshToken RefreshToken[]
 
   @@map("client")
 }
 
 model UserClientRelation {
-  userUuid   String
-  clientUuid String
+  userUuid   String @db.Uuid
+  clientUuid String @db.Uuid
 
-  User   User   @relation(fields: [userUuid], references: [uuid], onDelete: Cascade)
-  Client Client @relation(fields: [clientUuid], references: [uuid], onDelete: Cascade)
+  user   User   @relation(fields: [userUuid], references: [uuid], onDelete: Cascade)
+  client Client @relation(fields: [clientUuid], references: [uuid], onDelete: Cascade)
 
   role RoleType @default(MEMBER)
 
   @@id([userUuid, clientUuid])
-  @@map("user_client")
+  @@map("user_client_relations")
 }
 
 model RefreshToken {
