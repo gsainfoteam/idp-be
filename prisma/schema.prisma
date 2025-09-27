@@ -12,6 +12,11 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum RoleType {
+  ADMIN
+  MEMBER
+}
+
 model User {
   uuid     String @id @default(uuid()) @db.Uuid
   password String
@@ -26,10 +31,11 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  clients         Client[]       @relation("ClientToUser")
-  consent         Consent[]
-  RefreshToken    RefreshToken[]
-  authenticators  Authenticator[]
+  clients            Client[]             @relation("ClientToUser")
+  consent            Consent[]
+  RefreshToken       RefreshToken[]
+  authenticators     Authenticator[]
+  UserClientRelation UserClientRelation[]
 
   @@map("user")
 }
@@ -49,11 +55,25 @@ model Client {
   scopes         String[]
   optionalScopes String[] @map("optional_scopes")
 
-  member       User[]         @relation("ClientToUser")
-  consent      Consent[]
-  RefreshToken RefreshToken[]
+  member             User[]               @relation("ClientToUser")
+  ClientUserRelation UserClientRelation[]
+  consent            Consent[]
+  RefreshToken       RefreshToken[]
 
   @@map("client")
+}
+
+model UserClientRelation {
+  userUuid   String
+  clientUuid String
+
+  User   User   @relation(fields: [userUuid], references: [uuid], onDelete: Cascade)
+  Client Client @relation(fields: [clientUuid], references: [uuid], onDelete: Cascade)
+
+  role RoleType @default(MEMBER)
+
+  @@id([userUuid, clientUuid])
+  @@map("user_client")
 }
 
 model RefreshToken {
@@ -87,14 +107,14 @@ model Consent {
 }
 
 model Authenticator {
-  id            String  @id @default(uuid())
-  name          String
-  credentialId  String  @unique @map("credential_id")
-  publicKey     Bytes   @map("public_key")
-  counter       Int
-  userUuid      String  @db.Uuid @map("user_uuid")
+  id           String @id @default(uuid())
+  name         String
+  credentialId String @unique @map("credential_id")
+  publicKey    Bytes  @map("public_key")
+  counter      Int
+  userUuid     String @map("user_uuid") @db.Uuid
 
-  user          User    @relation(fields: [userUuid], references: [uuid], onDelete: Cascade)
+  user User @relation(fields: [userUuid], references: [uuid], onDelete: Cascade)
 
   @@map("authenticator")
 }
