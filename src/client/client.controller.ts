@@ -142,6 +142,7 @@ export class ClientController {
   @ApiForbiddenResponse({ description: '접근 불가' })
   @ApiInternalServerErrorResponse({ description: '서버 오류' })
   @UseGuards(UserGuard)
+  @Post(':clientId/members')
   async addMember(
     @Param('clientId', ParseUUIDPipe) uuid: string,
     @Body() body: MemberEmailDto,
@@ -161,6 +162,7 @@ export class ClientController {
   @ApiForbiddenResponse({ description: '접근 불가' })
   @ApiInternalServerErrorResponse({ description: '서버 오류' })
   @UseGuards(UserGuard)
+  @Delete(':cliendId/members')
   async removeMemebr(
     @Param('clientId', ParseUUIDPipe) uuid: string,
     @Body() body: MemberEmailDto,

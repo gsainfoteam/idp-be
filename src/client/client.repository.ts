@@ -8,7 +8,7 @@ import {
   Logger,
   NotFoundException,
 } from '@nestjs/common';
-import { Client } from '@prisma/client';
+import { Client, RoleType } from '@prisma/client';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 
 @Injectable()
@@ -96,7 +96,7 @@ export class ClientRepository {
           userLinks: {
             create: {
               userUuid: userUuid,
-              role: 'ADMIN',
+              role: RoleType.ADMIN,
             },
           },
         },
@@ -207,7 +207,7 @@ export class ClientRepository {
           userLinks: {
             create: {
               userUuid: member.uuid,
-              role: 'MEMBER',
+              role: RoleType.MEMBER,
             },
           },
         },
