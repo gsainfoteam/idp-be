@@ -98,6 +98,26 @@ export class ClientService {
   }
 
   /**
+   * to add the user to the client and give access
+   * @param uuid client's uuid
+   * @param memberEmail user's email, whom we want to add to the client
+   */
+  async addMember(uuid: string, memberEmail: string): Promise<void> {
+    await this.clientRepository.findClientByUuid(uuid);
+    await this.clientRepository.addMemberToClient(uuid, memberEmail);
+  }
+
+  /**
+   * to remove the user from the client, ro restrict the access
+   * @param uuid client's uuid
+   * @param memberEmail user's email, whom we want to remove from client
+   */
+  async removeMember(uuid: string, memberEmail: string): Promise<void> {
+    await this.clientRepository.findClientByUuid(uuid);
+    await this.clientRepository.removeMemberFromClient(uuid, memberEmail);
+  }
+
+  /**
    * to reset the client secret, generate a new secret key and update the client secret
    * @param uuid client's uuid
    * @param user user who wants to reset the client secret

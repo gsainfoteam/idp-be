@@ -34,7 +34,11 @@ import { GetUser } from 'src/auth/decorator/getUser.decorator';
 import { UserGuard } from 'src/auth/guard/auth.guard';
 
 import { ClientService } from './client.service';
-import { CreateClientDto, UpdateClientDto } from './dto/req.dto';
+import {
+  CreateClientDto,
+  MemberEmailDto,
+  UpdateClientDto,
+} from './dto/req.dto';
 import {
   ClientCredentialResDto,
   ClientPublicResDto,
@@ -105,6 +109,7 @@ export class ClientController {
       await this.clientService.getClientByUuid(uuid),
     );
   }
+
   @ApiOperation({
     summary: 'Register client',
     description: '유저가 client를 등록한다.',
@@ -123,6 +128,44 @@ export class ClientController {
     return new ClientCredentialResDto(
       await this.clientService.registerClient(createClientDto, user),
     );
+  }
+
+  @ApiOperation({
+    summary: 'Add a member to client',
+    description: 'Add a member to access the client',
+  })
+  @ApiBearerAuth('user:jwt')
+  @ApiOkResponse({
+    description: 'Client added successfully',
+  })
+  @ApiUnauthorizedResponse({ description: '인증 실패' })
+  @ApiForbiddenResponse({ description: '접근 불가' })
+  @ApiInternalServerErrorResponse({ description: '서버 오류' })
+  @UseGuards(UserGuard)
+  async addMember(
+    @Param('clientId', ParseUUIDPipe) uuid: string,
+    @Body() body: MemberEmailDto,
+  ): Promise<void> {
+    return this.clientService.addMember(uuid, body.email);
+  }
+
+  @ApiOperation({
+    summary: 'Remove a member from client',
+    description: 'Remove a user from client to restrict the access',
+  })
+  @ApiBearerAuth('user:jwt')
+  @ApiOkResponse({
+    description: 'Client removed successfully',
+  })
+  @ApiUnauthorizedResponse({ description: '인증 실패' })
+  @ApiForbiddenResponse({ description: '접근 불가' })
+  @ApiInternalServerErrorResponse({ description: '서버 오류' })
+  @UseGuards(UserGuard)
+  async removeMemebr(
+    @Param('clientId', ParseUUIDPipe) uuid: string,
+    @Body() body: MemberEmailDto,
+  ): Promise<void> {
+    return this.clientService.removeMember(uuid, body.email);
   }
 
   @ApiOperation({

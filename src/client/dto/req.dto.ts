@@ -2,6 +2,7 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
   IsArray,
   IsBoolean,
+  IsEmail,
   IsIn,
   IsOptional,
   IsString,
@@ -89,4 +90,10 @@ export class UpdateClientDto {
   @IsBoolean()
   @IsOptional()
   idTokenAllowed?: boolean;
+}
+
+export class MemberEmailDto {
+  @ApiProperty({ example: 'student@gist.ac.kr' })
+  @IsEmail()
+  email!: string;
 }

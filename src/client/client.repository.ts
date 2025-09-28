@@ -198,7 +198,6 @@ export class ClientRepository {
       where: { email: memberEmail },
     });
     if (!member) throw new NotFoundException('User not found');
-
     try {
       await this.prismaService.client.update({
         where: {
@@ -214,12 +213,14 @@ export class ClientRepository {
         },
       });
     } catch (error) {
-      if (
-        error instanceof PrismaClientKnownRequestError &&
-        error.code === 'P2025'
-      ) {
+      if (error instanceof PrismaClientKnownRequestError) {
         this.logger.debug(`addMemberToClient error: ${error.stack}`);
-        throw new ForbiddenException();
+        if (error.code === 'P2025') {
+          throw new ForbiddenException();
+        }
+        if (error.code === 'P2002') {
+          throw new ConflictException('Already a member');
+        }
       }
       this.logger.error(`addMemberToClient error: ${error}`);
       throw new InternalServerErrorException();
