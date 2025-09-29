@@ -53,6 +53,8 @@ erDiagram
     Bytes public_key 
     Int counter 
     String user_uuid 
+    DateTime created_at 
+    DateTime login_at "❓"
     }
   
     "user" o{--}o "client" : "clients"

@@ -95,7 +95,10 @@ export class AuthRepository {
         where: {
           credentialId,
         },
-        data: { counter },
+        data: {
+          counter,
+          loginAt: new Date(),
+        },
       })
       .catch((error) => {
         if (error instanceof PrismaClientKnownRequestError) {
