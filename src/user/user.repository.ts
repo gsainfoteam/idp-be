@@ -238,6 +238,8 @@ export class UserRepository {
       select: {
         id: true,
         name: true,
+        createdAt: true,
+        loginAt: true,
       },
     });
   }
@@ -289,15 +291,11 @@ export class UserRepository {
       });
   }
 
-  async updatePasskey(id: string, name: string): Promise<BasicPasskeyDto> {
-    return await this.prismaService.authenticator
+  async updatePasskey(id: string, name: string): Promise<void> {
+    await this.prismaService.authenticator
       .update({
         where: { id },
         data: { name },
-        select: {
-          id: true,
-          name: true,
-        },
       })
       .catch((error) => {
         if (error instanceof PrismaClientKnownRequestError) {

@@ -293,7 +293,7 @@ export class UserService {
     id: string,
     name: string,
     userUuid: string,
-  ): Promise<BasicPasskeyDto> {
+  ): Promise<void> {
     const auth = await this.userRepository.getAuthenticator(id);
 
     if (auth.userUuid !== userUuid) throw new ForbiddenException();

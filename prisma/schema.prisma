@@ -93,6 +93,8 @@ model Authenticator {
   publicKey     Bytes   @map("public_key")
   counter       Int
   userUuid      String  @db.Uuid @map("user_uuid")
+  createdAt     DateTime  @default(now()) @map("created_at")
+  loginAt       DateTime? @map("login_at")
 
   user          User    @relation(fields: [userUuid], references: [uuid], onDelete: Cascade)
 
