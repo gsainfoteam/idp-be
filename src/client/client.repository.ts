@@ -264,6 +264,26 @@ export class ClientRepository {
       where: { uuid: userUuid },
     });
     if (!member) throw new NotFoundException('User not found');
+
+    const relation = await this.prismaService.userClientRelation.findUnique({
+      where: {
+        userUuid_clientUuid: {
+          userUuid,
+          clientUuid: uuid,
+        },
+      },
+      select: { role: true },
+    });
+    if (!relation) {
+      throw new ForbiddenException();
+    }
+    if (relation.role === RoleType.OWNER) {
+      throw new ForbiddenException('Owner cannot be downgraded');
+    }
+    if (relation.role === RoleType.ADMIN) {
+      return;
+    }
+
     try {
       await this.prismaService.userClientRelation.update({
         where: {
@@ -291,6 +311,26 @@ export class ClientRepository {
       where: { uuid: userUuid },
     });
     if (!member) throw new NotFoundException('User not found');
+
+    const relation = await this.prismaService.userClientRelation.findUnique({
+      where: {
+        userUuid_clientUuid: {
+          userUuid,
+          clientUuid: uuid,
+        },
+      },
+      select: { role: true },
+    });
+    if (!relation) {
+      throw new ForbiddenException();
+    }
+    if (relation.role === RoleType.OWNER) {
+      throw new ForbiddenException('Owner cannot be downgraded');
+    }
+    if (relation.role !== RoleType.ADMIN) {
+      throw new ForbiddenException('User is not an admin');
+    }
+
     try {
       await this.prismaService.userClientRelation.update({
         where: {
