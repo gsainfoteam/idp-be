@@ -2,7 +2,8 @@
 erDiagram
 
         RoleType {
-            ADMIN ADMIN
+            OWNER OWNER
+ADMIN ADMIN
 MEMBER MEMBER
         }
     

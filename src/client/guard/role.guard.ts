@@ -22,6 +22,19 @@ export class ClientRoleGuard implements CanActivate {
     private reflector: Reflector,
     private prisma: PrismaService,
   ) {}
+
+  private rank(role: RoleType): number {
+    switch (role) {
+      case RoleType.OWNER:
+        return 3;
+      case RoleType.ADMIN:
+        return 2;
+      case RoleType.MEMBER:
+      default:
+        return 1;
+    }
+  }
+
   async canActivate(context: ExecutionContext) {
     const required = this.reflector.getAllAndOverride<RoleType>(
       'requiredRole',
@@ -48,8 +61,7 @@ export class ClientRoleGuard implements CanActivate {
     });
     if (!membership) throw new ForbiddenException('Not a member');
 
-    const rank = (r: RoleType) => (r === RoleType.ADMIN ? 2 : 1);
-    if (rank(membership.role) < rank(required)) {
+    if (this.rank(membership.role) < this.rank(required)) {
       throw new ForbiddenException('Insufficient role');
     }
     return true;

@@ -96,7 +96,7 @@ export class ClientRepository {
           userLinks: {
             create: {
               userUuid: userUuid,
-              role: RoleType.ADMIN,
+              role: RoleType.OWNER,
             },
           },
         },
@@ -257,6 +257,60 @@ export class ClientRepository {
         this.logger.error(`updateClientPicture error: ${error}`);
         throw new InternalServerErrorException();
       });
+  }
+
+  async giveAdminToUser(uuid: string, userUuid: string): Promise<void> {
+    const member = await this.prismaService.user.findUnique({
+      where: { uuid: userUuid },
+    });
+    if (!member) throw new NotFoundException('User not found');
+    try {
+      await this.prismaService.userClientRelation.update({
+        where: {
+          userUuid_clientUuid: {
+            userUuid: userUuid,
+            clientUuid: uuid,
+          },
+        },
+        data: { role: RoleType.ADMIN },
+      });
+    } catch (error) {
+      if (error instanceof PrismaClientKnownRequestError) {
+        this.logger.debug(`addMemberToClient error: ${error.stack}`);
+        if (error.code === 'P2025') {
+          throw new ForbiddenException();
+        }
+      }
+      this.logger.error(`giveAdminToUser error: ${error}`);
+      throw new InternalServerErrorException();
+    }
+  }
+
+  async removeAdminFromUser(uuid: string, userUuid: string): Promise<void> {
+    const member = await this.prismaService.user.findUnique({
+      where: { uuid: userUuid },
+    });
+    if (!member) throw new NotFoundException('User not found');
+    try {
+      await this.prismaService.userClientRelation.update({
+        where: {
+          userUuid_clientUuid: {
+            userUuid: userUuid,
+            clientUuid: uuid,
+          },
+        },
+        data: { role: RoleType.MEMBER },
+      });
+    } catch (error) {
+      if (error instanceof PrismaClientKnownRequestError) {
+        this.logger.debug(`addMemberToClient error: ${error.stack}`);
+        if (error.code === 'P2025') {
+          throw new ForbiddenException();
+        }
+      }
+      this.logger.error(`removeAdminToUser error: ${error}`);
+      throw new InternalServerErrorException();
+    }
   }
 
   async deleteRequestClient(uuid: string, userUuid: string): Promise<void> {

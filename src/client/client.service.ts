@@ -108,13 +108,33 @@ export class ClientService {
   }
 
   /**
-   * to remove the user from the client, ro restrict the access
+   * to remove the user from the client, to restrict the access
    * @param uuid client's uuid
    * @param memberEmail user's email, whom we want to remove from client
    */
   async removeMember(uuid: string, memberEmail: string): Promise<void> {
     await this.clientRepository.findClientByUuid(uuid);
     await this.clientRepository.removeMemberFromClient(uuid, memberEmail);
+  }
+
+  /**
+   * to give admin to user in the client, to give more persmissions
+   * @param uuid client's uuid
+   * @param user user to whom we want to give Admin
+   */
+  async giveAdmin(uuid: string, userUuid: string): Promise<void> {
+    await this.clientRepository.findClientByUuid(uuid);
+    await this.clientRepository.giveAdminToUser(uuid, userUuid);
+  }
+
+  /**
+   * to remove admin froma a user in the client, to restrict persmissions
+   * @param uuid client's uuid
+   * @param user user from whom we want to remove Admin
+   */
+  async removeAdmin(uuid: string, userUuid: string): Promise<void> {
+    await this.clientRepository.findClientByUuid(uuid);
+    await this.clientRepository.removeAdminFromUser(uuid, userUuid);
   }
 
   /**

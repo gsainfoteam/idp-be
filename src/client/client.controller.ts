@@ -29,7 +29,7 @@ import {
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
-import { User } from '@prisma/client';
+import { RoleType, User } from '@prisma/client';
 import { GetUser } from 'src/auth/decorator/getUser.decorator';
 import { UserGuard } from 'src/auth/guard/auth.guard';
 
@@ -45,6 +45,7 @@ import {
   ClientResDto,
   UpdateClientPictureResDto,
 } from './dto/res.dto';
+import { ClientRoleGuard, Roles } from './guard/role.guard';
 
 @ApiTags('client')
 @Controller('client')
@@ -141,7 +142,8 @@ export class ClientController {
   @ApiUnauthorizedResponse({ description: '인증 실패' })
   @ApiForbiddenResponse({ description: '접근 불가' })
   @ApiInternalServerErrorResponse({ description: '서버 오류' })
-  @UseGuards(UserGuard)
+  @UseGuards(UserGuard, ClientRoleGuard)
+  @Roles(RoleType.ADMIN)
   @Post(':clientId/members')
   async addMember(
     @Param('clientId', ParseUUIDPipe) uuid: string,
@@ -161,13 +163,56 @@ export class ClientController {
   @ApiUnauthorizedResponse({ description: '인증 실패' })
   @ApiForbiddenResponse({ description: '접근 불가' })
   @ApiInternalServerErrorResponse({ description: '서버 오류' })
-  @UseGuards(UserGuard)
+  @UseGuards(UserGuard, ClientRoleGuard)
+  @Roles(RoleType.ADMIN)
   @Delete(':cliendId/members')
   async removeMemebr(
     @Param('clientId', ParseUUIDPipe) uuid: string,
     @Body() body: MemberEmailDto,
   ): Promise<void> {
     return this.clientService.removeMember(uuid, body.email);
+  }
+
+  @ApiOperation({
+    summary: 'Give admin to a member',
+    description: 'Give an access to add and remove users',
+  })
+  @ApiBearerAuth('user:jwt')
+  @ApiOkResponse({
+    description: 'Admin given successfully',
+  })
+  @ApiUnauthorizedResponse({ description: '인증 실패' })
+  @ApiForbiddenResponse({ description: '접근 불가' })
+  @ApiInternalServerErrorResponse({ description: '서버 오류' })
+  @UseGuards(UserGuard, ClientRoleGuard)
+  @Roles(RoleType.OWNER)
+  @Post(':cliendId/:userId/give/admin')
+  async giveAdmin(
+    @Param('clientId', ParseUUIDPipe) uuid: string,
+    @Param('userId', ParseUUIDPipe) userUuid: string,
+  ): Promise<void> {
+    return this.clientService.giveAdmin(uuid, userUuid);
+  }
+
+  @ApiOperation({
+    summary: 'Remove admin from a member',
+    description: 'Remove an access to add and remove users',
+  })
+  @ApiBearerAuth('user:jwt')
+  @ApiOkResponse({
+    description: 'Admin removed successfully',
+  })
+  @ApiUnauthorizedResponse({ description: '인증 실패' })
+  @ApiForbiddenResponse({ description: '접근 불가' })
+  @ApiInternalServerErrorResponse({ description: '서버 오류' })
+  @UseGuards(UserGuard, ClientRoleGuard)
+  @Roles(RoleType.OWNER)
+  @Post(':cliendId/:userId/remove/admin')
+  async removeAdmin(
+    @Param('clientId', ParseUUIDPipe) uuid: string,
+    @Param('userId', ParseUUIDPipe) userUuid: string,
+  ): Promise<void> {
+    return this.clientService.removeAdmin(uuid, userUuid);
   }
 
   @ApiOperation({
@@ -180,7 +225,8 @@ export class ClientController {
   @ApiForbiddenResponse({ description: '접근 불가' })
   @ApiInternalServerErrorResponse({ description: '서버 오류' })
   @Patch(':clientId/secret')
-  @UseGuards(UserGuard)
+  @UseGuards(UserGuard, ClientRoleGuard)
+  @Roles(RoleType.ADMIN)
   async resetClientSecret(
     @Param('clientId', ParseUUIDPipe) uuid: string,
     @GetUser() user: User,
@@ -200,7 +246,8 @@ export class ClientController {
   @ApiForbiddenResponse({ description: '접근 불가' })
   @ApiInternalServerErrorResponse({ description: '서버 오류' })
   @Patch(':clientId')
-  @UseGuards(UserGuard)
+  @UseGuards(UserGuard, ClientRoleGuard)
+  @Roles(RoleType.ADMIN)
   async updateClient(
     @Param('clientId', ParseUUIDPipe) uuid: string,
     @Body() body: UpdateClientDto,
@@ -221,7 +268,8 @@ export class ClientController {
   @ApiUnauthorizedResponse({ description: 'token not valid' })
   @ApiForbiddenResponse({ description: 'access token and user not match' })
   @ApiInternalServerErrorResponse({ description: 'server error' })
-  @UseGuards(UserGuard)
+  @UseGuards(UserGuard, ClientRoleGuard)
+  @Roles(RoleType.ADMIN)
   @Patch(':clientId/picture')
   async updateClientPicture(
     @Param('clientId', ParseUUIDPipe) uuid: string,
@@ -241,7 +289,8 @@ export class ClientController {
   @ApiForbiddenResponse({ description: '접근 불가' })
   @ApiInternalServerErrorResponse({ description: '서버 오류' })
   @Post(':clientId/delete')
-  @UseGuards(UserGuard)
+  @UseGuards(UserGuard, ClientRoleGuard)
+  @Roles(RoleType.MEMBER)
   deleteClient(
     @Param('clientId', ParseUUIDPipe) uuid: string,
     @GetUser() user: User,
@@ -259,7 +308,8 @@ export class ClientController {
   @ApiForbiddenResponse({ description: '접근 불가' })
   @ApiInternalServerErrorResponse({ description: '서버 오류' })
   @Delete(':clientId/picture')
-  @UseGuards(UserGuard)
+  @UseGuards(UserGuard, ClientRoleGuard)
+  @Roles(RoleType.ADMIN)
   async deleteClientPicture(
     @Param('clientId', ParseUUIDPipe) uuid: string,
     @GetUser() user: User,
