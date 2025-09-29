@@ -137,7 +137,7 @@ export class ClientController {
   })
   @ApiBearerAuth('user:jwt')
   @ApiOkResponse({
-    description: 'Client added successfully',
+    description: 'User added successfully',
   })
   @ApiUnauthorizedResponse({ description: '인증 실패' })
   @ApiForbiddenResponse({ description: '접근 불가' })
@@ -158,7 +158,7 @@ export class ClientController {
   })
   @ApiBearerAuth('user:jwt')
   @ApiOkResponse({
-    description: 'Client removed successfully',
+    description: 'User removed successfully',
   })
   @ApiUnauthorizedResponse({ description: '인증 실패' })
   @ApiForbiddenResponse({ description: '접근 불가' })
@@ -166,7 +166,7 @@ export class ClientController {
   @UseGuards(UserGuard, ClientRoleGuard)
   @Roles(RoleType.ADMIN)
   @Delete(':cliendId/members')
-  async removeMemebr(
+  async removeMember(
     @Param('clientId', ParseUUIDPipe) uuid: string,
     @Body() body: MemberEmailDto,
   ): Promise<void> {
@@ -186,7 +186,7 @@ export class ClientController {
   @ApiInternalServerErrorResponse({ description: '서버 오류' })
   @UseGuards(UserGuard, ClientRoleGuard)
   @Roles(RoleType.OWNER)
-  @Post(':cliendId/:userId/give/admin')
+  @Patch(':clientId/members/:userId/role/admin')
   async giveAdmin(
     @Param('clientId', ParseUUIDPipe) uuid: string,
     @Param('userId', ParseUUIDPipe) userUuid: string,
@@ -207,7 +207,7 @@ export class ClientController {
   @ApiInternalServerErrorResponse({ description: '서버 오류' })
   @UseGuards(UserGuard, ClientRoleGuard)
   @Roles(RoleType.OWNER)
-  @Post(':cliendId/:userId/remove/admin')
+  @Patch(':clientId/members/:userId/role/member')
   async removeAdmin(
     @Param('clientId', ParseUUIDPipe) uuid: string,
     @Param('userId', ParseUUIDPipe) userUuid: string,

@@ -120,7 +120,7 @@ export class ClientService {
   /**
    * to give admin to user in the client, to give more persmissions
    * @param uuid client's uuid
-   * @param user user to whom we want to give Admin
+   * @param userUuid user's id to whom we want to take Admin
    */
   async giveAdmin(uuid: string, userUuid: string): Promise<void> {
     await this.clientRepository.findClientByUuid(uuid);
@@ -130,7 +130,7 @@ export class ClientService {
   /**
    * to remove admin froma a user in the client, to restrict persmissions
    * @param uuid client's uuid
-   * @param user user from whom we want to remove Admin
+   * @param userUuid user's id from whom we want to take Admin
    */
   async removeAdmin(uuid: string, userUuid: string): Promise<void> {
     await this.clientRepository.findClientByUuid(uuid);

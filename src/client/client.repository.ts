@@ -276,7 +276,7 @@ export class ClientRepository {
       });
     } catch (error) {
       if (error instanceof PrismaClientKnownRequestError) {
-        this.logger.debug(`addMemberToClient error: ${error.stack}`);
+        this.logger.debug(`giveAdminToUser error: ${error.stack}`);
         if (error.code === 'P2025') {
           throw new ForbiddenException();
         }
@@ -303,12 +303,12 @@ export class ClientRepository {
       });
     } catch (error) {
       if (error instanceof PrismaClientKnownRequestError) {
-        this.logger.debug(`addMemberToClient error: ${error.stack}`);
+        this.logger.debug(`removeAdminFromUser error: ${error.stack}`);
         if (error.code === 'P2025') {
           throw new ForbiddenException();
         }
       }
-      this.logger.error(`removeAdminToUser error: ${error}`);
+      this.logger.error(`removeAdminFromUser error: ${error}`);
       throw new InternalServerErrorException();
     }
   }
