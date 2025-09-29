@@ -352,6 +352,22 @@ export class ClientRepository {
     });
     if (!member) throw new NotFoundException('User not found');
 
+    const relation = await this.prismaService.userClientRelation.findUnique({
+      where: {
+        userUuid_clientUuid: {
+          userUuid: member.uuid,
+          clientUuid: uuid,
+        },
+      },
+      select: { role: true },
+    });
+    if (!relation) {
+      throw new ForbiddenException();
+    }
+    if (relation.role === RoleType.OWNER) {
+      throw new ForbiddenException('Owner cannot be removed');
+    }
+
     try {
       await this.prismaService.client.update({
         where: {
