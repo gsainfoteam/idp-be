@@ -3,60 +3,60 @@ erDiagram
 
   "user" {
     String uuid "🗝️"
-    String password 
+    String password
     String profile "❓"
     String picture "❓"
-    String name 
-    String email 
-    String student_id 
-    String phone_number 
-    DateTime createdAt 
-    DateTime updatedAt 
+    String name
+    String email
+    String student_id
+    String phone_number
+    DateTime createdAt
+    DateTime updatedAt
     }
-  
+
 
   "client" {
     String uuid "🗝️"
-    String secret 
-    String name 
+    String secret
+    String name
     String picture "❓"
-    String urls 
-    DateTime createdAt 
-    DateTime updatedAt 
+    String urls
+    DateTime createdAt
+    DateTime updatedAt
     DateTime delete_requested_at "❓"
-    Boolean idTokenAllowed 
-    String scopes 
-    String optional_scopes 
+    Boolean idTokenAllowed
+    String scopes
+    String optional_scopes
     }
-  
+
 
   "refresh_token" {
     String token "🗝️"
-    DateTime createdAt 
-    DateTime expiresAt 
+    DateTime createdAt
+    DateTime expiresAt
     String nonce "❓"
-    String scopes 
+    String scopes
     }
-  
+
 
   "consent" {
-    String scopes 
-    DateTime createdAt 
-    DateTime updatedAt 
+    String scopes
+    DateTime createdAt
+    DateTime updatedAt
     }
-  
+
 
   "authenticator" {
-    String user_uuid "🗝️"
-    String name 
-    String credential_id 
-    Bytes public_key 
-    Int counter 
-    String user_uuid 
-    DateTime created_at 
+    String id "🗝️"
+    String name
+    String credential_id
+    Bytes public_key
+    Int counter
+    String user_uuid
+    DateTime created_at
     DateTime login_at "❓"
     }
-  
+
     "user" o{--}o "client" : "clients"
     "user" o{--}o "consent" : "consent"
     "user" o{--}o "refresh_token" : "RefreshToken"
