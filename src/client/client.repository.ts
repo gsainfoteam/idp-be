@@ -345,7 +345,7 @@ export class ClientRepository {
     uuid: string,
     memberEmail: string,
   ): Promise<void> {
-    const member = await this.prismaService.user.findFirst({
+    const member = await this.prismaService.user.findUnique({
       where: {
         email: memberEmail,
       },

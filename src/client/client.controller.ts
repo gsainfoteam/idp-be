@@ -165,7 +165,7 @@ export class ClientController {
   @ApiInternalServerErrorResponse({ description: '서버 오류' })
   @UseGuards(UserGuard, ClientRoleGuard)
   @Roles(RoleType.ADMIN)
-  @Delete(':cliendId/members')
+  @Delete(':clientId/members')
   async removeMember(
     @Param('clientId', ParseUUIDPipe) uuid: string,
     @Body() body: MemberEmailDto,
