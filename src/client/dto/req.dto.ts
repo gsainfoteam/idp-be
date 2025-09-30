@@ -4,6 +4,7 @@ import {
   IsArray,
   IsBoolean,
   IsEmail,
+  IsEnum,
   IsIn,
   IsOptional,
   IsString,
@@ -115,5 +116,6 @@ export class ClientRoleDto {
     description: 'Setting a role in the client',
     example: 'ADMIN',
   })
+  @IsEnum(RoleType)
   role: RoleType;
 }
