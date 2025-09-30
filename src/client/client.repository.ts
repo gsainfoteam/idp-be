@@ -197,7 +197,7 @@ export class ClientRepository {
     const member = await this.prismaService.user.findUnique({
       where: { email: memberEmail },
     });
-    if (!member) throw new NotFoundException('User not found');
+    if (!member) throw new NotFoundException();
     try {
       await this.prismaService.client.update({
         where: {
@@ -219,7 +219,7 @@ export class ClientRepository {
           throw new ForbiddenException();
         }
         if (error.code === 'P2002') {
-          throw new ConflictException('Already a member');
+          throw new ConflictException();
         }
       }
       this.logger.error(`addMemberToClient error: ${error}`);
@@ -259,29 +259,18 @@ export class ClientRepository {
       });
   }
 
-  async giveAdminToUser(uuid: string, userUuid: string): Promise<void> {
+  async setRoleToUser(
+    uuid: string,
+    userUuid: string,
+    role: RoleType,
+  ): Promise<void> {
     const member = await this.prismaService.user.findUnique({
       where: { uuid: userUuid },
     });
-    if (!member) throw new NotFoundException('User not found');
+    if (!member) throw new NotFoundException();
 
-    const relation = await this.prismaService.userClientRelation.findUnique({
-      where: {
-        userUuid_clientUuid: {
-          userUuid,
-          clientUuid: uuid,
-        },
-      },
-      select: { role: true },
-    });
-    if (!relation) {
+    if (role === RoleType.OWNER) {
       throw new ForbiddenException();
-    }
-    if (relation.role === RoleType.OWNER) {
-      throw new ForbiddenException('Owner cannot be downgraded');
-    }
-    if (relation.role === RoleType.ADMIN) {
-      return;
     }
 
     try {
@@ -292,63 +281,16 @@ export class ClientRepository {
             clientUuid: uuid,
           },
         },
-        data: { role: RoleType.ADMIN },
+        data: { role },
       });
     } catch (error) {
       if (error instanceof PrismaClientKnownRequestError) {
-        this.logger.debug(`giveAdminToUser error: ${error.stack}`);
+        this.logger.debug(`setRoleToUser error: ${error.stack}`);
         if (error.code === 'P2025') {
           throw new ForbiddenException();
         }
       }
-      this.logger.error(`giveAdminToUser error: ${error}`);
-      throw new InternalServerErrorException();
-    }
-  }
-
-  async removeAdminFromUser(uuid: string, userUuid: string): Promise<void> {
-    const member = await this.prismaService.user.findUnique({
-      where: { uuid: userUuid },
-    });
-    if (!member) throw new NotFoundException('User not found');
-
-    const relation = await this.prismaService.userClientRelation.findUnique({
-      where: {
-        userUuid_clientUuid: {
-          userUuid,
-          clientUuid: uuid,
-        },
-      },
-      select: { role: true },
-    });
-    if (!relation) {
-      throw new ForbiddenException();
-    }
-    if (relation.role === RoleType.OWNER) {
-      throw new ForbiddenException('Owner cannot be downgraded');
-    }
-    if (relation.role !== RoleType.ADMIN) {
-      throw new ForbiddenException('User is not an admin');
-    }
-
-    try {
-      await this.prismaService.userClientRelation.update({
-        where: {
-          userUuid_clientUuid: {
-            userUuid: userUuid,
-            clientUuid: uuid,
-          },
-        },
-        data: { role: RoleType.MEMBER },
-      });
-    } catch (error) {
-      if (error instanceof PrismaClientKnownRequestError) {
-        this.logger.debug(`removeAdminFromUser error: ${error.stack}`);
-        if (error.code === 'P2025') {
-          throw new ForbiddenException();
-        }
-      }
-      this.logger.error(`removeAdminFromUser error: ${error}`);
+      this.logger.error(`setRoleToUser error: ${error}`);
       throw new InternalServerErrorException();
     }
   }
@@ -381,21 +323,18 @@ export class ClientRepository {
       });
   }
 
-  async removeMemberFromClient(
-    uuid: string,
-    memberEmail: string,
-  ): Promise<void> {
+  async removeMemberFromClient(uuid: string, userUuid: string): Promise<void> {
     const member = await this.prismaService.user.findUnique({
       where: {
-        email: memberEmail,
+        uuid: userUuid,
       },
     });
-    if (!member) throw new NotFoundException('User not found');
+    if (!member) throw new NotFoundException();
 
     const relation = await this.prismaService.userClientRelation.findUnique({
       where: {
         userUuid_clientUuid: {
-          userUuid: member.uuid,
+          userUuid: userUuid,
           clientUuid: uuid,
         },
       },
@@ -405,7 +344,7 @@ export class ClientRepository {
       throw new ForbiddenException();
     }
     if (relation.role === RoleType.OWNER) {
-      throw new ForbiddenException('Owner cannot be removed');
+      throw new ForbiddenException();
     }
 
     try {

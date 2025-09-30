@@ -9,7 +9,8 @@ import {
 import { Reflector } from '@nestjs/core';
 import { RoleType } from '@prisma/client';
 
-export const Roles = (role: RoleType) => SetMetadata('requiredRole', role);
+export const RequireClientRole = (role: RoleType) =>
+  SetMetadata('requiredRole', role);
 
 type RequestShape = {
   user: { uuid: string };

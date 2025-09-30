@@ -1,7 +1,7 @@
 import { Loggable } from '@lib/logger/decorator/loggable';
 import { ObjectService } from '@lib/object';
 import { ForbiddenException, Injectable } from '@nestjs/common';
-import { Client, User } from '@prisma/client';
+import { Client, RoleType, User } from '@prisma/client';
 import * as bcrypt from 'bcryptjs';
 import * as crypto from 'crypto';
 import { SlackService } from 'nestjs-slack';
@@ -100,41 +100,29 @@ export class ClientService {
   /**
    * to add the user to the client and give access
    * @param uuid client's uuid
-   * @param memberEmail user's email, whom we want to add to the client
+   * @param memberEmail email of the user who will be added to client
    */
   async addMember(uuid: string, memberEmail: string): Promise<void> {
-    await this.clientRepository.findClientByUuid(uuid);
     await this.clientRepository.addMemberToClient(uuid, memberEmail);
   }
 
   /**
    * to remove the user from the client, to restrict the access
    * @param uuid client's uuid
-   * @param memberEmail user's email, whom we want to remove from client
+   * @param userUuid id of the user who will be removed from the client
    */
-  async removeMember(uuid: string, memberEmail: string): Promise<void> {
-    await this.clientRepository.findClientByUuid(uuid);
-    await this.clientRepository.removeMemberFromClient(uuid, memberEmail);
+  async removeMember(uuid: string, userUuid: string): Promise<void> {
+    await this.clientRepository.removeMemberFromClient(uuid, userUuid);
   }
 
   /**
    * to give admin to user in the client, to give more persmissions
    * @param uuid client's uuid
-   * @param userUuid user's id to whom we want to take Admin
+   * @param userUuid id of the user to who we want to give Admin
+   * @body ?????
    */
-  async giveAdmin(uuid: string, userUuid: string): Promise<void> {
-    await this.clientRepository.findClientByUuid(uuid);
-    await this.clientRepository.giveAdminToUser(uuid, userUuid);
-  }
-
-  /**
-   * to remove admin froma a user in the client, to restrict persmissions
-   * @param uuid client's uuid
-   * @param userUuid user's id from whom we want to take Admin
-   */
-  async removeAdmin(uuid: string, userUuid: string): Promise<void> {
-    await this.clientRepository.findClientByUuid(uuid);
-    await this.clientRepository.removeAdminFromUser(uuid, userUuid);
+  async setRole(uuid: string, userUuid: string, role: RoleType): Promise<void> {
+    await this.clientRepository.setRoleToUser(uuid, userUuid, role);
   }
 
   /**
