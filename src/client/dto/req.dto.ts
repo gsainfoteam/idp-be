@@ -115,6 +115,7 @@ export class ClientRoleDto {
   @ApiProperty({
     description: 'Setting a role in the client',
     example: 'ADMIN',
+    enum: RoleType,
   })
   @IsEnum(RoleType)
   role: RoleType;
