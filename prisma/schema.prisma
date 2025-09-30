@@ -106,12 +106,14 @@ model Consent {
 }
 
 model Authenticator {
-  id           String @id @default(uuid())
+  id           String    @id @default(uuid())
   name         String
-  credentialId String @unique @map("credential_id")
-  publicKey    Bytes  @map("public_key")
+  credentialId String    @unique @map("credential_id")
+  publicKey    Bytes     @map("public_key")
   counter      Int
-  userUuid     String @map("user_uuid") @db.Uuid
+  userUuid     String    @map("user_uuid") @db.Uuid
+  createdAt    DateTime  @default(now()) @map("created_at")
+  loginAt      DateTime? @map("login_at")
 
   user User @relation(fields: [userUuid], references: [uuid], onDelete: Cascade)
 

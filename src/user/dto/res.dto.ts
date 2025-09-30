@@ -318,4 +318,18 @@ export class BasicPasskeyDto {
     description: 'Passkey name',
   })
   name: string;
+
+  @ApiProperty({
+    example: '2025-01-01T00:00:00.000Z',
+    description: 'Date the passkey was created',
+  })
+  createdAt: Date;
+
+  @ApiProperty({
+    example: '2025-01-01T00:00:00.000Z',
+    description: 'Date the client was logined',
+    type: 'string',
+    format: 'date-time',
+  })
+  loginAt: Date | null;
 }

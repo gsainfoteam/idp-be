@@ -256,7 +256,7 @@ export class UserController {
     description: '패스키의 이름을 수정합니다.',
   })
   @ApiBearerAuth('user:jwt')
-  @ApiOkResponse({ description: 'success', type: BasicPasskeyDto })
+  @ApiOkResponse({ description: 'success' })
   @ApiUnauthorizedResponse({ description: 'token not valid' })
   @ApiForbiddenResponse({ description: 'Invalid user or token' })
   @ApiNotFoundResponse({ description: 'Id is not found' })
@@ -267,7 +267,7 @@ export class UserController {
     @GetUser() user: User,
     @Param('id', ParseUUIDPipe) id: string,
     @Body() { name }: ChangePasskeyNameDto,
-  ): Promise<BasicPasskeyDto> {
+  ): Promise<void> {
     return await this.userService.updatePasskey(id, name, user.uuid);
   }
 
