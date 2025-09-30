@@ -107,21 +107,37 @@ export class ClientService {
   }
 
   /**
-   * to remove the user from the client, to restrict the access
+   * to remove the user from the client and restrict access
    * @param uuid client's uuid
    * @param userUuid id of the user who will be removed from the client
    */
   async removeMember(uuid: string, userUuid: string): Promise<void> {
+    const curRole = await this.clientRepository.getUserClientRole(
+      uuid,
+      userUuid,
+    );
+    if (curRole === RoleType.OWNER) {
+      throw new ForbiddenException('Owner role cannot be removed');
+    }
     await this.clientRepository.removeMemberFromClient(uuid, userUuid);
   }
 
   /**
-   * to give admin to user in the client, to give more persmissions
+   * to set a role to user in the client, to give/take persmissions
    * @param uuid client's uuid
    * @param userUuid id of the user to who we want to give Admin
-   * @body ?????
    */
   async setRole(uuid: string, userUuid: string, role: RoleType): Promise<void> {
+    const curRole = await this.clientRepository.getUserClientRole(
+      uuid,
+      userUuid,
+    );
+    if (curRole === RoleType.OWNER) {
+      throw new ForbiddenException('Owner role cannot be changed');
+    }
+    if (curRole === role) {
+      return;
+    }
     await this.clientRepository.setRoleToUser(uuid, userUuid, role);
   }
 
