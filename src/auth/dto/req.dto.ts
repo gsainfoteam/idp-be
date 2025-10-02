@@ -35,22 +35,6 @@ export class LoginDto {
   password: string;
 }
 
-export class PasskeyDto {
-  @ApiProperty({
-    example: 'JohbDoe@gm.gist.ac.kr',
-    description: '유저의 이메일 주소',
-  })
-  @IsEmail()
-  @IsGistEmail()
-  @Transform(({ value }) => {
-    if (typeof value === 'string') {
-      return value.toLowerCase();
-    }
-    throw new BadRequestException('이메일 형식이 올바르지 않습니다.');
-  })
-  email: string;
-}
-
 class AuthenticationResponseObjectDto {
   @ApiProperty({ example: 'eyJ0eXBlIjoid2ViYXV0aG...' })
   @IsString()
@@ -125,18 +109,11 @@ class AuthenticationResponseDto {
 
 export class VerifyPasskeyAuthenticationDto {
   @ApiProperty({
-    example: 'JohbDoe@gm.gist.ac.kr',
-    description: '유저의 이메일 주소',
+    example: 'uuid',
+    description: 'uuid for challenge',
   })
-  @IsEmail()
-  @IsGistEmail()
-  @Transform(({ value }) => {
-    if (typeof value === 'string') {
-      return value.toLowerCase();
-    }
-    throw new BadRequestException('이메일 형식이 올바르지 않습니다.');
-  })
-  email: string;
+  @IsString()
+  key: string;
 
   @ApiProperty({
     description: '유저의 패스키 인증 응답',

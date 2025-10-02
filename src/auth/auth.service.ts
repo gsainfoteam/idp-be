@@ -1,11 +1,6 @@
 import { Loggable } from '@lib/logger/decorator/loggable';
 import { RedisService } from '@lib/redis';
-import {
-  Injectable,
-  Logger,
-  NotFoundException,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { Injectable, Logger, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { User } from '@prisma/client';
@@ -13,16 +8,14 @@ import {
   generateAuthenticationOptions,
   verifyAuthenticationResponse,
 } from '@simplewebauthn/server';
-import {
-  AuthenticationResponseJSON,
-  PublicKeyCredentialRequestOptionsJSON,
-} from '@simplewebauthn/types';
+import { AuthenticationResponseJSON } from '@simplewebauthn/types';
 import * as bcrypt from 'bcryptjs';
 import * as crypto from 'crypto';
 import ms, { StringValue } from 'ms';
 
 import { AuthRepository } from './auth.repository';
 import { LoginDto } from './dto/req.dto';
+import { PasskeyAuthOptionResDto } from './dto/res.dto';
 import { LoginResultType } from './types/loginResult.type';
 
 @Injectable()
@@ -107,47 +100,30 @@ export class AuthService {
     return this.authRepository.findUserByUuid(uuid);
   }
 
-  async authenticateOptions(
-    email: string,
-  ): Promise<PublicKeyCredentialRequestOptionsJSON> {
-    const user = await this.authRepository.findUserByEmail(email);
-
-    if (!user || user.authenticators.length === 0) {
-      throw new NotFoundException();
-    }
-
+  async authenticateOptions(): Promise<PasskeyAuthOptionResDto> {
     const options = await generateAuthenticationOptions({
       rpID: this.passkeyRpId,
-      allowCredentials: user.authenticators.map((auth) => ({
-        id: auth.credentialId,
-        type: 'public-key',
-      })),
     });
+    const key = crypto.randomUUID();
 
-    await this.redisService.set<string>(user.uuid, options.challenge, {
+    await this.redisService.set<string>(key, options.challenge, {
       prefix: this.passkeyPrefix,
       ttl: 10 * 60,
     });
 
-    return options;
+    return { key, ...options };
   }
 
   async verifyAuthentication(
-    email: string,
+    key: string,
     response: AuthenticationResponseJSON,
   ): Promise<LoginResultType> {
-    const user = await this.authRepository.findUserByEmail(email);
-    if (!user) throw new NotFoundException();
-
-    const expectedChallenge = await this.redisService.getOrThrow<string>(
-      user.uuid,
-      {
-        prefix: this.passkeyPrefix,
-      },
-    );
+    const expectedChallenge = await this.redisService.getOrThrow<string>(key, {
+      prefix: this.passkeyPrefix,
+    });
     if (!expectedChallenge) throw new UnauthorizedException();
 
-    await this.redisService.del(user.uuid, { prefix: this.passkeyPrefix });
+    await this.redisService.del(key, { prefix: this.passkeyPrefix });
 
     const authenticator = await this.authRepository.findAuthenticator(
       response.id,
@@ -161,7 +137,6 @@ export class AuthService {
         expectedRPID: this.passkeyRpId,
         credential: {
           ...authenticator,
-          id: authenticator.credentialId,
         },
         requireUserVerification: true,
       },
@@ -172,11 +147,11 @@ export class AuthService {
     }
 
     await this.authRepository.updatePasskeyCounter(
-      authenticator.credentialId,
+      authenticator.id,
       authenticationInfo.newCounter,
     );
 
-    return this.issueTokens(user.uuid);
+    return this.issueTokens(authenticator.userUuid);
   }
 
   /**

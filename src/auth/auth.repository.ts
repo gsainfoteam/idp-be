@@ -65,11 +65,11 @@ export class AuthRepository {
       });
   }
 
-  async findAuthenticator(credentialId: string): Promise<Authenticator> {
+  async findAuthenticator(id: string): Promise<Authenticator> {
     return this.prismaService.authenticator
       .findUniqueOrThrow({
         where: {
-          credentialId,
+          id,
         },
       })
       .catch((error) => {
@@ -87,13 +87,13 @@ export class AuthRepository {
   }
 
   async updatePasskeyCounter(
-    credentialId: string,
+    id: string,
     counter: number,
   ): Promise<Authenticator> {
     return this.prismaService.authenticator
       .update({
         where: {
-          credentialId,
+          id,
         },
         data: {
           counter,
