@@ -265,7 +265,7 @@ export class UserRepository {
   async saveAuthenticator(
     name: string,
     authenticator: {
-      credentialId: string;
+      id: string;
       publicKey: Uint8Array;
       counter: number;
       userUuid: string;
@@ -278,9 +278,7 @@ export class UserRepository {
       .catch((error) => {
         if (error instanceof PrismaClientKnownRequestError) {
           if (error.code === 'P2002') {
-            this.logger.debug(
-              `conflict credentialId: ${authenticator.credentialId}`,
-            );
+            this.logger.debug(`conflict credentialId: ${authenticator.id}`);
             throw new ConflictException('conflict credentialId');
           }
           this.logger.debug(`prisma error occurred: ${error.code}`);

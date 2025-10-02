@@ -49,6 +49,12 @@ class AuthenticationExtensionsDto {
 
 export class PasskeyAuthOptionResDto {
   @ApiProperty({
+    description: 'uuid for challenge',
+    example: 'uuid',
+  })
+  key: string;
+
+  @ApiProperty({
     description: 'challenge (Base64URL)',
     example: 'HPv7vydo...',
   })

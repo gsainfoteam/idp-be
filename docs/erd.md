@@ -58,13 +58,12 @@ MEMBER MEMBER
   
 
   "authenticator" {
-    String user_uuid "🗝️"
-    String name 
-    String credential_id 
-    Bytes public_key 
-    Int counter 
-    String user_uuid 
-    DateTime created_at 
+    String id "🗝️"
+    String name
+    Bytes public_key
+    Int counter
+    String user_uuid
+    DateTime created_at
     DateTime login_at "❓"
     }
   
