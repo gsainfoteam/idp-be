@@ -24,11 +24,7 @@ import {
 import { FastifyReply, FastifyRequest } from 'fastify';
 
 import { AuthService } from './auth.service';
-import {
-  LoginDto,
-  PasskeyDto,
-  VerifyPasskeyAuthenticationDto,
-} from './dto/req.dto';
+import { LoginDto, VerifyPasskeyAuthenticationDto } from './dto/req.dto';
 import { LoginResDto, PasskeyAuthOptionResDto } from './dto/res.dto';
 
 @ApiTags('auth')
@@ -149,10 +145,8 @@ export class AuthController {
   @ApiNotFoundResponse({ description: 'Email is not found' })
   @ApiInternalServerErrorResponse({ description: 'server error' })
   @Post('passkey')
-  async authenticateOptions(
-    @Body() { email }: PasskeyDto,
-  ): Promise<PasskeyAuthOptionResDto> {
-    return this.authService.authenticateOptions(email);
+  async authenticateOptions(): Promise<PasskeyAuthOptionResDto> {
+    return this.authService.authenticateOptions();
   }
 
   @ApiOperation({
