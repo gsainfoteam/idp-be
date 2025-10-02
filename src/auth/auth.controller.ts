@@ -165,7 +165,7 @@ export class AuthController {
   @ApiInternalServerErrorResponse({ description: 'server error' })
   @Post('passkey/verify')
   async verifyAuthentication(
-    @Body() { email, authenticationResponse }: VerifyPasskeyAuthenticationDto,
+    @Body() { key, authenticationResponse }: VerifyPasskeyAuthenticationDto,
     @Res({ passthrough: true }) response: FastifyReply,
   ): Promise<LoginResDto> {
     const {
@@ -174,7 +174,7 @@ export class AuthController {
       refreshTokenExpireTime,
       accessTokenExpireTime,
     } = await this.authService.verifyAuthentication(
-      email,
+      key,
       authenticationResponse,
     );
     response.cookie('accessToken', accessToken, {
