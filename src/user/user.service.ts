@@ -238,7 +238,7 @@ export class UserService {
       userID: Buffer.from(user.uuid),
       userName: user.name,
       excludeCredentials: user.authenticators.map((auth) => ({
-        id: auth.credentialId,
+        id: auth.id,
         type: 'public-key',
       })),
     });
@@ -280,7 +280,7 @@ export class UserService {
     const { id, publicKey, counter } = registrationInfo.credential;
 
     await this.userRepository.saveAuthenticator(name, {
-      credentialId: id,
+      id,
       publicKey,
       counter,
       userUuid: user.uuid,

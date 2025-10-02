@@ -49,7 +49,6 @@ erDiagram
   "authenticator" {
     String id "🗝️"
     String name
-    String credential_id
     Bytes public_key
     Int counter
     String user_uuid

@@ -137,7 +137,6 @@ export class AuthService {
         expectedRPID: this.passkeyRpId,
         credential: {
           ...authenticator,
-          id: authenticator.credentialId,
         },
         requireUserVerification: true,
       },
@@ -148,7 +147,7 @@ export class AuthService {
     }
 
     await this.authRepository.updatePasskeyCounter(
-      authenticator.credentialId,
+      authenticator.id,
       authenticationInfo.newCounter,
     );
 
