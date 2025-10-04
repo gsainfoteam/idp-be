@@ -7,7 +7,6 @@ import {
   Get,
   Param,
   ParseIntPipe,
-  ParseUUIDPipe,
   Patch,
   Post,
   Query,
@@ -265,7 +264,7 @@ export class UserController {
   @Patch('passkey/:id')
   async updatePasskey(
     @GetUser() user: User,
-    @Param('id', ParseUUIDPipe) id: string,
+    @Param('id') id: string,
     @Body() { name }: ChangePasskeyNameDto,
   ): Promise<void> {
     return await this.userService.updatePasskey(id, name, user.uuid);
@@ -285,7 +284,7 @@ export class UserController {
   @Delete('passkey/:id')
   async deletePasskey(
     @GetUser() user: User,
-    @Param('id', ParseUUIDPipe) id: string,
+    @Param('id') id: string,
   ): Promise<void> {
     return await this.userService.deletePasskey(id, user.uuid);
   }
