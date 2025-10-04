@@ -319,6 +319,13 @@ export class BasicPasskeyDto {
   })
   name: string;
 
+  @ApiPropertyOptional({
+    example: 'passkey icon url',
+    description: 'Passkey icon url',
+    type: String,
+  })
+  icon: string | null;
+
   @ApiProperty({
     example: '2025-01-01T00:00:00.000Z',
     description: 'Date the passkey was created',

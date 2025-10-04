@@ -255,6 +255,7 @@ export class UserService {
     email: string,
     name: string,
     response: RegistrationResponseJSON,
+    icon?: string,
   ): Promise<boolean> {
     const user = await this.userRepository.findUserByEmail(email);
     const expectedChallenge = await this.redisService.getOrThrow<string>(
@@ -279,8 +280,10 @@ export class UserService {
 
     const { id, publicKey, counter } = registrationInfo.credential;
 
-    await this.userRepository.saveAuthenticator(name, {
+    await this.userRepository.saveAuthenticator({
       id,
+      name,
+      icon,
       publicKey,
       counter,
       userUuid: user.uuid,
