@@ -228,12 +228,13 @@ export class VerifyPasskeyRegistrationDto {
   @IsString()
   name: string;
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     example: 'Passkey Icon',
     description: '패스키 아이콘 url',
   })
+  @IsOptional()
   @IsString()
-  icon: string;
+  icon?: string;
 
   @ApiProperty({
     description: '유저의 패스키 등록 응답',

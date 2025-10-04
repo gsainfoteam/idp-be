@@ -246,8 +246,8 @@ export class UserController {
     return await this.userService.verifyRegistration(
       user.email,
       name,
-      icon,
       registrationResponse,
+      icon,
     );
   }
 

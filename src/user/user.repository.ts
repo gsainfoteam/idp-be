@@ -266,7 +266,7 @@ export class UserRepository {
   async saveAuthenticator(authenticator: {
     id: string;
     name: string;
-    icon: string;
+    icon?: string;
     publicKey: Uint8Array;
     counter: number;
     userUuid: string;

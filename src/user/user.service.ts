@@ -254,8 +254,8 @@ export class UserService {
   async verifyRegistration(
     email: string,
     name: string,
-    icon: string,
     response: RegistrationResponseJSON,
+    icon?: string,
   ): Promise<boolean> {
     const user = await this.userRepository.findUserByEmail(email);
     const expectedChallenge = await this.redisService.getOrThrow<string>(
