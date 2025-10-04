@@ -254,6 +254,7 @@ export class UserService {
   async verifyRegistration(
     email: string,
     name: string,
+    icon: string,
     response: RegistrationResponseJSON,
   ): Promise<boolean> {
     const user = await this.userRepository.findUserByEmail(email);
@@ -279,8 +280,10 @@ export class UserService {
 
     const { id, publicKey, counter } = registrationInfo.credential;
 
-    await this.userRepository.saveAuthenticator(name, {
+    await this.userRepository.saveAuthenticator({
       id,
+      name,
+      icon,
       publicKey,
       counter,
       userUuid: user.uuid,

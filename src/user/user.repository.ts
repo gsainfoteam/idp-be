@@ -238,6 +238,7 @@ export class UserRepository {
       select: {
         id: true,
         name: true,
+        icon: true,
         createdAt: true,
         loginAt: true,
       },
@@ -262,18 +263,17 @@ export class UserRepository {
       });
   }
 
-  async saveAuthenticator(
-    name: string,
-    authenticator: {
-      id: string;
-      publicKey: Uint8Array;
-      counter: number;
-      userUuid: string;
-    },
-  ): Promise<Authenticator> {
+  async saveAuthenticator(authenticator: {
+    id: string;
+    name: string;
+    icon: string;
+    publicKey: Uint8Array;
+    counter: number;
+    userUuid: string;
+  }): Promise<Authenticator> {
     return this.prismaService.authenticator
       .create({
-        data: { ...authenticator, name },
+        data: authenticator,
       })
       .catch((error) => {
         if (error instanceof PrismaClientKnownRequestError) {

@@ -241,11 +241,12 @@ export class UserController {
   @Post('passkey/verify')
   async verifyRegistration(
     @GetUser() user: User,
-    @Body() { name, registrationResponse }: VerifyPasskeyRegistrationDto,
+    @Body() { name, icon, registrationResponse }: VerifyPasskeyRegistrationDto,
   ): Promise<boolean> {
     return await this.userService.verifyRegistration(
       user.email,
       name,
+      icon,
       registrationResponse,
     );
   }
