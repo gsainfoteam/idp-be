@@ -12,6 +12,12 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum RoleType {
+  OWNER
+  ADMIN
+  MEMBER
+}
+
 model User {
   uuid     String @id @default(uuid()) @db.Uuid
   password String
@@ -26,10 +32,10 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  clients         Client[]       @relation("ClientToUser")
-  consent         Consent[]
-  RefreshToken    RefreshToken[]
-  authenticators  Authenticator[]
+  memberships    UserClientRelation[] //role-aware
+  consent        Consent[]
+  RefreshToken   RefreshToken[]
+  authenticators Authenticator[]
 
   @@map("user")
 }
@@ -49,11 +55,24 @@ model Client {
   scopes         String[]
   optionalScopes String[] @map("optional_scopes")
 
-  member       User[]         @relation("ClientToUser")
+  userLinks    UserClientRelation[] //role-aware
   consent      Consent[]
   RefreshToken RefreshToken[]
 
   @@map("client")
+}
+
+model UserClientRelation {
+  userUuid   String @db.Uuid
+  clientUuid String @db.Uuid
+
+  user   User   @relation(fields: [userUuid], references: [uuid], onDelete: Cascade)
+  client Client @relation(fields: [clientUuid], references: [uuid], onDelete: Cascade)
+
+  role RoleType @default(MEMBER)
+
+  @@id([userUuid, clientUuid])
+  @@map("user_client_relations")
 }
 
 model RefreshToken {
@@ -96,7 +115,7 @@ model Authenticator {
   createdAt     DateTime  @default(now()) @map("created_at")
   loginAt       DateTime? @map("login_at")
 
-  user          User    @relation(fields: [userUuid], references: [uuid], onDelete: Cascade)
+  user User @relation(fields: [userUuid], references: [uuid], onDelete: Cascade)
 
   @@map("authenticator")
 }

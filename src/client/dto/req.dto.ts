@@ -1,11 +1,15 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { RoleType } from '@prisma/client';
 import {
   IsArray,
   IsBoolean,
+  IsEmail,
+  IsEnum,
   IsIn,
   IsOptional,
   IsString,
   IsUrl,
+  IsUUID,
 } from 'class-validator';
 
 import { ClientScopeList, ClientScopeType } from '../types/clientScopes.type';
@@ -89,4 +93,30 @@ export class UpdateClientDto {
   @IsBoolean()
   @IsOptional()
   idTokenAllowed?: boolean;
+}
+
+export class MemberEmailDto {
+  @ApiProperty({ example: 'student@gist.ac.kr' })
+  @IsEmail()
+  email!: string;
+}
+
+export class ClientMemberParamsDto {
+  @ApiProperty({ description: 'id of the client' })
+  @IsUUID()
+  clientId!: string;
+
+  @ApiProperty({ description: 'id of the user' })
+  @IsUUID()
+  userId!: string;
+}
+
+export class ClientRoleDto {
+  @ApiProperty({
+    description: 'Setting a role in the client',
+    example: 'ADMIN',
+    enum: RoleType,
+  })
+  @IsEnum(RoleType)
+  role: RoleType;
 }

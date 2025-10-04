@@ -6,8 +6,9 @@ import {
   Injectable,
   InternalServerErrorException,
   Logger,
+  NotFoundException,
 } from '@nestjs/common';
-import { Client } from '@prisma/client';
+import { Client, RoleType } from '@prisma/client';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 
 @Injectable()
@@ -19,9 +20,9 @@ export class ClientRepository {
   async findClientListByUserUuid(userUuid: string): Promise<Client[]> {
     return this.prismaService.client.findMany({
       where: {
-        member: {
+        userLinks: {
           some: {
-            uuid: userUuid,
+            userUuid: userUuid,
           },
         },
       },
@@ -53,12 +54,12 @@ export class ClientRepository {
     userUuid: string,
   ): Promise<Client> {
     return this.prismaService.client
-      .findUniqueOrThrow({
+      .findFirstOrThrow({
         where: {
           uuid,
-          member: {
+          userLinks: {
             some: {
-              uuid: userUuid,
+              userUuid: userUuid,
             },
           },
         },
@@ -92,9 +93,10 @@ export class ClientRepository {
           name,
           urls,
           secret,
-          member: {
-            connect: {
-              uuid: userUuid,
+          userLinks: {
+            create: {
+              userUuid: userUuid,
+              role: RoleType.OWNER,
             },
           },
         },
@@ -120,9 +122,9 @@ export class ClientRepository {
       .update({
         where: {
           uuid,
-          member: {
+          userLinks: {
             some: {
-              uuid: userUuid,
+              userUuid: userUuid,
             },
           },
         },
@@ -164,9 +166,9 @@ export class ClientRepository {
       .update({
         where: {
           uuid,
-          member: {
+          userLinks: {
             some: {
-              uuid: userUuid,
+              userUuid: userUuid,
             },
           },
         },
@@ -191,6 +193,40 @@ export class ClientRepository {
       });
   }
 
+  async addMemberToClient(uuid: string, memberEmail: string): Promise<void> {
+    const member = await this.prismaService.user.findUnique({
+      where: { email: memberEmail },
+    });
+    if (!member) throw new NotFoundException('User not found');
+    try {
+      await this.prismaService.client.update({
+        where: {
+          uuid: uuid,
+        },
+        data: {
+          userLinks: {
+            create: {
+              userUuid: member.uuid,
+              role: RoleType.MEMBER,
+            },
+          },
+        },
+      });
+    } catch (error) {
+      if (error instanceof PrismaClientKnownRequestError) {
+        this.logger.debug(`addMemberToClient error: ${error.stack}`);
+        if (error.code === 'P2025') {
+          throw new ForbiddenException();
+        }
+        if (error.code === 'P2002') {
+          throw new ConflictException();
+        }
+      }
+      this.logger.error(`addMemberToClient error: ${error}`);
+      throw new InternalServerErrorException();
+    }
+  }
+
   async updateClientPicture(
     picture: string,
     uuid: string,
@@ -200,9 +236,9 @@ export class ClientRepository {
       .update({
         where: {
           uuid,
-          member: {
+          userLinks: {
             some: {
-              uuid: userUuid,
+              userUuid: userUuid,
             },
           },
         },
@@ -223,14 +259,41 @@ export class ClientRepository {
       });
   }
 
+  async setRoleToUser(
+    uuid: string,
+    userUuid: string,
+    role: RoleType,
+  ): Promise<void> {
+    await this.prismaService.userClientRelation
+      .update({
+        where: {
+          userUuid_clientUuid: {
+            userUuid: userUuid,
+            clientUuid: uuid,
+          },
+        },
+        data: { role },
+      })
+      .catch((error) => {
+        if (error instanceof PrismaClientKnownRequestError) {
+          this.logger.debug(`setRoleToUser error: ${error.stack}`);
+          if (error.code === 'P2025') {
+            throw new ForbiddenException();
+          }
+        }
+        this.logger.error(`setRoleToUser error: ${error}`);
+        throw new InternalServerErrorException();
+      });
+  }
+
   async deleteRequestClient(uuid: string, userUuid: string): Promise<void> {
     await this.prismaService.client
       .update({
         where: {
           uuid,
-          member: {
+          userLinks: {
             some: {
-              uuid: userUuid,
+              userUuid: userUuid,
             },
           },
         },
@@ -251,14 +314,44 @@ export class ClientRepository {
       });
   }
 
+  async removeMemberFromClient(uuid: string, userUuid: string): Promise<void> {
+    await this.prismaService.client
+      .update({
+        where: {
+          uuid: uuid,
+        },
+        data: {
+          userLinks: {
+            delete: {
+              userUuid_clientUuid: {
+                userUuid: userUuid,
+                clientUuid: uuid,
+              },
+            },
+          },
+        },
+      })
+      .catch((error) => {
+        if (
+          error instanceof PrismaClientKnownRequestError &&
+          error.code === 'P2025'
+        ) {
+          this.logger.debug(`removeMemberFromClient error: ${error.stack}`);
+          throw new ForbiddenException();
+        }
+        this.logger.error(`removeMemberFromClient error: ${error}`);
+        throw new InternalServerErrorException();
+      });
+  }
+
   async deleteClientPicture(uuid: string, userUuid: string): Promise<void> {
     await this.prismaService.client
       .update({
         where: {
           uuid,
-          member: {
+          userLinks: {
             some: {
-              uuid: userUuid,
+              userUuid: userUuid,
             },
           },
         },
@@ -275,6 +368,36 @@ export class ClientRepository {
           throw new ForbiddenException();
         }
         this.logger.error(`deleteClientPicture error: ${error}`);
+        throw new InternalServerErrorException();
+      });
+  }
+
+  async getUserClientRole(
+    clientUuid: string,
+    userUuid: string,
+  ): Promise<RoleType> {
+    return this.prismaService.userClientRelation
+      .findUniqueOrThrow({
+        where: {
+          userUuid_clientUuid: {
+            clientUuid: clientUuid,
+            userUuid: userUuid,
+          },
+        },
+        select: {
+          role: true,
+        },
+      })
+      .then((r) => r.role)
+      .catch((error) => {
+        if (
+          error instanceof PrismaClientKnownRequestError &&
+          error.code === 'P2025'
+        ) {
+          this.logger.debug(`getUserClientRole error: ${error.stack}`);
+          throw new ForbiddenException();
+        }
+        this.logger.error(`getUserClientRole error: ${error}`);
         throw new InternalServerErrorException();
       });
   }
