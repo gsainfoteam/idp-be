@@ -7,7 +7,6 @@ import {
   Get,
   Param,
   ParseIntPipe,
-  ParseUUIDPipe,
   Patch,
   Post,
   Query,
@@ -242,12 +241,13 @@ export class UserController {
   @Post('passkey/verify')
   async verifyRegistration(
     @GetUser() user: User,
-    @Body() { name, registrationResponse }: VerifyPasskeyRegistrationDto,
+    @Body() { name, icon, registrationResponse }: VerifyPasskeyRegistrationDto,
   ): Promise<boolean> {
     return await this.userService.verifyRegistration(
       user.email,
       name,
       registrationResponse,
+      icon,
     );
   }
 
@@ -265,7 +265,7 @@ export class UserController {
   @Patch('passkey/:id')
   async updatePasskey(
     @GetUser() user: User,
-    @Param('id', ParseUUIDPipe) id: string,
+    @Param('id') id: string,
     @Body() { name }: ChangePasskeyNameDto,
   ): Promise<void> {
     return await this.userService.updatePasskey(id, name, user.uuid);
@@ -285,7 +285,7 @@ export class UserController {
   @Delete('passkey/:id')
   async deletePasskey(
     @GetUser() user: User,
-    @Param('id', ParseUUIDPipe) id: string,
+    @Param('id') id: string,
   ): Promise<void> {
     return await this.userService.deletePasskey(id, user.uuid);
   }
