@@ -1,7 +1,7 @@
 import { Loggable } from '@lib/logger/decorator/loggable';
 import { ObjectService } from '@lib/object';
 import { ForbiddenException, Injectable } from '@nestjs/common';
-import { Client, User } from '@prisma/client';
+import { Client, RoleType, User } from '@prisma/client';
 import * as bcrypt from 'bcryptjs';
 import * as crypto from 'crypto';
 import { SlackService } from 'nestjs-slack';
@@ -95,6 +95,50 @@ export class ClientService {
     );
     client.secret = secretKey;
     return client;
+  }
+
+  /**
+   * to add the user to the client and give access
+   * @param uuid client's uuid
+   * @param memberEmail email of the user who will be added to client
+   */
+  async addMember(uuid: string, memberEmail: string): Promise<void> {
+    await this.clientRepository.addMemberToClient(uuid, memberEmail);
+  }
+
+  /**
+   * to remove the user from the client and restrict access
+   * @param uuid client's uuid
+   * @param userUuid id of the user who will be removed from the client
+   */
+  async removeMember(uuid: string, userUuid: string): Promise<void> {
+    const curRole = await this.clientRepository.getUserClientRole(
+      uuid,
+      userUuid,
+    );
+    if (curRole === RoleType.OWNER) {
+      throw new ForbiddenException('Owner role cannot be removed');
+    }
+    await this.clientRepository.removeMemberFromClient(uuid, userUuid);
+  }
+
+  /**
+   * to set a role to user in the client, to give/take persmissions
+   * @param uuid client's uuid
+   * @param userUuid id of the user to who we want to give Admin
+   */
+  async setRole(uuid: string, userUuid: string, role: RoleType): Promise<void> {
+    const curRole = await this.clientRepository.getUserClientRole(
+      uuid,
+      userUuid,
+    );
+    if (curRole === RoleType.OWNER) {
+      throw new ForbiddenException('Owner role cannot be changed');
+    }
+    if (curRole === role) {
+      return;
+    }
+    await this.clientRepository.setRoleToUser(uuid, userUuid, role);
   }
 
   /**
