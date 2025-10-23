@@ -78,6 +78,10 @@ export class UserService {
     };
   }
 
+  async checkEmail(email: string): Promise<boolean> {
+    return await this.userRepository.checkEmail(email);
+  }
+
   async findUserConsentByUuid({
     uuid,
   }: Pick<User, 'uuid'>): Promise<UserConsentType[]> {

@@ -48,6 +48,16 @@ export class UserRepository {
       });
   }
 
+  async checkEmail(email: string): Promise<boolean> {
+    return Boolean(
+      await this.prismaService.user.findUnique({
+        where: {
+          email,
+        },
+      }),
+    );
+  }
+
   /**
    * Find user by uuid
    * @param uuid uuid of user to find
