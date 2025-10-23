@@ -49,12 +49,12 @@ export class UserRepository {
   }
 
   async checkEmail(email: string): Promise<boolean> {
-    return Boolean(
-      await this.prismaService.user.findUnique({
+    return (
+      (await this.prismaService.user.findUnique({
         where: {
           email,
         },
-      }),
+      })) != null
     );
   }
 
