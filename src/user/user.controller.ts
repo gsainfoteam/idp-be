@@ -94,8 +94,8 @@ export class UserController {
   }
 
   @ApiOperation({
-    summary: 'check existed email',
-    description: 'api for checking exited email',
+    summary: 'check existing email',
+    description: 'api for checking existing email',
   })
   @ApiOkResponse({ description: 'success', type: Boolean })
   @ApiInternalServerErrorResponse({ description: 'server error' })
