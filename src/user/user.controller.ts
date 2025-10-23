@@ -94,6 +94,17 @@ export class UserController {
   }
 
   @ApiOperation({
+    summary: 'check existing email',
+    description: 'api for checking existing email',
+  })
+  @ApiOkResponse({ description: 'success', type: Boolean })
+  @ApiInternalServerErrorResponse({ description: 'server error' })
+  @Get('/email/:email')
+  async checkEmail(@Param('email') email: string): Promise<boolean> {
+    return await this.userService.checkEmail(email);
+  }
+
+  @ApiOperation({
     summary: 'sign up',
     description: 'api for the sign up',
   })
