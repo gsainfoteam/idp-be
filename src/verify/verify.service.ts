@@ -150,10 +150,20 @@ export class VerifyService {
       });
   }
 
-  async verifyStudentId({
-    name,
-    birthDate,
-  }: VerifyStudentIdDto): Promise<StudentIdKeyDto> {
+  async verifyStudentId(dto: VerifyStudentIdDto): Promise<StudentIdKeyDto> {
+    const studentId = await this.getStudentId(dto);
+
+    const key = uuidv4();
+
+    await this.redisService.set<string>(key, studentId, {
+      ttl: 3 * 60,
+      prefix: this.studentIdVerificationPrefix,
+    });
+
+    return { studentIdKey: key };
+  }
+
+  async getStudentId({ name, birthDate }: VerifyStudentIdDto): Promise<string> {
     const formData = new URLSearchParams();
     formData.append('name', name);
     formData.append('birth_dt', birthDate);
@@ -165,14 +175,6 @@ export class VerifyService {
     const data = (await res.json()) as { result: string; studtNo?: string };
     if (data.result === 'false' || !data.studtNo)
       throw new NotFoundException('Student ID is not found');
-
-    const key = uuidv4();
-
-    await this.redisService.set<string>(key, data.studtNo, {
-      ttl: 3 * 60,
-      prefix: this.studentIdVerificationPrefix,
-    });
-
-    return { studentIdKey: key };
+    return data.studtNo;
   }
 }

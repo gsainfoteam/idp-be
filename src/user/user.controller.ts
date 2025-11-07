@@ -32,6 +32,7 @@ import {
 import { User } from '@prisma/client';
 import { GetUser } from 'src/auth/decorator/getUser.decorator';
 import { UserGuard } from 'src/auth/guard/auth.guard';
+import { VerifyStudentIdDto } from 'src/verify/dto/req.dto';
 
 import {
   ChangePasskeyNameDto,
@@ -115,6 +116,16 @@ export class UserController {
   @Post()
   async register(@Body() body: RegisterDto): Promise<void> {
     return this.userService.register(body);
+  }
+
+  @ApiBearerAuth('user:jwt')
+  @UseGuards(UserGuard)
+  @Post('/verify/studentId')
+  async verifyStudentId(
+    @GetUser() user: User,
+    @Body() body: VerifyStudentIdDto,
+  ): Promise<void> {
+    return await this.userService.verifyStudentId(user.uuid, body);
   }
 
   @ApiOperation({

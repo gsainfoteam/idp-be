@@ -145,6 +145,26 @@ export class UserRepository {
       });
   }
 
+  async updateStudentId(uuid: string, studentId: string) {
+    await this.prismaService.user
+      .update({
+        where: { uuid },
+        data: { studentId },
+      })
+      .catch((error) => {
+        if (error instanceof PrismaClientKnownRequestError) {
+          if (error.code === 'P2025' || error.code === 'P2002') {
+            this.logger.debug(`user not found with uuid: ${uuid}`);
+            throw new ForbiddenException('user not found');
+          }
+          this.logger.debug(`prisma error occurred: ${error.code}`);
+          throw new InternalServerErrorException();
+        }
+        this.logger.error(`update user password error: ${error}`);
+        throw new InternalServerErrorException();
+      });
+  }
+
   /**
    * update user's password
    * @param uuid uuid of user to update

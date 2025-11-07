@@ -24,6 +24,7 @@ import fs from 'fs';
 import Handlebars from 'handlebars';
 import juice from 'juice';
 import path from 'path';
+import { VerifyStudentIdDto } from 'src/verify/dto/req.dto';
 import { VerificationJwtPayloadType } from 'src/verify/types/verificationJwtPayload.type';
 import { VerifyService } from 'src/verify/verify.service';
 
@@ -132,6 +133,11 @@ export class UserService {
       studentId,
       phoneNumber,
     });
+  }
+
+  async verifyStudentId(uuid: string, dto: VerifyStudentIdDto): Promise<void> {
+    const studentId = await this.verifyService.getStudentId(dto);
+    await this.userRepository.updateStudentId(uuid, studentId);
   }
 
   /**
