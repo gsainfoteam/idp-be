@@ -14,6 +14,7 @@ import {
   IsObject,
   IsOptional,
   IsString,
+  IsUUID,
   MaxLength,
   ValidateNested,
 } from 'class-validator';
@@ -80,11 +81,12 @@ export class RegisterDto {
   name: string;
 
   @ApiProperty({
-    example: '20180000',
-    description: '학번',
+    example: 'uuid',
+    description: '학번 식별 키',
   })
-  @IsStudentId()
-  studentId: string;
+  @IsString()
+  @IsUUID()
+  studentIdKey: string;
 
   @ApiProperty({
     example: '01012345678',

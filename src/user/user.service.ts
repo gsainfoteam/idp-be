@@ -53,6 +53,7 @@ export class UserService {
   private readonly verifyStudentIdUrl = this.configService.getOrThrow<string>(
     'VERIFY_STUDENT_ID_URL',
   );
+  private readonly studentIdVerificationPrefix = 'studentId';
 
   constructor(
     private readonly userRepository: UserRepository,
@@ -99,7 +100,7 @@ export class UserService {
     email,
     password,
     name,
-    studentId,
+    studentIdKey,
     phoneNumber,
     verificationJwtToken,
   }: RegisterDto): Promise<void> {
@@ -115,6 +116,10 @@ export class UserService {
       this.logger.debug('verification jwt token not valid');
       throw new ForbiddenException('verification jwt token not valid');
     }
+
+    const studentId = await this.redisService.getOrThrow<string>(studentIdKey, {
+      prefix: this.studentIdVerificationPrefix,
+    });
 
     const hashedPassword: string = bcrypt.hashSync(
       password,
