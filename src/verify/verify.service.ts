@@ -184,6 +184,12 @@ export class VerifyService {
         throw new InternalServerErrorException();
       })
       .finally(() => clearTimeout(timer));
+    if (!res.ok) {
+      this.logger.debug(`GIST server error: ${res.status} ${res.statusText}`);
+      throw new InternalServerErrorException(
+        `GIST server error: ${res.status} ${res.statusText}`,
+      );
+    }
     const data = (await res.json()) as { result: string; studtNo?: string };
     if (data.result === 'false' || !data.studtNo)
       throw new NotFoundException('Student ID is not found');
