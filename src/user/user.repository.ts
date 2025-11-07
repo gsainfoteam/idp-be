@@ -130,6 +130,7 @@ export class UserRepository {
           name,
           studentId,
           phoneNumber,
+          verifiedId: true,
         },
       })
       .catch((error) => {
@@ -145,11 +146,11 @@ export class UserRepository {
       });
   }
 
-  async updateStudentId(uuid: string, studentId: string) {
+  async updateStudentId(uuid: string, studentId: string): Promise<void> {
     await this.prismaService.user
       .update({
         where: { uuid },
-        data: { studentId },
+        data: { studentId, verifiedId: true },
       })
       .catch((error) => {
         if (error instanceof PrismaClientKnownRequestError) {
