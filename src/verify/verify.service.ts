@@ -15,13 +15,14 @@ import fs from 'fs';
 import Handlebars from 'handlebars';
 import juice from 'juice';
 import path from 'path';
+import { v4 as uuidv4 } from 'uuid';
 
 import {
   SendEmailCodeDto,
   VerifyCodeDto,
   VerifyStudentIdDto,
 } from './dto/req.dto';
-import { StudentIdDto, VerificationJwtResDto } from './dto/res.dto';
+import { StudentIdKeyDto, VerificationJwtResDto } from './dto/res.dto';
 import { VerificationJwtPayloadType } from './types/verificationJwtPayload.type';
 
 @Loggable()
@@ -38,6 +39,7 @@ export class VerifyService {
   private readonly verifyStudentIdUrl = this.configService.getOrThrow<string>(
     'VERIFY_STUDENT_ID_URL',
   );
+  private readonly studentIdVerificationPrefix = 'studentId';
 
   constructor(
     private readonly configService: ConfigService,
@@ -151,7 +153,7 @@ export class VerifyService {
   async verifyStudentId({
     name,
     birthDate,
-  }: VerifyStudentIdDto): Promise<StudentIdDto> {
+  }: VerifyStudentIdDto): Promise<StudentIdKeyDto> {
     const formData = new URLSearchParams();
     formData.append('name', name);
     formData.append('birth_dt', birthDate);
@@ -164,6 +166,13 @@ export class VerifyService {
     if (data.result === 'false' || !data.studtNo)
       throw new NotFoundException('Student ID is not found');
 
-    return { studentId: data.studtNo };
+    const key = uuidv4();
+
+    await this.redisService.set<string>(key, data.studtNo, {
+      ttl: 3 * 60,
+      prefix: this.studentIdVerificationPrefix,
+    });
+
+    return { studentIdKey: key };
   }
 }

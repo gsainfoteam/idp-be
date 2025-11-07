@@ -20,7 +20,7 @@ import {
   VerifyCodeDto,
   VerifyStudentIdDto,
 } from './dto/req.dto';
-import { StudentIdDto, VerificationJwtResDto } from './dto/res.dto';
+import { StudentIdKeyDto, VerificationJwtResDto } from './dto/res.dto';
 import { VerifyService } from './verify.service';
 
 @ApiTags('verify')
@@ -66,7 +66,7 @@ export class VerifyController {
   @Post('/studentId')
   async verifyStudentId(
     @Body() dto: VerifyStudentIdDto,
-  ): Promise<StudentIdDto> {
+  ): Promise<StudentIdKeyDto> {
     return await this.verifyService.verifyStudentId(dto);
   }
 }
