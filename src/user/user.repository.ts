@@ -113,7 +113,14 @@ export class UserRepository {
     phoneNumber,
   }: Omit<
     User,
-    'accessLevel' | 'uuid' | 'createdAt' | 'updatedAt' | 'picture' | 'profile'
+    | 'accessLevel'
+    | 'uuid'
+    | 'createdAt'
+    | 'updatedAt'
+    | 'picture'
+    | 'profile'
+    | 'verifiedId'
+    | 'verifiedNumber'
   >): Promise<void> {
     await this.prismaService.user
       .create({
