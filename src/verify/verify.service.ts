@@ -168,10 +168,22 @@ export class VerifyService {
     formData.append('name', name);
     formData.append('birth_dt', birthDate);
     formData.append('mode', 'studtNoSearch');
+    const ac = new AbortController();
+    const timer = setTimeout(() => ac.abort(), 60e3);
     const res = await fetch(this.verifyStudentIdUrl, {
       method: 'POST',
       body: formData,
-    });
+      signal: ac.signal,
+    })
+      .catch((error) => {
+        if (error instanceof Error && error.name === 'AbortError') {
+          this.logger.debug('timeout error');
+          throw new InternalServerErrorException('timeout error');
+        }
+        this.logger.error(`get student id error: ${error}`);
+        throw new InternalServerErrorException();
+      })
+      .finally(() => clearTimeout(timer));
     const data = (await res.json()) as { result: string; studtNo?: string };
     if (data.result === 'false' || !data.studtNo)
       throw new NotFoundException('Student ID is not found');
