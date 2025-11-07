@@ -15,8 +15,12 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 
-import { SendEmailCodeDto, VerifyCodeDto } from './dto/req.dto';
-import { VerificationJwtResDto } from './dto/res.dto';
+import {
+  SendEmailCodeDto,
+  VerifyCodeDto,
+  VerifyStudentIdDto,
+} from './dto/req.dto';
+import { StudentIdDto, VerificationJwtResDto } from './dto/res.dto';
 import { VerifyService } from './verify.service';
 
 @ApiTags('verify')
@@ -57,5 +61,12 @@ export class VerifyController {
     @Body() body: SendEmailCodeDto,
   ): Promise<void> {
     await this.verifyService.sendEmailCode(body);
+  }
+
+  @Post('/studentId')
+  async verifyStudentId(
+    @Body() dto: VerifyStudentIdDto,
+  ): Promise<StudentIdDto> {
+    return await this.verifyService.verifyStudentId(dto);
   }
 }

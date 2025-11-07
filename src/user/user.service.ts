@@ -6,7 +6,6 @@ import {
   ForbiddenException,
   Injectable,
   Logger,
-  NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
@@ -27,20 +26,14 @@ import juice from 'juice';
 import path from 'path';
 import { VerificationJwtPayloadType } from 'src/verify/types/verificationJwtPayload.type';
 import { VerifyService } from 'src/verify/verify.service';
-import { URLSearchParams } from 'url';
 
 import {
   ChangePasswordDto,
   DeleteUserReqDto,
   IssueUserSecretDto,
   RegisterDto,
-  VerifyStudentIdDto,
 } from './dto/req.dto';
-import {
-  BasicPasskeyDto,
-  StudentIdDto,
-  UpdateUserPictureResDto,
-} from './dto/res.dto';
+import { BasicPasskeyDto, UpdateUserPictureResDto } from './dto/res.dto';
 import { UserConsentType } from './types/userConsent.type';
 import { UserRepository } from './user.repository';
 
@@ -90,25 +83,6 @@ export class UserService {
 
   async checkEmail(email: string): Promise<boolean> {
     return await this.userRepository.checkEmail(email);
-  }
-
-  async verifyStudentId({
-    name,
-    birthDate,
-  }: VerifyStudentIdDto): Promise<StudentIdDto> {
-    const formData = new URLSearchParams();
-    formData.append('name', name);
-    formData.append('birth_dt', birthDate);
-    formData.append('mode', 'studtNoSearch');
-    const res = await fetch(this.verifyStudentIdUrl, {
-      method: 'POST',
-      body: formData,
-    });
-    const data = (await res.json()) as { result: string; studtNo?: string };
-    if (data.result === 'false' || !data.studtNo)
-      throw new NotFoundException('Student ID is not found');
-
-    return { studentId: data.studtNo };
   }
 
   async findUserConsentByUuid({

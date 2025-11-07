@@ -68,14 +68,14 @@ export class UserResDto implements User {
   })
   updatedAt: Date;
 
-  @Exclude()
-  password: string;
-
-  @Exclude()
+  @ApiProperty()
   verifiedId: boolean;
 
-  @Exclude()
+  @ApiProperty()
   verifiedNumber: boolean;
+
+  @Exclude()
+  password: string;
 
   constructor(user: User) {
     Object.assign(this, user);
@@ -345,9 +345,4 @@ export class BasicPasskeyDto {
     format: 'date-time',
   })
   loginAt: Date | null;
-}
-
-export class StudentIdDto {
-  @ApiProperty({ description: '학번' })
-  studentId: string;
 }

@@ -253,13 +253,3 @@ export class ChangePasskeyNameDto {
   @IsString()
   name: string;
 }
-
-export class VerifyStudentIdDto {
-  @ApiProperty({ description: '이름' })
-  @IsString()
-  name: string;
-
-  @ApiProperty({ example: '20000101', description: '생년월일' })
-  @IsString()
-  birthDate: string;
-}

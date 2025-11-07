@@ -6,6 +6,7 @@ import {
   Injectable,
   InternalServerErrorException,
   Logger,
+  NotFoundException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
@@ -15,8 +16,12 @@ import Handlebars from 'handlebars';
 import juice from 'juice';
 import path from 'path';
 
-import { SendEmailCodeDto, VerifyCodeDto } from './dto/req.dto';
-import { VerificationJwtResDto } from './dto/res.dto';
+import {
+  SendEmailCodeDto,
+  VerifyCodeDto,
+  VerifyStudentIdDto,
+} from './dto/req.dto';
+import { StudentIdDto, VerificationJwtResDto } from './dto/res.dto';
 import { VerificationJwtPayloadType } from './types/verificationJwtPayload.type';
 
 @Loggable()
@@ -29,6 +34,9 @@ export class VerifyService {
     this.configService.get<string>('EMAIL_USER');
   private readonly template = Handlebars.compile(
     fs.readFileSync(path.join(__dirname, '../templates', 'email.html'), 'utf8'),
+  );
+  private readonly verifyStudentIdUrl = this.configService.getOrThrow<string>(
+    'VERIFY_STUDENT_ID_URL',
   );
 
   constructor(
@@ -138,5 +146,24 @@ export class VerifyService {
         this.logger.error(`jwt verify error: ${error}`);
         throw new BadRequestException('invalid jwt token');
       });
+  }
+
+  async verifyStudentId({
+    name,
+    birthDate,
+  }: VerifyStudentIdDto): Promise<StudentIdDto> {
+    const formData = new URLSearchParams();
+    formData.append('name', name);
+    formData.append('birth_dt', birthDate);
+    formData.append('mode', 'studtNoSearch');
+    const res = await fetch(this.verifyStudentIdUrl, {
+      method: 'POST',
+      body: formData,
+    });
+    const data = (await res.json()) as { result: string; studtNo?: string };
+    if (data.result === 'false' || !data.studtNo)
+      throw new NotFoundException('Student ID is not found');
+
+    return { studentId: data.studtNo };
   }
 }

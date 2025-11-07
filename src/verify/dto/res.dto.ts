@@ -7,3 +7,8 @@ export class VerificationJwtResDto {
   })
   verificationJwtToken: string;
 }
+
+export class StudentIdDto {
+  @ApiProperty({ description: '학번' })
+  studentId: string;
+}

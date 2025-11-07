@@ -40,12 +40,10 @@ import {
   IssueUserSecretDto,
   RegisterDto,
   VerifyPasskeyRegistrationDto,
-  VerifyStudentIdDto,
 } from './dto/req.dto';
 import {
   BasicPasskeyDto,
   PasskeyRegisterOptionResDto,
-  StudentIdDto,
   UpdateUserPictureResDto,
   UserConsentListResDto,
   UserConsentResDto,
@@ -117,13 +115,6 @@ export class UserController {
   @Post()
   async register(@Body() body: RegisterDto): Promise<void> {
     return this.userService.register(body);
-  }
-
-  @Post('/verify/studentId')
-  async verifyStudentId(
-    @Body() dto: VerifyStudentIdDto,
-  ): Promise<StudentIdDto> {
-    return await this.userService.verifyStudentId(dto);
   }
 
   @ApiOperation({
