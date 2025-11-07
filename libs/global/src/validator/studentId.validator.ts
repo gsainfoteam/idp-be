@@ -1,20 +1,7 @@
 import {
-  registerDecorator,
-  ValidationOptions,
   ValidatorConstraint,
   ValidatorConstraintInterface,
 } from 'class-validator';
-
-export function IsStudentId(validationOptions?: ValidationOptions) {
-  return function (object: object, propertyName: string) {
-    registerDecorator({
-      target: object.constructor,
-      propertyName,
-      options: validationOptions,
-      validator: StudentIdValidator,
-    });
-  };
-}
 
 @ValidatorConstraint()
 export class StudentIdValidator implements ValidatorConstraintInterface {

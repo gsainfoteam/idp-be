@@ -1,5 +1,4 @@
 import { IsGistEmail } from '@lib/global';
-import { IsStudentId } from '@lib/global/validator/studentId.validator';
 import { BadRequestException } from '@nestjs/common';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Transform, Type } from 'class-transformer';
