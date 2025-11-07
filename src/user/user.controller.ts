@@ -118,7 +118,15 @@ export class UserController {
     return this.userService.register(body);
   }
 
+  @ApiOperation({
+    summary: 'verify student id for original user',
+    description:
+      'verify student id using birth date and name for original user',
+  })
   @ApiBearerAuth('user:jwt')
+  @ApiOkResponse({ description: 'success' })
+  @ApiNotFoundResponse({ description: 'user is not found' })
+  @ApiInternalServerErrorResponse({ description: 'server error' })
   @UseGuards(UserGuard)
   @Post('/verify/studentId')
   async verifyStudentId(

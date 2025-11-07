@@ -10,6 +10,8 @@ import {
 import {
   ApiBadRequestResponse,
   ApiInternalServerErrorResponse,
+  ApiNotFoundResponse,
+  ApiOkResponse,
   ApiOperation,
   ApiResponse,
   ApiTags,
@@ -63,10 +65,18 @@ export class VerifyController {
     await this.verifyService.sendEmailCode(body);
   }
 
+  @ApiOperation({
+    summary: 'return key for verifying student id',
+    description:
+      'verify student id using birth date and name for signing up and return uuid key',
+  })
+  @ApiOkResponse({ description: 'success', type: StudentIdKeyDto })
+  @ApiNotFoundResponse({ description: 'Student id is not found' })
+  @ApiInternalServerErrorResponse({ description: 'server error' })
   @Post('/studentId')
   async verifyStudentId(
-    @Body() dto: VerifyStudentIdDto,
+    @Body() body: VerifyStudentIdDto,
   ): Promise<StudentIdKeyDto> {
-    return await this.verifyService.verifyStudentId(dto);
+    return await this.verifyService.verifyStudentId(body);
   }
 }
