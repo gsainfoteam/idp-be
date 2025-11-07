@@ -122,6 +122,10 @@ export class UserService {
       prefix: this.studentIdVerificationPrefix,
     });
 
+    await this.redisService.del(studentIdKey, {
+      prefix: this.studentIdVerificationPrefix,
+    });
+
     const hashedPassword: string = bcrypt.hashSync(
       password,
       bcrypt.genSaltSync(10),
