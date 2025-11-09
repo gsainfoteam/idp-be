@@ -76,7 +76,7 @@ export class VerifyController {
   @Post('/studentId')
   async verifyStudentId(
     @Body() body: VerifyStudentIdDto,
-  ): Promise<StudentIdKeyDto> {
+  ): Promise<VerificationJwtResDto> {
     return await this.verifyService.verifyStudentId(body);
   }
 }

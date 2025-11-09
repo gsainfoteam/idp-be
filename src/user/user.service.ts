@@ -101,30 +101,36 @@ export class UserService {
     email,
     password,
     name,
-    studentIdKey,
+    studentId,
     phoneNumber,
-    verificationJwtToken,
+    emailVerificationJwtToken,
+    studentIdVerificationJwtToken,
   }: RegisterDto): Promise<void> {
-    const payload: VerificationJwtPayloadType =
-      await this.verifyService.validateJwtToken(verificationJwtToken);
+    const emailPayload: VerificationJwtPayloadType =
+      await this.verifyService.validateJwtToken(emailVerificationJwtToken);
 
-    if (payload.hint !== 'email') {
+    if (emailPayload.hint !== 'email') {
       this.logger.debug('verification hint is not email');
       throw new ForbiddenException('verification hint is not email');
     }
 
-    if (payload.sub !== email) {
+    if (emailPayload.sub !== email) {
       this.logger.debug('verification jwt token not valid');
       throw new ForbiddenException('verification jwt token not valid');
     }
 
-    const studentId = await this.redisService.getOrThrow<string>(studentIdKey, {
-      prefix: this.studentIdVerificationPrefix,
-    });
+    const studentIdPayload: VerificationJwtPayloadType =
+      await this.verifyService.validateJwtToken(studentIdVerificationJwtToken);
 
-    await this.redisService.del(studentIdKey, {
-      prefix: this.studentIdVerificationPrefix,
-    });
+    if (studentIdPayload.hint !== 'studentId') {
+      this.logger.debug('verification hint is not studentId');
+      throw new ForbiddenException('verification hint is not studentId');
+    }
+
+    if (studentIdPayload.sub !== studentId) {
+      this.logger.debug('verification jwt token not valid');
+      throw new ForbiddenException('verification jwt token not valid');
+    }
 
     const hashedPassword: string = bcrypt.hashSync(
       password,

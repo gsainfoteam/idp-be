@@ -1,4 +1,5 @@
 import { IsGistEmail } from '@lib/global';
+import { IsStudentId } from '@lib/global/validator/studentId.validator';
 import { BadRequestException } from '@nestjs/common';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Transform, Type } from 'class-transformer';
@@ -13,7 +14,6 @@ import {
   IsObject,
   IsOptional,
   IsString,
-  IsUUID,
   MaxLength,
   ValidateNested,
 } from 'class-validator';
@@ -80,12 +80,12 @@ export class RegisterDto {
   name: string;
 
   @ApiProperty({
-    example: 'uuid',
-    description: '학번 식별 키',
+    example: '20180000',
+    description: '학번',
   })
   @IsString()
-  @IsUUID()
-  studentIdKey: string;
+  @IsStudentId()
+  studentId: string;
 
   @ApiProperty({
     example: '01012345678',
@@ -101,7 +101,15 @@ export class RegisterDto {
     description: '이메일 인증 jwt 토큰',
   })
   @IsJWT()
-  verificationJwtToken: string;
+  emailVerificationJwtToken: string;
+
+  @ApiProperty({
+    example:
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6Ikp9.eyJlbWFpbCI6ImpvaG5AZ21haWwuY29tIiwiaWF0IjoxNjI2NzQwMjY5LCJleHAiOjE2MjY3NDAyNzZ9.4RZq0Xq2vHf6VQ5o4GtG6tKv4oL9a8kF8y0JW7w5ZlY',
+    description: '이메일 인증 jwt 토큰',
+  })
+  @IsJWT()
+  studentIdVerificationJwtToken: string;
 }
 
 export class DeleteUserReqDto {

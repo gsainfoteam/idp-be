@@ -15,14 +15,13 @@ import fs from 'fs';
 import Handlebars from 'handlebars';
 import juice from 'juice';
 import path from 'path';
-import { v4 as uuidv4 } from 'uuid';
 
 import {
   SendEmailCodeDto,
   VerifyCodeDto,
   VerifyStudentIdDto,
 } from './dto/req.dto';
-import { StudentIdKeyDto, VerificationJwtResDto } from './dto/res.dto';
+import { VerificationJwtResDto } from './dto/res.dto';
 import { VerificationJwtPayloadType } from './types/verificationJwtPayload.type';
 
 @Loggable()
@@ -150,17 +149,19 @@ export class VerifyService {
       });
   }
 
-  async verifyStudentId(dto: VerifyStudentIdDto): Promise<StudentIdKeyDto> {
+  async verifyStudentId(
+    dto: VerifyStudentIdDto,
+  ): Promise<VerificationJwtResDto> {
     const studentId = await this.getStudentId(dto);
 
-    const key = uuidv4();
-
-    await this.redisService.set<string>(key, studentId, {
-      ttl: 3 * 60,
-      prefix: this.studentIdVerificationPrefix,
-    });
-
-    return { studentIdKey: key };
+    const payload: VerificationJwtPayloadType = {
+      iss: this.configService.getOrThrow<string>('JWT_ISSUER'),
+      sub: studentId,
+      hint: 'studentId',
+    };
+    return {
+      verificationJwtToken: this.jwtService.sign(payload),
+    };
   }
 
   async getStudentId({ name, birthDate }: VerifyStudentIdDto): Promise<string> {
