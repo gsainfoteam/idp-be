@@ -32,8 +32,8 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  verifiedId      Boolean @default(false)
-  verifiedNumber  Boolean @default(false)
+  isIdVerified          Boolean @default(false)
+  isPhoneNumberVerified Boolean @default(false)
 
   memberships    UserClientRelation[] //role-aware
   consent        Consent[]

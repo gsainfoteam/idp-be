@@ -119,8 +119,8 @@ export class UserRepository {
     | 'updatedAt'
     | 'picture'
     | 'profile'
-    | 'verifiedId'
-    | 'verifiedNumber'
+    | 'isIdVerified'
+    | 'isPhoneNumberVerified'
   >): Promise<void> {
     await this.prismaService.user
       .create({
@@ -130,7 +130,7 @@ export class UserRepository {
           name,
           studentId,
           phoneNumber,
-          verifiedId: true,
+          isIdVerified: true,
         },
       })
       .catch((error) => {
@@ -150,7 +150,7 @@ export class UserRepository {
     await this.prismaService.user
       .update({
         where: { uuid },
-        data: { studentId, verifiedId: true },
+        data: { studentId, isIdVerified: true },
       })
       .catch((error) => {
         if (error instanceof PrismaClientKnownRequestError) {

@@ -18,8 +18,8 @@ MEMBER MEMBER
     String phone_number 
     DateTime createdAt 
     DateTime updatedAt 
-    Boolean verifiedId 
-    Boolean verifiedNumber 
+    Boolean isIdVerified 
+    Boolean isPhoneNumberVerified 
     }
   
 

@@ -69,10 +69,10 @@ export class UserResDto implements User {
   updatedAt: Date;
 
   @ApiProperty()
-  verifiedId: boolean;
+  isIdVerified: boolean;
 
   @ApiProperty()
-  verifiedNumber: boolean;
+  isPhoneNumberVerified: boolean;
 
   @Exclude()
   password: string;
