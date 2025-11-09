@@ -21,7 +21,7 @@ import {
   VerifyCodeDto,
   VerifyStudentIdDto,
 } from './dto/req.dto';
-import { VerificationJwtResDto } from './dto/res.dto';
+import { VerificationJwtResDto, VerifyStudentIdResDto } from './dto/res.dto';
 import { VerificationJwtPayloadType } from './types/verificationJwtPayload.type';
 
 @Loggable()
@@ -151,7 +151,7 @@ export class VerifyService {
 
   async verifyStudentId(
     dto: VerifyStudentIdDto,
-  ): Promise<VerificationJwtResDto> {
+  ): Promise<VerifyStudentIdResDto> {
     const studentId = await this.getStudentId(dto);
 
     const payload: VerificationJwtPayloadType = {
@@ -160,6 +160,7 @@ export class VerifyService {
       hint: 'studentId',
     };
     return {
+      studentId,
       verificationJwtToken: this.jwtService.sign(payload),
     };
   }

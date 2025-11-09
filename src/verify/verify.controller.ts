@@ -22,7 +22,7 @@ import {
   VerifyCodeDto,
   VerifyStudentIdDto,
 } from './dto/req.dto';
-import { StudentIdKeyDto, VerificationJwtResDto } from './dto/res.dto';
+import { VerificationJwtResDto, VerifyStudentIdResDto } from './dto/res.dto';
 import { VerifyService } from './verify.service';
 
 @ApiTags('verify')
@@ -70,13 +70,13 @@ export class VerifyController {
     description:
       'verify student id using birth date and name for signing up and return uuid key',
   })
-  @ApiOkResponse({ description: 'success', type: StudentIdKeyDto })
+  @ApiOkResponse({ description: 'success', type: VerifyStudentIdResDto })
   @ApiNotFoundResponse({ description: 'Student id is not found' })
   @ApiInternalServerErrorResponse({ description: 'server error' })
   @Post('/studentId')
   async verifyStudentId(
     @Body() body: VerifyStudentIdDto,
-  ): Promise<VerificationJwtResDto> {
+  ): Promise<VerifyStudentIdResDto> {
     return await this.verifyService.verifyStudentId(body);
   }
 }
