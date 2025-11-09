@@ -113,7 +113,14 @@ export class UserRepository {
     phoneNumber,
   }: Omit<
     User,
-    'accessLevel' | 'uuid' | 'createdAt' | 'updatedAt' | 'picture' | 'profile'
+    | 'accessLevel'
+    | 'uuid'
+    | 'createdAt'
+    | 'updatedAt'
+    | 'picture'
+    | 'profile'
+    | 'isIdVerified'
+    | 'isPhoneNumberVerified'
   >): Promise<void> {
     await this.prismaService.user
       .create({
@@ -123,6 +130,7 @@ export class UserRepository {
           name,
           studentId,
           phoneNumber,
+          isIdVerified: true,
         },
       })
       .catch((error) => {
@@ -134,6 +142,26 @@ export class UserRepository {
           throw new ConflictException('user already exists');
         }
         this.logger.error(`create user error: ${error}`);
+        throw new InternalServerErrorException();
+      });
+  }
+
+  async updateStudentId(uuid: string, studentId: string): Promise<void> {
+    await this.prismaService.user
+      .update({
+        where: { uuid },
+        data: { studentId, isIdVerified: true },
+      })
+      .catch((error) => {
+        if (error instanceof PrismaClientKnownRequestError) {
+          if (error.code === 'P2025' || error.code === 'P2002') {
+            this.logger.debug(`user not found with uuid: ${uuid}`);
+            throw new ForbiddenException('user not found');
+          }
+          this.logger.debug(`prisma error occurred: ${error.code}`);
+          throw new InternalServerErrorException();
+        }
+        this.logger.error(`update user password error: ${error}`);
         throw new InternalServerErrorException();
       });
   }

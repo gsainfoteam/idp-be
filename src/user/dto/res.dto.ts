@@ -68,6 +68,12 @@ export class UserResDto implements User {
   })
   updatedAt: Date;
 
+  @ApiProperty()
+  isIdVerified: boolean;
+
+  @ApiProperty()
+  isPhoneNumberVerified: boolean;
+
   @Exclude()
   password: string;
 

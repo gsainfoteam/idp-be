@@ -10,13 +10,19 @@ import {
 import {
   ApiBadRequestResponse,
   ApiInternalServerErrorResponse,
+  ApiNotFoundResponse,
+  ApiOkResponse,
   ApiOperation,
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
 
-import { SendEmailCodeDto, VerifyCodeDto } from './dto/req.dto';
-import { VerificationJwtResDto } from './dto/res.dto';
+import {
+  SendEmailCodeDto,
+  VerifyCodeDto,
+  VerifyStudentIdDto,
+} from './dto/req.dto';
+import { VerificationJwtResDto, VerifyStudentIdResDto } from './dto/res.dto';
 import { VerifyService } from './verify.service';
 
 @ApiTags('verify')
@@ -57,5 +63,20 @@ export class VerifyController {
     @Body() body: SendEmailCodeDto,
   ): Promise<void> {
     await this.verifyService.sendEmailCode(body);
+  }
+
+  @ApiOperation({
+    summary: 'return key for verifying student id',
+    description:
+      'verify student id using birth date and name for signing up and return uuid key',
+  })
+  @ApiOkResponse({ description: 'success', type: VerifyStudentIdResDto })
+  @ApiNotFoundResponse({ description: 'Student id is not found' })
+  @ApiInternalServerErrorResponse({ description: 'server error' })
+  @Post('/studentId')
+  async verifyStudentId(
+    @Body() body: VerifyStudentIdDto,
+  ): Promise<VerifyStudentIdResDto> {
+    return await this.verifyService.verifyStudentId(body);
   }
 }

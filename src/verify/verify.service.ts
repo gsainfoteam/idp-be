@@ -6,6 +6,7 @@ import {
   Injectable,
   InternalServerErrorException,
   Logger,
+  NotFoundException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
@@ -15,8 +16,12 @@ import Handlebars from 'handlebars';
 import juice from 'juice';
 import path from 'path';
 
-import { SendEmailCodeDto, VerifyCodeDto } from './dto/req.dto';
-import { VerificationJwtResDto } from './dto/res.dto';
+import {
+  SendEmailCodeDto,
+  VerifyCodeDto,
+  VerifyStudentIdDto,
+} from './dto/req.dto';
+import { VerificationJwtResDto, VerifyStudentIdResDto } from './dto/res.dto';
 import { VerificationJwtPayloadType } from './types/verificationJwtPayload.type';
 
 @Loggable()
@@ -30,6 +35,10 @@ export class VerifyService {
   private readonly template = Handlebars.compile(
     fs.readFileSync(path.join(__dirname, '../templates', 'email.html'), 'utf8'),
   );
+  private readonly verifyStudentIdUrl = this.configService.getOrThrow<string>(
+    'VERIFY_STUDENT_ID_URL',
+  );
+  private readonly studentIdVerificationPrefix = 'studentId';
 
   constructor(
     private readonly configService: ConfigService,
@@ -138,5 +147,54 @@ export class VerifyService {
         this.logger.error(`jwt verify error: ${error}`);
         throw new BadRequestException('invalid jwt token');
       });
+  }
+
+  async verifyStudentId(
+    dto: VerifyStudentIdDto,
+  ): Promise<VerifyStudentIdResDto> {
+    const studentId = await this.getStudentId(dto);
+
+    const payload: VerificationJwtPayloadType = {
+      iss: this.configService.getOrThrow<string>('JWT_ISSUER'),
+      sub: studentId,
+      hint: 'studentId',
+    };
+    return {
+      studentId,
+      verificationJwtToken: this.jwtService.sign(payload),
+    };
+  }
+
+  async getStudentId({ name, birthDate }: VerifyStudentIdDto): Promise<string> {
+    const formData = new URLSearchParams();
+    formData.append('name', name);
+    formData.append('birth_dt', birthDate);
+    formData.append('mode', 'studtNoSearch');
+    const ac = new AbortController();
+    const timer = setTimeout(() => ac.abort(), 60e3);
+    const res = await fetch(this.verifyStudentIdUrl, {
+      method: 'POST',
+      body: formData,
+      signal: ac.signal,
+    })
+      .catch((error) => {
+        if (error instanceof Error && error.name === 'AbortError') {
+          this.logger.debug('timeout error');
+          throw new InternalServerErrorException('timeout error');
+        }
+        this.logger.error(`get student id error: ${error}`);
+        throw new InternalServerErrorException();
+      })
+      .finally(() => clearTimeout(timer));
+    if (!res.ok) {
+      this.logger.debug(`GIST server error: ${res.status} ${res.statusText}`);
+      throw new InternalServerErrorException(
+        `GIST server error: ${res.status} ${res.statusText}`,
+      );
+    }
+    const data = (await res.json()) as { result: string; studtNo?: string };
+    if (data.result === 'false' || !data.studtNo)
+      throw new NotFoundException('Student ID is not found');
+    return data.studtNo;
   }
 }

@@ -2,7 +2,7 @@ import { IsGistEmail } from '@lib/global';
 import { BadRequestException } from '@nestjs/common';
 import { ApiProperty } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
-import { IsEmail } from 'class-validator';
+import { IsEmail, IsString } from 'class-validator';
 
 import { VerificationList, VerificationType } from '../types/verification.type';
 
@@ -45,4 +45,14 @@ export class VerifyCodeDto {
     enum: VerificationList,
   })
   hint: VerificationType;
+}
+
+export class VerifyStudentIdDto {
+  @ApiProperty({ description: '이름' })
+  @IsString()
+  name: string;
+
+  @ApiProperty({ example: '20000101', description: '생년월일' })
+  @IsString()
+  birthDate: string;
 }

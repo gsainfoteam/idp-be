@@ -24,6 +24,7 @@ import fs from 'fs';
 import Handlebars from 'handlebars';
 import juice from 'juice';
 import path from 'path';
+import { VerifyStudentIdDto } from 'src/verify/dto/req.dto';
 import { VerificationJwtPayloadType } from 'src/verify/types/verificationJwtPayload.type';
 import { VerifyService } from 'src/verify/verify.service';
 
@@ -50,6 +51,10 @@ export class UserService {
   private readonly passkeyPrefix = 'passkeyRegister';
   private readonly passkeyRpOrigin: string;
   private readonly passkeyRpId: string;
+  private readonly verifyStudentIdUrl = this.configService.getOrThrow<string>(
+    'VERIFY_STUDENT_ID_URL',
+  );
+  private readonly studentIdVerificationPrefix = 'studentId';
 
   constructor(
     private readonly userRepository: UserRepository,
@@ -98,17 +103,31 @@ export class UserService {
     name,
     studentId,
     phoneNumber,
-    verificationJwtToken,
+    emailVerificationJwtToken,
+    studentIdVerificationJwtToken,
   }: RegisterDto): Promise<void> {
-    const payload: VerificationJwtPayloadType =
-      await this.verifyService.validateJwtToken(verificationJwtToken);
+    const emailPayload: VerificationJwtPayloadType =
+      await this.verifyService.validateJwtToken(emailVerificationJwtToken);
 
-    if (payload.hint !== 'email') {
+    if (emailPayload.hint !== 'email') {
       this.logger.debug('verification hint is not email');
       throw new ForbiddenException('verification hint is not email');
     }
 
-    if (payload.sub !== email) {
+    if (emailPayload.sub !== email) {
+      this.logger.debug('verification jwt token not valid');
+      throw new ForbiddenException('verification jwt token not valid');
+    }
+
+    const studentIdPayload: VerificationJwtPayloadType =
+      await this.verifyService.validateJwtToken(studentIdVerificationJwtToken);
+
+    if (studentIdPayload.hint !== 'studentId') {
+      this.logger.debug('verification hint is not studentId');
+      throw new ForbiddenException('verification hint is not studentId');
+    }
+
+    if (studentIdPayload.sub !== studentId) {
       this.logger.debug('verification jwt token not valid');
       throw new ForbiddenException('verification jwt token not valid');
     }
@@ -124,6 +143,11 @@ export class UserService {
       studentId,
       phoneNumber,
     });
+  }
+
+  async verifyStudentId(uuid: string, dto: VerifyStudentIdDto): Promise<void> {
+    const studentId = await this.verifyService.getStudentId(dto);
+    await this.userRepository.updateStudentId(uuid, studentId);
   }
 
   /**

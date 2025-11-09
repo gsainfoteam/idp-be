@@ -18,6 +18,8 @@ MEMBER MEMBER
     String phone_number 
     DateTime createdAt 
     DateTime updatedAt 
+    Boolean isIdVerified 
+    Boolean isPhoneNumberVerified 
     }
   
 
@@ -61,10 +63,10 @@ MEMBER MEMBER
     String user_uuid "🗝️"
     String name 
     String icon "❓"
-    Bytes public_key
-    Int counter
-    String user_uuid
-    DateTime created_at
+    Bytes public_key 
+    Int counter 
+    String user_uuid 
+    DateTime created_at 
     DateTime login_at "❓"
     }
   
