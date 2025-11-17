@@ -121,7 +121,7 @@ export class UserController {
   @ApiOperation({
     summary: 'verify student id for original user',
     description:
-      'verify student id using birth date and name for original user',
+      'verify student id using birth date and name for original user. If ',
   })
   @ApiBearerAuth('user:jwt')
   @ApiOkResponse({ description: 'success' })
