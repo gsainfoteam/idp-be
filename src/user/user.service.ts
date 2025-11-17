@@ -119,7 +119,7 @@ export class UserService {
       throw new ForbiddenException('verification jwt token not valid');
     }
 
-    if (email.includes('@gm.gist.ac.kr')) {
+    if (email.endsWith('@gm.gist.ac.kr')) {
       if (!studentIdVerificationJwtToken)
         throw new ForbiddenException('student id verification jwt is required');
 
