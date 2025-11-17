@@ -146,11 +146,15 @@ export class UserRepository {
       });
   }
 
-  async updateStudentId(uuid: string, studentId: string): Promise<void> {
+  async updateStudentId(
+    uuid: string,
+    name: string,
+    studentId: string,
+  ): Promise<void> {
     await this.prismaService.user
       .update({
         where: { uuid },
-        data: { studentId, isIdVerified: true },
+        data: { name, studentId, isIdVerified: true },
       })
       .catch((error) => {
         if (error instanceof PrismaClientKnownRequestError) {
