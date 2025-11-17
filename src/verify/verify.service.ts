@@ -152,7 +152,7 @@ export class VerifyService {
   async verifyStudentId(
     dto: VerifyStudentIdDto,
   ): Promise<VerifyStudentIdResDto> {
-    const studentId = await this.getStudentId(dto);
+    const { studentId } = await this.getStudentId(dto);
 
     const payload: VerificationJwtPayloadType = {
       iss: this.configService.getOrThrow<string>('JWT_ISSUER'),
@@ -165,7 +165,10 @@ export class VerifyService {
     };
   }
 
-  async getStudentId({ name, birthDate }: VerifyStudentIdDto): Promise<string> {
+  async getStudentId({
+    name,
+    birthDate,
+  }: VerifyStudentIdDto): Promise<{ name: string; studentId: string }> {
     const formData = new URLSearchParams();
     formData.append('name', name);
     formData.append('birth_dt', birthDate);
@@ -195,6 +198,6 @@ export class VerifyService {
     const data = (await res.json()) as { result: string; studtNo?: string };
     if (data.result === 'false' || !data.studtNo)
       throw new NotFoundException('Student ID is not found');
-    return data.studtNo;
+    return { name, studentId: data.studtNo };
   }
 }

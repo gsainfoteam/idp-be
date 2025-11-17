@@ -146,8 +146,8 @@ export class UserService {
   }
 
   async verifyStudentId(uuid: string, dto: VerifyStudentIdDto): Promise<void> {
-    const studentId = await this.verifyService.getStudentId(dto);
-    await this.userRepository.updateStudentId(uuid, studentId);
+    const { name, studentId } = await this.verifyService.getStudentId(dto);
+    await this.userRepository.updateStudentId(uuid, name, studentId);
   }
 
   /**
