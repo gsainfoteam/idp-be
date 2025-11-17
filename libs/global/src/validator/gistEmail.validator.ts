@@ -20,6 +20,6 @@ export function IsGistEmail(validationOptions?: ValidationOptions) {
 export class GistEmailValidator implements ValidatorConstraintInterface {
   validate(value: string): boolean {
     if (!value) return false;
-    return value.includes('@gm.gist.ac.kr') || value.includes('@gist.ac.kr');
+    return value.endsWith('@gm.gist.ac.kr') || value.endsWith('@gist.ac.kr');
   }
 }

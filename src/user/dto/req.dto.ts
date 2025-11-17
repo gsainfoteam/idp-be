@@ -108,8 +108,9 @@ export class RegisterDto {
       'eyJhbGciOiJIUzI1NiIsInR5cCI6Ikp9.eyJlbWFpbCI6ImpvaG5AZ21haWwuY29tIiwiaWF0IjoxNjI2NzQwMjY5LCJleHAiOjE2MjY3NDAyNzZ9.4RZq0Xq2vHf6VQ5o4GtG6tKv4oL9a8kF8y0JW7w5ZlY',
     description: '학번 인증 jwt 토큰',
   })
+  @IsOptional()
   @IsJWT()
-  studentIdVerificationJwtToken: string;
+  studentIdVerificationJwtToken?: string;
 }
 
 export class DeleteUserReqDto {

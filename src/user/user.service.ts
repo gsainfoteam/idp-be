@@ -119,17 +119,24 @@ export class UserService {
       throw new ForbiddenException('verification jwt token not valid');
     }
 
-    const studentIdPayload: VerificationJwtPayloadType =
-      await this.verifyService.validateJwtToken(studentIdVerificationJwtToken);
+    if (email.endsWith('@gm.gist.ac.kr')) {
+      if (!studentIdVerificationJwtToken)
+        throw new ForbiddenException('student id verification jwt is required');
 
-    if (studentIdPayload.hint !== 'studentId') {
-      this.logger.debug('verification hint is not studentId');
-      throw new ForbiddenException('verification hint is not studentId');
-    }
+      const studentIdPayload: VerificationJwtPayloadType =
+        await this.verifyService.validateJwtToken(
+          studentIdVerificationJwtToken,
+        );
 
-    if (studentIdPayload.sub !== studentId) {
-      this.logger.debug('verification jwt token not valid');
-      throw new ForbiddenException('verification jwt token not valid');
+      if (studentIdPayload.hint !== 'studentId') {
+        this.logger.debug('verification hint is not studentId');
+        throw new ForbiddenException('verification hint is not studentId');
+      }
+
+      if (studentIdPayload.sub !== studentId) {
+        this.logger.debug('verification jwt token not valid');
+        throw new ForbiddenException('verification jwt token not valid');
+      }
     }
 
     const hashedPassword: string = bcrypt.hashSync(
