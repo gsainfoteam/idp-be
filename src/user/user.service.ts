@@ -214,7 +214,7 @@ export class UserService {
     length: number,
     userUuid: string,
   ): Promise<UpdateUserPictureResDto> {
-    const key = `user/${userUuid}/profile_${crypto.randomBytes(16).toString('base64')}.webp`;
+    const key = `user/${userUuid}/profile_${crypto.randomBytes(16).toString('base64url')}.webp`;
     const presignedUrl = await this.objectService.createPresignedUrl(
       key,
       length,
