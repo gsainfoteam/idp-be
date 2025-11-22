@@ -37,6 +37,12 @@ export class ClientRoleGuard implements CanActivate {
   }
 
   async canActivate(context: ExecutionContext) {
+    const required = this.reflector.getAllAndOverride<RoleType>(
+      'requiredRole',
+      [context.getHandler(), context.getClass()],
+    );
+    if (!required) return true;
+
     const req = context.switchToHttp().getRequest<RequestShape>();
     const userUuid = req.user?.uuid;
     const clientUuid = req.params?.clientId;
@@ -55,12 +61,6 @@ export class ClientRoleGuard implements CanActivate {
       select: { role: true },
     });
     if (!membership) throw new ForbiddenException('Not a member');
-
-    const required = this.reflector.getAllAndOverride<RoleType>(
-      'requiredRole',
-      [context.getHandler(), context.getClass()],
-    );
-    if (!required) return true;
 
     if (this.rank(membership.role) < this.rank(required)) {
       throw new ForbiddenException('Insufficient role');

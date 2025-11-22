@@ -147,6 +147,7 @@ export class ClientController {
   @ApiForbiddenResponse({ description: '접근 불가' })
   @ApiInternalServerErrorResponse({ description: '서버 오류' })
   @UseGuards(UserGuard, ClientRoleGuard)
+  @RequireClientRole(RoleType.MEMBER)
   @Get(':clientId/members')
   async getMembers(
     @Param('clientId', ParseUUIDPipe) uuid: string,
