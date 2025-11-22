@@ -98,7 +98,7 @@ export class ClientService {
     return client;
   }
 
-  async getMemebers(uuid: string): Promise<ClientMember[]> {
+  async getMembers(uuid: string): Promise<ClientMember[]> {
     return await this.clientRepository.getMembersToClient(uuid);
   }
 

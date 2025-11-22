@@ -151,7 +151,7 @@ export class ClientController {
   async getMembers(
     @Param('clientId', ParseUUIDPipe) uuid: string,
   ): Promise<ClientMembersResDto[]> {
-    return this.clientService.getMemebers(uuid);
+    return this.clientService.getMembers(uuid);
   }
 
   @ApiOperation({

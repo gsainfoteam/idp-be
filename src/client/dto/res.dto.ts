@@ -232,7 +232,6 @@ export class ClientMembersResDto {
 
   @ApiProperty({
     description: 'Member roles in the client',
-    example: [{ role: 'admin' }, { role: 'member' }],
     type: [RoleDto],
   })
   memberships: RoleDto[];
