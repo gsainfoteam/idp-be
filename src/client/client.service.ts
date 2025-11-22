@@ -99,7 +99,14 @@ export class ClientService {
   }
 
   async getMembers(uuid: string): Promise<ClientMember[]> {
-    return await this.clientRepository.getMembersToClient(uuid);
+    const members = await this.clientRepository.getMembersToClient(uuid);
+    return members.map((member) => ({
+      ...member,
+      picture:
+        member.picture === null
+          ? null
+          : this.objectService.getUrl(member.picture),
+    }));
   }
 
   /**
