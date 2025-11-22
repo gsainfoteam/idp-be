@@ -11,6 +11,8 @@ import {
 import { Client, RoleType } from '@prisma/client';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 
+import { ClientMember } from './types/clientMember.type';
+
 @Injectable()
 @Loggable()
 export class ClientRepository {
@@ -193,13 +195,51 @@ export class ClientRepository {
       });
   }
 
+  async getMembersToClient(uuid: string): Promise<ClientMember[]> {
+    return await this.prismaService.user
+      .findMany({
+        where: {
+          memberships: {
+            some: {
+              client: {
+                uuid,
+              },
+            },
+          },
+        },
+        select: {
+          name: true,
+          email: true,
+          picture: true,
+          memberships: {
+            where: {
+              client: {
+                uuid,
+              },
+            },
+            select: {
+              role: true,
+            },
+          },
+        },
+      })
+      .catch((error) => {
+        if (error instanceof PrismaClientKnownRequestError) {
+          this.logger.debug(`database error: ${error.stack}`);
+          throw new InternalServerErrorException();
+        }
+        this.logger.error(`getMembersToClient error: ${error}`);
+        throw new InternalServerErrorException();
+      });
+  }
+
   async addMemberToClient(uuid: string, memberEmail: string): Promise<void> {
     const member = await this.prismaService.user.findUnique({
       where: { email: memberEmail },
     });
     if (!member) throw new NotFoundException('User not found');
-    try {
-      await this.prismaService.client.update({
+    await this.prismaService.client
+      .update({
         where: {
           uuid: uuid,
         },
@@ -211,20 +251,20 @@ export class ClientRepository {
             },
           },
         },
+      })
+      .catch((error) => {
+        if (error instanceof PrismaClientKnownRequestError) {
+          this.logger.debug(`addMemberToClient error: ${error.stack}`);
+          if (error.code === 'P2025') {
+            throw new ForbiddenException();
+          }
+          if (error.code === 'P2002') {
+            throw new ConflictException();
+          }
+        }
+        this.logger.error(`addMemberToClient error: ${error}`);
+        throw new InternalServerErrorException();
       });
-    } catch (error) {
-      if (error instanceof PrismaClientKnownRequestError) {
-        this.logger.debug(`addMemberToClient error: ${error.stack}`);
-        if (error.code === 'P2025') {
-          throw new ForbiddenException();
-        }
-        if (error.code === 'P2002') {
-          throw new ConflictException();
-        }
-      }
-      this.logger.error(`addMemberToClient error: ${error}`);
-      throw new InternalServerErrorException();
-    }
   }
 
   async updateClientPicture(

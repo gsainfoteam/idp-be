@@ -43,6 +43,7 @@ import {
 } from './dto/req.dto';
 import {
   ClientCredentialResDto,
+  ClientMembersResDto,
   ClientPublicResDto,
   ClientResDto,
   UpdateClientPictureResDto,
@@ -131,6 +132,26 @@ export class ClientController {
     return new ClientCredentialResDto(
       await this.clientService.registerClient(createClientDto, user),
     );
+  }
+
+  @ApiOperation({
+    summary: 'Get members',
+    description: 'Get members who can access the client',
+  })
+  @ApiBearerAuth('user:jwt')
+  @ApiOkResponse({
+    description: 'User list retrieved successfully',
+    type: [ClientMembersResDto],
+  })
+  @ApiUnauthorizedResponse({ description: '인증 실패' })
+  @ApiForbiddenResponse({ description: '접근 불가' })
+  @ApiInternalServerErrorResponse({ description: '서버 오류' })
+  @UseGuards(UserGuard, ClientRoleGuard)
+  @Get(':clientId/members')
+  async getMembers(
+    @Param('clientId', ParseUUIDPipe) uuid: string,
+  ): Promise<ClientMembersResDto[]> {
+    return this.clientService.getMemebers(uuid);
   }
 
   @ApiOperation({
