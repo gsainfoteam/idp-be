@@ -1,4 +1,4 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Client } from '@prisma/client';
 import { Exclude, Expose } from 'class-transformer';
 
@@ -202,6 +202,39 @@ export class ClientCredentialResDto implements Client {
   constructor(client: Client) {
     Object.assign(this, client);
   }
+}
+
+class RoleDto {
+  @ApiProperty({ description: 'Role name', example: 'admin' })
+  role: string;
+}
+
+export class ClientMembersResDto {
+  @ApiProperty({
+    description: 'Member name',
+    example: 'John Doe',
+  })
+  name: string;
+
+  @ApiProperty({
+    description: 'Member email',
+    example: 'email@gm.gist.ac.kr',
+  })
+  email: string;
+
+  @ApiPropertyOptional({
+    description: 'Member picture url',
+    example: 'https://example.com/profile.png',
+    type: String,
+    nullable: true,
+  })
+  picture: string | null;
+
+  @ApiProperty({
+    description: 'Member roles in the client',
+    type: [RoleDto],
+  })
+  memberships: RoleDto[];
 }
 
 export class UpdateClientPictureResDto {

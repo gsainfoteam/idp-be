@@ -9,6 +9,7 @@ import { SlackService } from 'nestjs-slack';
 import { ClientRepository } from './client.repository';
 import { CreateClientDto, UpdateClientDto } from './dto/req.dto';
 import { UpdateClientPictureResDto } from './dto/res.dto';
+import { ClientMember } from './types/clientMember.type';
 
 @Injectable()
 @Loggable()
@@ -95,6 +96,17 @@ export class ClientService {
     );
     client.secret = secretKey;
     return client;
+  }
+
+  async getMembers(uuid: string): Promise<ClientMember[]> {
+    const members = await this.clientRepository.getMembersToClient(uuid);
+    return members.map((member) => ({
+      ...member,
+      picture:
+        member.picture === null
+          ? null
+          : this.objectService.getUrl(member.picture),
+    }));
   }
 
   /**
