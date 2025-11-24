@@ -1,4 +1,5 @@
 import { Loggable } from '@lib/logger/decorator/loggable';
+import { ObjectService } from '@lib/object';
 import { RedisService } from '@lib/redis';
 import { Injectable, Logger, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
@@ -34,6 +35,7 @@ export class AuthService {
     private readonly configService: ConfigService,
     private readonly redisService: RedisService,
     private readonly jwtService: JwtService,
+    private readonly objectService: ObjectService,
   ) {
     this.accessTokenExpireTime = ms(
       configService.getOrThrow<string>('JWT_EXPIRE') as StringValue,
@@ -97,7 +99,12 @@ export class AuthService {
   }
 
   async findUserByUuid(uuid: string): Promise<User> {
-    return this.authRepository.findUserByUuid(uuid);
+    const user = await this.authRepository.findUserByUuid(uuid);
+    return {
+      ...user,
+      picture:
+        user.picture === null ? null : this.objectService.getUrl(user.picture),
+    };
   }
 
   async authenticateOptions(): Promise<PasskeyAuthOptionResDto> {

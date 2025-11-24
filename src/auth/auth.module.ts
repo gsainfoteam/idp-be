@@ -1,4 +1,5 @@
 import { LoggerModule } from '@lib/logger';
+import { ObjectModule } from '@lib/object';
 import { PrismaModule } from '@lib/prisma';
 import { RedisModule } from '@lib/redis';
 import { Module } from '@nestjs/common';
@@ -30,6 +31,7 @@ import { UserStrategy } from './guard/auth.strategy';
         },
       }),
     }),
+    ObjectModule,
   ],
   controllers: [AuthController],
   providers: [AuthService, AuthRepository, UserStrategy, UserGuard],
