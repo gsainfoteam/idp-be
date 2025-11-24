@@ -219,10 +219,7 @@ export class UserService {
       key,
       length,
     );
-    await this.userRepository.updateUserPicture(
-      this.objectService.getUrl(key),
-      userUuid,
-    );
+    await this.userRepository.updateUserPicture(key, userUuid);
     return {
       presignedUrl,
     };
