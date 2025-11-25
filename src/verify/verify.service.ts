@@ -1,6 +1,7 @@
 import { Loggable } from '@lib/logger';
 import { MailService } from '@lib/mail';
 import { CacheNotFoundException, RedisService } from '@lib/redis';
+import { HttpService } from '@nestjs/axios';
 import {
   BadRequestException,
   Injectable,
@@ -15,9 +16,11 @@ import fs from 'fs';
 import Handlebars from 'handlebars';
 import juice from 'juice';
 import path from 'path';
+import { firstValueFrom } from 'rxjs';
 
 import {
   SendEmailCodeDto,
+  SendPhoneCodeDto,
   VerifyCodeDto,
   VerifyStudentIdDto,
 } from './dto/req.dto';
@@ -38,13 +41,20 @@ export class VerifyService {
   private readonly verifyStudentIdUrl = this.configService.getOrThrow<string>(
     'VERIFY_STUDENT_ID_URL',
   );
-  private readonly studentIdVerificationPrefix = 'studentId';
+  private readonly phoneNumberVerificationCodePrefix = 'phoneNumber';
+  private readonly aligoApiUrl =
+    this.configService.getOrThrow<string>('ALIGO_API_URL');
+  private readonly aligoApiKey =
+    this.configService.getOrThrow<string>('ALIGO_API_KEY');
+  private readonly aligoApiSender =
+    this.configService.getOrThrow<string>('ALIGO_API_SENDER');
 
   constructor(
     private readonly configService: ConfigService,
     private readonly jwtService: JwtService,
     private readonly redisService: RedisService,
     private readonly mailService: MailService,
+    private readonly httpService: HttpService,
   ) {}
 
   /**
@@ -196,5 +206,34 @@ export class VerifyService {
     if (data.result === 'false' || !data.studtNo)
       throw new NotFoundException('Student ID is not found');
     return data.studtNo;
+  }
+
+  async sendPhoneCode({ phoneNumber }: SendPhoneCodeDto): Promise<void> {
+    const phoneNumberVerificationCode: string = crypto
+      .randomInt(1000000)
+      .toString()
+      .padStart(6, '0');
+
+    const result = await firstValueFrom(
+      this.httpService.post(this.aligoApiUrl, {
+        key: this.aligoApiKey,
+        sender: this.aligoApiSender,
+        receiver: phoneNumber,
+        msg: `GIST 메일로 로그인 서비스의 전화번호 인증 문자입니다.
+    [${phoneNumberVerificationCode}]를 입력하여 전화번호를 인증하여 주시기 바랍니다.
+    이 인증번호는 3분 내에 만료됩니다. 시간 안에 입력해주세요.`,
+      }),
+    );
+
+    console.log(result.data);
+
+    await this.redisService.set<string>(
+      phoneNumber,
+      phoneNumberVerificationCode,
+      {
+        ttl: 3 * 60,
+        prefix: this.phoneNumberVerificationCodePrefix,
+      },
+    );
   }
 }

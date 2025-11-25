@@ -38,6 +38,7 @@
     "@prisma/client": "^6.3.0",
     "@simplewebauthn/server": "^13.1.2",
     "@simplewebauthn/types": "^12.0.0",
+    "aligoapi": "^1.1.3",
     "bcryptjs": "^2.4.3",
     "cache-manager": "^6.4.0",
     "class-transformer": "^0.5.1",

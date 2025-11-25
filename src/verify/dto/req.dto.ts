@@ -56,3 +56,12 @@ export class VerifyStudentIdDto {
   @IsString()
   birthDate: string;
 }
+
+export class SendPhoneCodeDto {
+  @ApiProperty({
+    example: '01012345678',
+    description: '전화번호',
+  })
+  @IsString()
+  phoneNumber: string;
+}

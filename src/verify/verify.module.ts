@@ -1,6 +1,7 @@
 import { LoggerModule } from '@lib/logger';
 import { MailModule } from '@lib/mail';
 import { RedisModule } from '@lib/redis';
+import { HttpModule } from '@nestjs/axios';
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
@@ -27,6 +28,7 @@ import { VerifyService } from './verify.service';
         },
       }),
     }),
+    HttpModule,
   ],
   controllers: [VerifyController],
   providers: [VerifyService],

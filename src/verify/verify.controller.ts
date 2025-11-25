@@ -19,6 +19,7 @@ import {
 
 import {
   SendEmailCodeDto,
+  SendPhoneCodeDto,
   VerifyCodeDto,
   VerifyStudentIdDto,
 } from './dto/req.dto';
@@ -78,5 +79,17 @@ export class VerifyController {
     @Body() body: VerifyStudentIdDto,
   ): Promise<VerifyStudentIdResDto> {
     return await this.verifyService.verifyStudentId(body);
+  }
+
+  @ApiOperation({
+    summary: 'send phone number certification code',
+    description:
+      'send the phone number certification code to the phone number. The code is valid for 5 minutes.',
+  })
+  @ApiOkResponse({ description: 'success' })
+  @ApiInternalServerErrorResponse({ description: 'server error' })
+  @Post('/phoneNumber')
+  async sendPhoneCode(@Body() body: SendPhoneCodeDto): Promise<void> {
+    return await this.verifyService.sendPhoneCode(body);
   }
 }
