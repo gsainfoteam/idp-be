@@ -46,6 +46,8 @@ export class VerifyService {
     this.configService.getOrThrow<string>('ALIGO_API_URL');
   private readonly aligoApiKey =
     this.configService.getOrThrow<string>('ALIGO_API_KEY');
+  private readonly aligoApiId =
+    this.configService.getOrThrow<string>('ALIGO_API_ID');
   private readonly aligoApiSender =
     this.configService.getOrThrow<string>('ALIGO_API_SENDER');
 
@@ -214,18 +216,32 @@ export class VerifyService {
       .toString()
       .padStart(6, '0');
 
-    const result = await firstValueFrom(
-      this.httpService.post(this.aligoApiUrl, {
-        key: this.aligoApiKey,
-        sender: this.aligoApiSender,
-        receiver: phoneNumber,
-        msg: `GIST 메일로 로그인 서비스의 전화번호 인증 문자입니다.
-    [${phoneNumberVerificationCode}]를 입력하여 전화번호를 인증하여 주시기 바랍니다.
-    이 인증번호는 3분 내에 만료됩니다. 시간 안에 입력해주세요.`,
-      }),
+    const body = new URLSearchParams();
+    body.append('key', this.aligoApiKey);
+    body.append('user_id', this.aligoApiId);
+    body.append('sender', this.aligoApiSender);
+    body.append('receiver', phoneNumber);
+    body.append(
+      'msg',
+      `GIST 메일로 로그인 서비스의 전화번호 인증 문자입니다.
+[${phoneNumberVerificationCode}]를 입력하여 전화번호를 인증하여 주시기 바랍니다.
+이 인증번호는 3분 내에 만료됩니다. 시간 안에 입력해주세요.`,
     );
+    body.append('testmode_yn', 'Y'); // TODO: 배포할 때 삭제
 
-    console.log(result.data);
+    await firstValueFrom(this.httpService.post(this.aligoApiUrl, body));
+
+    /* TODO: 에러 핸들링 필요
+     * result
+     * {
+     *   result_code: '1',
+     *   message: 'success',
+     *   msg_id: '1205729423',
+     *   success_cnt: 1,
+     *   error_cnt: 0,
+     *   msg_type: 'LMS'
+     * }
+     */
 
     await this.redisService.set<string>(
       phoneNumber,
