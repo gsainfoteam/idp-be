@@ -105,6 +105,7 @@ export class UserService {
     phoneNumber,
     emailVerificationJwtToken,
     studentIdVerificationJwtToken,
+    phoneNumberVerificationJwtToken,
   }: RegisterDto): Promise<void> {
     const emailPayload: VerificationJwtPayloadType =
       await this.verifyService.validateJwtToken(emailVerificationJwtToken);
@@ -137,6 +138,21 @@ export class UserService {
         this.logger.debug('verification jwt token not valid');
         throw new ForbiddenException('verification jwt token not valid');
       }
+    }
+
+    const phoneNumberPayload: VerificationJwtPayloadType =
+      await this.verifyService.validateJwtToken(
+        phoneNumberVerificationJwtToken,
+      );
+
+    if (phoneNumberPayload.hint !== 'phoneNumber') {
+      this.logger.debug('verification hint is not phoneNumber');
+      throw new ForbiddenException('verification hint is not phoneNumber');
+    }
+
+    if (phoneNumberPayload.sub !== phoneNumber) {
+      this.logger.debug('verification jwt token not valid');
+      throw new ForbiddenException('verification jwt token not valid');
     }
 
     const hashedPassword: string = bcrypt.hashSync(

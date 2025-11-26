@@ -25,8 +25,8 @@ export class SendEmailCodeDto {
 
 export class VerifyCodeDto {
   @ApiProperty({
-    example: 'JohnDoe@gm.gist.ac.kr',
-    description: 'GIST 이메일 혹은 다른 인증 대상의 대푯값',
+    example: 'JohnDoe@gm.gist.ac.kr or 01012345678',
+    description: 'GIST 이메일, 전화번호 혹은 다른 인증 대상의 대푯값',
     required: true,
   })
   @IsString()
@@ -41,8 +41,8 @@ export class VerifyCodeDto {
   code: string;
 
   @ApiProperty({
-    example: 'email',
-    description: '인증 타입',
+    example: 'email or phoneNumber',
+    description: '인증 타입 (email 또는 phoneNumber)',
     required: true,
     enum: VerificationList,
   })

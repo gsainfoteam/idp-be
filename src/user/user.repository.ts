@@ -131,6 +131,7 @@ export class UserRepository {
           studentId,
           phoneNumber,
           isIdVerified: true,
+          isPhoneNumberVerified: true,
         },
       })
       .catch((error) => {
