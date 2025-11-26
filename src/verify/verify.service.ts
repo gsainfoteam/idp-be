@@ -1,7 +1,6 @@
 import { Loggable } from '@lib/logger';
 import { MailService } from '@lib/mail';
 import { CacheNotFoundException, RedisService } from '@lib/redis';
-import { HttpService } from '@nestjs/axios';
 import {
   BadRequestException,
   Injectable,
@@ -15,8 +14,8 @@ import * as crypto from 'crypto';
 import fs from 'fs';
 import Handlebars from 'handlebars';
 import juice from 'juice';
+import { AligoService } from 'libs/aligo/object/src';
 import path from 'path';
-import { firstValueFrom } from 'rxjs';
 
 import {
   SendEmailCodeDto,
@@ -43,21 +42,13 @@ export class VerifyService {
   );
   private readonly phoneNumberVerificationCodePrefix =
     'PhoneNumberVerificationCode';
-  private readonly aligoApiUrl =
-    this.configService.getOrThrow<string>('ALIGO_API_URL');
-  private readonly aligoApiKey =
-    this.configService.getOrThrow<string>('ALIGO_API_KEY');
-  private readonly aligoApiId =
-    this.configService.getOrThrow<string>('ALIGO_API_ID');
-  private readonly aligoApiSender =
-    this.configService.getOrThrow<string>('ALIGO_API_SENDER');
 
   constructor(
     private readonly configService: ConfigService,
     private readonly jwtService: JwtService,
     private readonly redisService: RedisService,
     private readonly mailService: MailService,
-    private readonly httpService: HttpService,
+    private readonly aligoService: AligoService,
   ) {}
 
   /**
@@ -222,32 +213,11 @@ export class VerifyService {
       .toString()
       .padStart(6, '0');
 
-    const body = new URLSearchParams();
-    body.append('key', this.aligoApiKey);
-    body.append('user_id', this.aligoApiId);
-    body.append('sender', this.aligoApiSender);
-    body.append('receiver', phoneNumber);
-    body.append('msg_type', 'SMS');
-    body.append(
-      'msg',
-      `GIST 메일로 로그인 서비스의 전화번호 인증 문자입니다.
+    const msg = `GIST 메일로 로그인 서비스의 전화번호 인증 문자입니다.
 [${phoneNumberVerificationCode}]를 입력하여 전화번호를 인증하여 주시기 바랍니다.
-이 인증번호는 3분 내에 만료됩니다. 시간 안에 입력해주세요.`,
-    );
+이 인증번호는 3분 내에 만료됩니다. 시간 안에 입력해주세요.`;
 
-    const { result_code, message } = (
-      await firstValueFrom(
-        this.httpService.post<{ result_code: string; message: string }>(
-          this.aligoApiUrl,
-          body,
-        ),
-      )
-    ).data;
-
-    if (result_code !== '1') {
-      this.logger.error(`Aligo SMS send error: ${result_code} ${message}`);
-      throw new InternalServerErrorException('failed to send SMS');
-    }
+    await this.aligoService.sendMessage(phoneNumber, msg);
 
     await this.redisService.set<string>(
       phoneNumber,
