@@ -1,10 +1,12 @@
 import { Loggable } from '@lib/logger';
 import { MailService } from '@lib/mail';
 import { ObjectService } from '@lib/object';
-import { RedisService } from '@lib/redis';
+import { CacheNotFoundException, RedisService } from '@lib/redis';
 import {
+  BadRequestException,
   ForbiddenException,
   Injectable,
+  InternalServerErrorException,
   Logger,
   UnauthorizedException,
 } from '@nestjs/common';
@@ -33,6 +35,7 @@ import {
   DeleteUserReqDto,
   IssueUserSecretDto,
   RegisterDto,
+  VerifyPhoneNumberDto,
 } from './dto/req.dto';
 import { BasicPasskeyDto, UpdateUserPictureResDto } from './dto/res.dto';
 import { UserConsentType } from './types/userConsent.type';
@@ -54,7 +57,8 @@ export class UserService {
   private readonly verifyStudentIdUrl = this.configService.getOrThrow<string>(
     'VERIFY_STUDENT_ID_URL',
   );
-  private readonly studentIdVerificationPrefix = 'studentId';
+  private readonly phoneNumberVerificationCodePrefix =
+    'PhoneNumberVerificationCode';
 
   constructor(
     private readonly userRepository: UserRepository,
@@ -171,6 +175,40 @@ export class UserService {
   async verifyStudentId(uuid: string, dto: VerifyStudentIdDto): Promise<void> {
     const studentId = await this.verifyService.getStudentId(dto);
     await this.userRepository.updateStudentId(uuid, dto.name, studentId);
+  }
+
+  async verifyPhoneNumber(
+    uuid: string,
+    { phoneNumber, code }: VerifyPhoneNumberDto,
+  ): Promise<void> {
+    const CachedCode = await this.redisService
+      .getOrThrow<string>(phoneNumber, {
+        prefix: this.phoneNumberVerificationCodePrefix,
+      })
+      .catch((error) => {
+        if (error instanceof CacheNotFoundException) {
+          this.logger.debug(
+            `Redis cache not found with subject: ${phoneNumber}`,
+          );
+          throw new BadRequestException('invalid email or code');
+        }
+        this.logger.error(`Redis get error: ${error}`);
+        throw new InternalServerErrorException();
+      });
+
+    if (
+      Buffer.from(code).length !== Buffer.from(CachedCode).length ||
+      !crypto.timingSafeEqual(Buffer.from(code), Buffer.from(CachedCode))
+    ) {
+      this.logger.debug(`code not matched: ${code}`);
+      throw new BadRequestException('invalid email or code');
+    }
+
+    await this.userRepository.updatePhoneNumber(uuid, phoneNumber);
+
+    await this.redisService.del(phoneNumber, {
+      prefix: this.phoneNumberVerificationCodePrefix,
+    });
   }
 
   /**

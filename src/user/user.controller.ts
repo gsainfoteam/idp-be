@@ -41,6 +41,7 @@ import {
   IssueUserSecretDto,
   RegisterDto,
   VerifyPasskeyRegistrationDto,
+  VerifyPhoneNumberDto,
 } from './dto/req.dto';
 import {
   BasicPasskeyDto,
@@ -134,6 +135,24 @@ export class UserController {
     @Body() body: VerifyStudentIdDto,
   ): Promise<void> {
     return await this.userService.verifyStudentId(user.uuid, body);
+  }
+
+  @ApiOperation({
+    summary: 'verify phone number for original user',
+    description:
+      'verify phone number using phone number and verification code for original user. If not error, it represents a successful save.',
+  })
+  @ApiBearerAuth('user:jwt')
+  @ApiOkResponse({ description: 'success' })
+  @ApiNotFoundResponse({ description: 'user is not found' })
+  @ApiInternalServerErrorResponse({ description: 'server error' })
+  @UseGuards(UserGuard)
+  @Post('/verify/phoneNumber')
+  async verifyPhoneNumber(
+    @GetUser() user: User,
+    @Body() body: VerifyPhoneNumberDto,
+  ): Promise<void> {
+    return await this.userService.verifyPhoneNumber(user.uuid, body);
   }
 
   @ApiOperation({

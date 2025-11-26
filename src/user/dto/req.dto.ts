@@ -271,3 +271,19 @@ export class ChangePasskeyNameDto {
   @IsString()
   name: string;
 }
+
+export class VerifyPhoneNumberDto {
+  @ApiProperty({
+    example: '01012345678',
+    description: '전화번호',
+  })
+  @IsString()
+  phoneNumber: string;
+
+  @ApiProperty({
+    example: '123456',
+    description: '인증 코드',
+  })
+  @IsString()
+  code: string;
+}
