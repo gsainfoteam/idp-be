@@ -36,7 +36,7 @@ export class VerifyController {
   @ApiOperation({
     summary: 'verify certification code',
     description:
-      'verify the certification code. If the code is valid, return the jwt token',
+      'verify the certification code. If the code is valid, return the jwt token. When verifying email, the hint should be "email", and when verifying phone number, the hint should be "phoneNumber". Subject is email address or phone number accordingly.',
   })
   @ApiResponse({
     status: 200,

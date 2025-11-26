@@ -41,7 +41,8 @@ export class VerifyService {
   private readonly verifyStudentIdUrl = this.configService.getOrThrow<string>(
     'VERIFY_STUDENT_ID_URL',
   );
-  private readonly phoneNumberVerificationCodePrefix = 'phoneNumber';
+  private readonly phoneNumberVerificationCodePrefix =
+    'PhoneNumberVerificationCode';
   private readonly aligoApiUrl =
     this.configService.getOrThrow<string>('ALIGO_API_URL');
   private readonly aligoApiKey =
@@ -104,14 +105,19 @@ export class VerifyService {
     code,
     hint,
   }: VerifyCodeDto): Promise<VerificationJwtResDto> {
-    if (hint !== 'email') {
-      throw new BadRequestException('only email supported');
+    let prefix: string;
+    if (hint === 'email') {
+      prefix = this.emailVerificationCodePrefix;
+      subject = subject.toLowerCase(); // to lower case
+    } else if (hint === 'phoneNumber') {
+      prefix = this.phoneNumberVerificationCodePrefix;
+    } else {
+      throw new BadRequestException('only email and phone number supported');
     }
-    subject = subject.toLowerCase(); // to lower case
 
     const CachedCode = await this.redisService
       .getOrThrow<string>(subject, {
-        prefix: this.emailVerificationCodePrefix,
+        prefix,
       })
       .catch((error) => {
         if (error instanceof CacheNotFoundException) {
@@ -131,13 +137,13 @@ export class VerifyService {
     }
 
     await this.redisService.del(subject, {
-      prefix: this.emailVerificationCodePrefix,
+      prefix,
     });
 
     const payload: VerificationJwtPayloadType = {
       iss: this.configService.getOrThrow<string>('JWT_ISSUER'),
       sub: subject,
-      hint: 'email',
+      hint,
     };
     return {
       verificationJwtToken: this.jwtService.sign(payload),
@@ -251,5 +257,7 @@ export class VerifyService {
         prefix: this.phoneNumberVerificationCodePrefix,
       },
     );
+
+    console.log(phoneNumberVerificationCode);
   }
 }

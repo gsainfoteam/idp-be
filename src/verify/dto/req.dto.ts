@@ -29,6 +29,7 @@ export class VerifyCodeDto {
     description: 'GIST 이메일 혹은 다른 인증 대상의 대푯값',
     required: true,
   })
+  @IsString()
   subject: string;
 
   @ApiProperty({
@@ -36,6 +37,7 @@ export class VerifyCodeDto {
     description: '인증 코드',
     required: true,
   })
+  @IsString()
   code: string;
 
   @ApiProperty({
@@ -44,6 +46,7 @@ export class VerifyCodeDto {
     required: true,
     enum: VerificationList,
   })
+  @IsString()
   hint: VerificationType;
 }
 
