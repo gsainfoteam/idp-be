@@ -190,7 +190,7 @@ export class UserService {
           this.logger.debug(
             `Redis cache not found with subject: ${phoneNumber}`,
           );
-          throw new BadRequestException('invalid email or code');
+          throw new BadRequestException('invalid phone number or code');
         }
         this.logger.error(`Redis get error: ${error}`);
         throw new InternalServerErrorException();
@@ -201,7 +201,7 @@ export class UserService {
       !crypto.timingSafeEqual(Buffer.from(code), Buffer.from(CachedCode))
     ) {
       this.logger.debug(`code not matched: ${code}`);
-      throw new BadRequestException('invalid email or code');
+      throw new BadRequestException('invalid phone number or code');
     }
 
     await this.userRepository.updatePhoneNumber(uuid, phoneNumber);

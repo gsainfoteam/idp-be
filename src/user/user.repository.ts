@@ -166,7 +166,7 @@ export class UserRepository {
           this.logger.debug(`prisma error occurred: ${error.code}`);
           throw new InternalServerErrorException();
         }
-        this.logger.error(`update user password error: ${error}`);
+        this.logger.error(`update student id error: ${error}`);
         throw new InternalServerErrorException();
       });
   }
@@ -186,7 +186,7 @@ export class UserRepository {
           this.logger.debug(`prisma error occurred: ${error.code}`);
           throw new InternalServerErrorException();
         }
-        this.logger.error(`update user password error: ${error}`);
+        this.logger.error(`update phone number error: ${error}`);
         throw new InternalServerErrorException();
       });
   }

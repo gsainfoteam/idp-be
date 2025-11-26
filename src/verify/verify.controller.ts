@@ -9,6 +9,7 @@ import {
 } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
+  ApiCreatedResponse,
   ApiInternalServerErrorResponse,
   ApiNotFoundResponse,
   ApiOkResponse,
@@ -86,7 +87,7 @@ export class VerifyController {
     description:
       'send the phone number certification code to the phone number. The code is valid for 5 minutes.',
   })
-  @ApiOkResponse({ description: 'success' })
+  @ApiCreatedResponse({ description: 'success' })
   @ApiInternalServerErrorResponse({ description: 'server error' })
   @Post('/phoneNumber')
   async sendPhoneCode(@Body() body: SendPhoneCodeDto): Promise<void> {

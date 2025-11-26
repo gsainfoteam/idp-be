@@ -122,7 +122,7 @@ export class VerifyService {
       .catch((error) => {
         if (error instanceof CacheNotFoundException) {
           this.logger.debug(`Redis cache not found with subject: ${subject}`);
-          throw new BadRequestException('invalid email or code');
+          throw new BadRequestException('invalid subject or code');
         }
         this.logger.error(`Redis get error: ${error}`);
         throw new InternalServerErrorException();
@@ -133,7 +133,7 @@ export class VerifyService {
       !crypto.timingSafeEqual(Buffer.from(code), Buffer.from(CachedCode))
     ) {
       this.logger.debug(`code not matched: ${code}`);
-      throw new BadRequestException('invalid email or code');
+      throw new BadRequestException('invalid subject or code');
     }
 
     await this.redisService.del(subject, {
