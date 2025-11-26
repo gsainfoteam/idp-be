@@ -227,6 +227,7 @@ export class VerifyService {
     body.append('user_id', this.aligoApiId);
     body.append('sender', this.aligoApiSender);
     body.append('receiver', phoneNumber);
+    body.append('msg_type', 'SMS');
     body.append(
       'msg',
       `GIST 메일로 로그인 서비스의 전화번호 인증 문자입니다.
@@ -235,7 +236,19 @@ export class VerifyService {
     );
     body.append('testmode_yn', 'Y'); // TODO: 배포할 때 삭제
 
-    await firstValueFrom(this.httpService.post(this.aligoApiUrl, body));
+    const { result_code, message } = (
+      await firstValueFrom(
+        this.httpService.post<{ result_code: string; message: string }>(
+          this.aligoApiUrl,
+          body,
+        ),
+      )
+    ).data;
+
+    if (result_code !== '1') {
+      this.logger.error(`Aligo SMS send error: ${result_code} ${message}`);
+      throw new InternalServerErrorException('failed to send SMS');
+    }
 
     /* TODO: 에러 핸들링 필요
      * result
@@ -258,6 +271,6 @@ export class VerifyService {
       },
     );
 
-    console.log(phoneNumberVerificationCode);
+    console.log(phoneNumberVerificationCode); // 배포할 때 삭제
   }
 }
