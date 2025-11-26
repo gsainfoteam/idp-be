@@ -75,7 +75,7 @@ export class VerifyController {
   @ApiOkResponse({ description: 'success', type: VerifyStudentIdResDto })
   @ApiNotFoundResponse({ description: 'Student id is not found' })
   @ApiInternalServerErrorResponse({ description: 'server error' })
-  @Post('/studentId')
+  @Post('/student-id')
   async verifyStudentId(
     @Body() body: VerifyStudentIdDto,
   ): Promise<VerifyStudentIdResDto> {
@@ -89,7 +89,7 @@ export class VerifyController {
   })
   @ApiCreatedResponse({ description: 'success' })
   @ApiInternalServerErrorResponse({ description: 'server error' })
-  @Post('/phoneNumber')
+  @Post('/phone-number')
   async sendPhoneCode(@Body() body: SendPhoneCodeDto): Promise<void> {
     return await this.verifyService.sendPhoneCode(body);
   }

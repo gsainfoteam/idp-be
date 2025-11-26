@@ -129,7 +129,7 @@ export class UserController {
   @ApiNotFoundResponse({ description: 'user is not found' })
   @ApiInternalServerErrorResponse({ description: 'server error' })
   @UseGuards(UserGuard)
-  @Post('/verify/studentId')
+  @Post('/verify/student-id')
   async verifyStudentId(
     @GetUser() user: User,
     @Body() body: VerifyStudentIdDto,
@@ -147,7 +147,7 @@ export class UserController {
   @ApiNotFoundResponse({ description: 'user is not found' })
   @ApiInternalServerErrorResponse({ description: 'server error' })
   @UseGuards(UserGuard)
-  @Post('/verify/phoneNumber')
+  @Post('/verify/phone-number')
   async verifyPhoneNumber(
     @GetUser() user: User,
     @Body() body: VerifyPhoneNumberDto,

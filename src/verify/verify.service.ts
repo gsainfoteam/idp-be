@@ -106,7 +106,7 @@ export class VerifyService {
       throw new BadRequestException('only email and phone number supported');
     }
 
-    const CachedCode = await this.redisService
+    const cachedCode = await this.redisService
       .getOrThrow<string>(subject, {
         prefix,
       })
@@ -120,8 +120,8 @@ export class VerifyService {
       });
 
     if (
-      Buffer.from(code).length !== Buffer.from(CachedCode).length ||
-      !crypto.timingSafeEqual(Buffer.from(code), Buffer.from(CachedCode))
+      Buffer.from(code).length !== Buffer.from(cachedCode).length ||
+      !crypto.timingSafeEqual(Buffer.from(code), Buffer.from(cachedCode))
     ) {
       this.logger.debug(`code not matched: ${code}`);
       throw new BadRequestException('invalid subject or code');
@@ -213,9 +213,7 @@ export class VerifyService {
       .toString()
       .padStart(6, '0');
 
-    const msg = `GIST 메일로 로그인 서비스의 전화번호 인증 문자입니다.
-[${phoneNumberVerificationCode}]를 입력하여 전화번호를 인증하여 주시기 바랍니다.
-이 인증번호는 3분 내에 만료됩니다. 시간 안에 입력해주세요.`;
+    const msg = `GIST 메일로 로그인 인증코드: [${phoneNumberVerificationCode}] 공유하지 마십시오.`;
 
     await this.aligoService.sendMessage(phoneNumber, msg);
 
