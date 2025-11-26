@@ -234,7 +234,6 @@ export class VerifyService {
 [${phoneNumberVerificationCode}]를 입력하여 전화번호를 인증하여 주시기 바랍니다.
 이 인증번호는 3분 내에 만료됩니다. 시간 안에 입력해주세요.`,
     );
-    body.append('testmode_yn', 'Y'); // TODO: 배포할 때 삭제
 
     const { result_code, message } = (
       await firstValueFrom(
@@ -250,18 +249,6 @@ export class VerifyService {
       throw new InternalServerErrorException('failed to send SMS');
     }
 
-    /* TODO: 에러 핸들링 필요
-     * result
-     * {
-     *   result_code: '1',
-     *   message: 'success',
-     *   msg_id: '1205729423',
-     *   success_cnt: 1,
-     *   error_cnt: 0,
-     *   msg_type: 'LMS'
-     * }
-     */
-
     await this.redisService.set<string>(
       phoneNumber,
       phoneNumberVerificationCode,
@@ -270,7 +257,5 @@ export class VerifyService {
         prefix: this.phoneNumberVerificationCodePrefix,
       },
     );
-
-    console.log(phoneNumberVerificationCode); // 배포할 때 삭제
   }
 }
