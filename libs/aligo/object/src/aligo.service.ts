@@ -5,11 +5,9 @@ import {
   Logger,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { firstValueFrom } from 'rxjs';
+import { AxiosError } from 'axios';
+import { catchError, firstValueFrom } from 'rxjs';
 
-/**
- * Service for using AWS S3.
- */
 @Injectable()
 export class AligoService {
   private readonly logger = new Logger(AligoService.name);
@@ -37,10 +35,17 @@ export class AligoService {
 
     const { result_code, message } = (
       await firstValueFrom(
-        this.httpService.post<{ result_code: string; message: string }>(
-          this.aligoApiUrl,
-          body,
-        ),
+        this.httpService
+          .post<{
+            result_code: string;
+            message: string;
+          }>(this.aligoApiUrl, body)
+          .pipe(
+            catchError((error: AxiosError) => {
+              this.logger.error(`failed to send SMS: ${error.message}`);
+              throw new InternalServerErrorException('failed to send SMS');
+            }),
+          ),
       )
     ).data;
 
