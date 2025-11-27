@@ -1,7 +1,7 @@
 import { Loggable } from '@lib/logger';
 import { MailService } from '@lib/mail';
 import { CacheNotFoundException, RedisService } from '@lib/redis';
-import { TemplatesService } from '@lib/templates/templates.service';
+import { TemplatesService } from '@lib/templates';
 import {
   BadRequestException,
   Injectable,

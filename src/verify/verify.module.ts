@@ -1,7 +1,7 @@
 import { LoggerModule } from '@lib/logger';
 import { MailModule } from '@lib/mail';
 import { RedisModule } from '@lib/redis';
-import { TemplatesModule } from '@lib/templates/templates.module';
+import { TemplatesModule } from '@lib/templates';
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';

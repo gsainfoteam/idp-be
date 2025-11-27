@@ -2,7 +2,7 @@ import { Loggable } from '@lib/logger';
 import { MailService } from '@lib/mail';
 import { ObjectService } from '@lib/object';
 import { RedisService } from '@lib/redis';
-import { TemplatesService } from '@lib/templates/templates.service';
+import { TemplatesService } from '@lib/templates';
 import {
   ForbiddenException,
   Injectable,
