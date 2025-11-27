@@ -39,7 +39,7 @@ export class AligoService {
           .post<{
             result_code: string;
             message: string;
-          }>(this.aligoApiUrl, body)
+          }>(this.aligoApiUrl + '/send/', body)
           .pipe(
             catchError((error: AxiosError) => {
               this.logger.error(`failed to send SMS: ${error.message}`);

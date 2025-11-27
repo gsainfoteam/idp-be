@@ -213,7 +213,7 @@ export class VerifyService {
       .toString()
       .padStart(6, '0');
 
-    const msg = `GIST 메일로 로그인 인증코드: [${phoneNumberVerificationCode}] 공유하지 마십시오.`;
+    const msg = `인포팀 계정으로 로그인 인증코드: [${phoneNumberVerificationCode}] 공유하지 마십시오.`;
 
     await this.aligoService.sendMessage(phoneNumber, msg);
 
