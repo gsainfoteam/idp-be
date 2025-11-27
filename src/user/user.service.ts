@@ -161,8 +161,8 @@ export class UserService {
     const newPassword = crypto.randomBytes(18).toString('base64');
     await this.mailService.sendEmail(
       email,
-      `"GIST 메일로 로그인" <${this.sender}>`,
-      'GIST 메일로 로그인 비밀번호',
+      `"인포팀 계정" <${this.sender}>`,
+      '인포팀 계정 임시 비밀번호',
       await this.templatesService.renderTemporaryPassword(newPassword),
     );
     await this.userRepository.updateUserPassword(

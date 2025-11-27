@@ -56,8 +56,8 @@ export class VerifyService {
 
     await this.mailService.sendEmail(
       email,
-      `"GIST 메일로 로그인" <${this.sender}>`,
-      'GIST 메일로 로그인 인증 코드',
+      `"인포팀 계정" <${this.sender}>`,
+      '인포팀 계정 인증 코드',
       await this.templatesService.renderCode(emailVerificationCode),
     );
 
