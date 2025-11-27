@@ -25,7 +25,7 @@ const Email = ({
   return (
     <Html lang="ko">
       <Head>
-        <title>인포팀 계정 인증코드</title>
+        <title>{preview}</title>
       </Head>
       <Tailwind
         config={{
