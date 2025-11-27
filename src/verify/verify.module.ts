@@ -2,6 +2,7 @@ import { AligoModule } from '@lib/aligo';
 import { LoggerModule } from '@lib/logger';
 import { MailModule } from '@lib/mail';
 import { RedisModule } from '@lib/redis';
+import { TemplatesModule } from '@lib/templates';
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
@@ -29,6 +30,7 @@ import { VerifyService } from './verify.service';
       }),
     }),
     AligoModule,
+    TemplatesModule,
   ],
   controllers: [VerifyController],
   providers: [VerifyService],

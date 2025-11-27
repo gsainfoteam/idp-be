@@ -18,6 +18,7 @@
     "noImplicitAny": true,
     "strictBindCallApply": true,
     "noFallthroughCasesInSwitch": true,
+    "jsx": "react-jsx",
     "paths": {
       "@lib/global": ["libs/global/src"],
       "@lib/global/*": ["libs/global/src/*"],
@@ -32,7 +33,9 @@
       "@lib/redis": ["libs/redis/src"],
       "@lib/redis/*": ["libs/redis/src/*"],
       "@lib/aligo": ["libs/aligo/src"],
-      "@lib/aligo/*": ["libs/aligo/src/*"]
+      "@lib/aligo/*": ["libs/aligo/src/*"],
+      "@lib/templates": ["libs/templates/src"],
+      "@lib/templates/*": ["libs/templates/src/*"]
     }
   }
 }
