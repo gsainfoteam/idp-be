@@ -3,6 +3,7 @@ import { MailModule } from '@lib/mail';
 import { ObjectModule } from '@lib/object';
 import { PrismaModule } from '@lib/prisma';
 import { RedisModule } from '@lib/redis';
+import { TemplatesModule } from '@lib/templates/templates.module';
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { AuthModule } from 'src/auth/auth.module';
@@ -22,6 +23,7 @@ import { UserService } from './user.service';
     LoggerModule,
     ObjectModule,
     RedisModule,
+    TemplatesModule,
   ],
   controllers: [UserController],
   providers: [UserService, UserRepository],
