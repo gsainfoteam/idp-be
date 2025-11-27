@@ -60,6 +60,15 @@
       "compilerOptions": {
         "tsConfigPath": "libs/redis/tsconfig.lib.json"
       }
+    },
+    "templates": {
+      "type": "library",
+      "root": "libs/templates",
+      "entryFile": "index",
+      "sourceRoot": "libs/templates/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/templates/tsconfig.lib.json"
+      }
     }
   }
 }
