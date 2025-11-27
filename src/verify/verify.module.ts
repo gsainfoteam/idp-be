@@ -4,7 +4,7 @@ import { RedisModule } from '@lib/redis';
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
-import { AligoModule } from 'libs/aligo/object/src';
+import { AligoModule } from 'libs/aligo/src';
 
 import { VerifyController } from './verify.controller';
 import { VerifyService } from './verify.service';

@@ -14,7 +14,7 @@ import * as crypto from 'crypto';
 import fs from 'fs';
 import Handlebars from 'handlebars';
 import juice from 'juice';
-import { AligoService } from 'libs/aligo/object/src';
+import { AligoService } from 'libs/aligo/src';
 import path from 'path';
 
 import {
