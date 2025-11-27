@@ -18,43 +18,21 @@
     "noImplicitAny": true,
     "strictBindCallApply": true,
     "noFallthroughCasesInSwitch": true,
+    "jsx": "react-jsx",
     "paths": {
-      "@lib/global": [
-        "libs/global/src"
-      ],
-      "@lib/global/*": [
-        "libs/global/src/*"
-      ],
-      "@lib/logger": [
-        "libs/logger/src"
-      ],
-      "@lib/logger/*": [
-        "libs/logger/src/*"
-      ],
-      "@lib/mail": [
-        "libs/mail/src"
-      ],
-      "@lib/mail/*": [
-        "libs/mail/src/*"
-      ],
-      "@lib/object": [
-        "libs/object/src"
-      ],
-      "@lib/object/*": [
-        "libs/object/src/*"
-      ],
-      "@lib/prisma": [
-        "libs/prisma/src"
-      ],
-      "@lib/prisma/*": [
-        "libs/prisma/src/*"
-      ],
-      "@lib/redis": [
-        "libs/redis/src"
-      ],
-      "@lib/redis/*": [
-        "libs/redis/src/*"
-      ]
+      "@lib/global": ["libs/global/src"],
+      "@lib/global/*": ["libs/global/src/*"],
+      "@lib/logger": ["libs/logger/src"],
+      "@lib/logger/*": ["libs/logger/src/*"],
+      "@lib/mail": ["libs/mail/src"],
+      "@lib/mail/*": ["libs/mail/src/*"],
+      "@lib/object": ["libs/object/src"],
+      "@lib/object/*": ["libs/object/src/*"],
+      "@lib/prisma": ["libs/prisma/src"],
+      "@lib/prisma/*": ["libs/prisma/src/*"],
+      "@lib/redis": ["libs/redis/src"],
+      "@lib/redis/*": ["libs/redis/src/*"],
+      "@lib/templates/*": ["libs/templates/src/*"]
     }
   }
 }
