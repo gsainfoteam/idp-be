@@ -1,3 +1,4 @@
+import { AligoService } from '@lib/aligo';
 import { Loggable } from '@lib/logger';
 import { MailService } from '@lib/mail';
 import { CacheNotFoundException, RedisService } from '@lib/redis';
@@ -14,7 +15,6 @@ import * as crypto from 'crypto';
 import fs from 'fs';
 import Handlebars from 'handlebars';
 import juice from 'juice';
-import { AligoService } from 'libs/aligo/src';
 import path from 'path';
 
 import {
