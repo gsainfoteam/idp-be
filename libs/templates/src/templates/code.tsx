@@ -1,12 +1,12 @@
 import * as React from 'react';
 
-import Email from './email';
+import Email from '../components/email';
 
 const Code = ({ code }: { code: string }): React.ReactNode => {
   return (
     <Email
-      title="인포팀 계정 인증코드"
-      preview="인포팀 계정 인증코드"
+      title="이메일 인증번호"
+      preview="인포팀 계정 인증번호"
       description={
         <>
           <span className="text-primary-600 font-bold">인포팀 계정</span> 이메일
@@ -22,6 +22,10 @@ const Code = ({ code }: { code: string }): React.ReactNode => {
       code={code}
     />
   );
+};
+
+Code.PreviewProps = {
+  code: '123456',
 };
 
 export default Code;

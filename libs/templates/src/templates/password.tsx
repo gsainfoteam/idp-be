@@ -1,11 +1,11 @@
 import * as React from 'react';
 
-import Email from './email';
+import Email from '../components/email';
 
 const Password = ({ password }: { password: string }): React.ReactNode => {
   return (
     <Email
-      title="인포팀 계정 임시 비밀번호"
+      title="임시 비밀번호"
       preview="인포팀 계정 임시 비밀번호"
       code={password}
       description={
@@ -22,6 +22,10 @@ const Password = ({ password }: { password: string }): React.ReactNode => {
       }
     />
   );
+};
+
+Password.PreviewProps = {
+  password: 'hs306hDNbyB448bFBcq4KckA',
 };
 
 export default Password;

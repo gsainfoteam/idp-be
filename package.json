@@ -19,7 +19,8 @@
     "test:debug": "bun --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config test/e2e/config/jest-e2e.ts",
     "doc": "bun ./patch-compodoc.js && compodoc -p tsconfig.json -a assets -d ./doc",
-    "doc:serve": "bun ./patch-compodoc.js && compodoc -p tsconfig.json -a assets -d ./doc -s"
+    "doc:serve": "bun ./patch-compodoc.js && compodoc -p tsconfig.json -a assets -d ./doc -s",
+    "email": "email dev --dir libs/templates/src/templates"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.750.0",
