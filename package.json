@@ -35,6 +35,7 @@
     "@nestjs/platform-fastify": "^11.0.7",
     "@nestjs/swagger": "^11.0.3",
     "@nestjs/terminus": "^11.0.0",
+    "@nestjs/throttler": "^6.4.0",
     "@prisma/client": "^6.3.0",
     "@simplewebauthn/server": "^13.1.2",
     "@simplewebauthn/types": "^12.0.0",

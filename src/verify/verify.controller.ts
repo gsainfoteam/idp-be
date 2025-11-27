@@ -4,6 +4,7 @@ import {
   Controller,
   Post,
   UseFilters,
+  UseGuards,
   UsePipes,
   ValidationPipe,
 } from '@nestjs/common';
@@ -25,6 +26,7 @@ import {
   VerifyStudentIdDto,
 } from './dto/req.dto';
 import { VerificationJwtResDto, VerifyStudentIdResDto } from './dto/res.dto';
+import { PhoneThrottlerGuard } from './guard/phoneThrottler.guard';
 import { VerifyService } from './verify.service';
 
 @ApiTags('verify')
@@ -105,6 +107,7 @@ export class VerifyController {
   })
   @ApiCreatedResponse({ description: 'success' })
   @ApiInternalServerErrorResponse({ description: 'server error' })
+  @UseGuards(PhoneThrottlerGuard)
   @Post('/phone-number')
   async sendPhoneCode(@Body() body: SendPhoneCodeDto): Promise<void> {
     return await this.verifyService.sendPhoneCode(body);
