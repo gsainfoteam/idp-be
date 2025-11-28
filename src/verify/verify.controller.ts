@@ -4,11 +4,13 @@ import {
   Controller,
   Post,
   UseFilters,
+  UseGuards,
   UsePipes,
   ValidationPipe,
 } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
+  ApiCreatedResponse,
   ApiInternalServerErrorResponse,
   ApiNotFoundResponse,
   ApiOkResponse,
@@ -19,10 +21,12 @@ import {
 
 import {
   SendEmailCodeDto,
+  SendPhoneCodeDto,
   VerifyCodeDto,
   VerifyStudentIdDto,
 } from './dto/req.dto';
 import { VerificationJwtResDto, VerifyStudentIdResDto } from './dto/res.dto';
+import { PhoneThrottlerGuard } from './guard/phoneThrottler.guard';
 import { VerifyService } from './verify.service';
 
 @ApiTags('verify')
@@ -35,7 +39,7 @@ export class VerifyController {
   @ApiOperation({
     summary: 'verify certification code',
     description:
-      'verify the certification code. If the code is valid, return the jwt token',
+      'verify the certification code. If the code is valid, return the jwt token. When verifying email, the hint should be "email", and when verifying phone number, the hint should be "phoneNumber". Subject is email address or phone number accordingly.',
   })
   @ApiResponse({
     status: 200,
@@ -69,14 +73,43 @@ export class VerifyController {
     summary: 'return key for verifying student id',
     description:
       'verify student id using birth date and name for signing up and return uuid key',
+    deprecated: true,
   })
   @ApiOkResponse({ description: 'success', type: VerifyStudentIdResDto })
   @ApiNotFoundResponse({ description: 'Student id is not found' })
   @ApiInternalServerErrorResponse({ description: 'server error' })
   @Post('/studentId')
+  async verifyStudentIdLegacy(
+    @Body() body: VerifyStudentIdDto,
+  ): Promise<VerifyStudentIdResDto> {
+    return await this.verifyService.verifyStudentId(body);
+  }
+
+  @ApiOperation({
+    summary: 'return key for verifying student id',
+    description:
+      'verify student id using birth date and name for signing up and return uuid key',
+  })
+  @ApiOkResponse({ description: 'success', type: VerifyStudentIdResDto })
+  @ApiNotFoundResponse({ description: 'Student id is not found' })
+  @ApiInternalServerErrorResponse({ description: 'server error' })
+  @Post('/student-id')
   async verifyStudentId(
     @Body() body: VerifyStudentIdDto,
   ): Promise<VerifyStudentIdResDto> {
     return await this.verifyService.verifyStudentId(body);
+  }
+
+  @ApiOperation({
+    summary: 'send phone number certification code',
+    description:
+      'send the phone number certification code to the phone number. The code is valid for 5 minutes.',
+  })
+  @ApiCreatedResponse({ description: 'success' })
+  @ApiInternalServerErrorResponse({ description: 'server error' })
+  @UseGuards(PhoneThrottlerGuard)
+  @Post('/phone-number')
+  async sendPhoneCode(@Body() body: SendPhoneCodeDto): Promise<void> {
+    return await this.verifyService.sendPhoneCode(body);
   }
 }

@@ -25,10 +25,11 @@ export class SendEmailCodeDto {
 
 export class VerifyCodeDto {
   @ApiProperty({
-    example: 'JohnDoe@gm.gist.ac.kr',
-    description: 'GIST 이메일 혹은 다른 인증 대상의 대푯값',
+    example: 'JohnDoe@gm.gist.ac.kr or 01012345678',
+    description: 'GIST 이메일, 전화번호 혹은 다른 인증 대상의 대푯값',
     required: true,
   })
+  @IsString()
   subject: string;
 
   @ApiProperty({
@@ -36,14 +37,16 @@ export class VerifyCodeDto {
     description: '인증 코드',
     required: true,
   })
+  @IsString()
   code: string;
 
   @ApiProperty({
-    example: 'email',
-    description: '인증 타입',
+    example: 'email or phoneNumber',
+    description: '인증 타입 (email 또는 phoneNumber)',
     required: true,
     enum: VerificationList,
   })
+  @IsString()
   hint: VerificationType;
 }
 
@@ -55,4 +58,13 @@ export class VerifyStudentIdDto {
   @ApiProperty({ example: '20000101', description: '생년월일' })
   @IsString()
   birthDate: string;
+}
+
+export class SendPhoneCodeDto {
+  @ApiProperty({
+    example: '01012345678',
+    description: '전화번호',
+  })
+  @IsString()
+  phoneNumber: string;
 }

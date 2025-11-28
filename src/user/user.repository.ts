@@ -131,6 +131,7 @@ export class UserRepository {
           studentId,
           phoneNumber,
           isIdVerified: true,
+          isPhoneNumberVerified: true,
         },
       })
       .catch((error) => {
@@ -165,7 +166,27 @@ export class UserRepository {
           this.logger.debug(`prisma error occurred: ${error.code}`);
           throw new InternalServerErrorException();
         }
-        this.logger.error(`update user password error: ${error}`);
+        this.logger.error(`update student id error: ${error}`);
+        throw new InternalServerErrorException();
+      });
+  }
+
+  async updatePhoneNumber(uuid: string, phoneNumber: string): Promise<void> {
+    await this.prismaService.user
+      .update({
+        where: { uuid },
+        data: { phoneNumber, isPhoneNumberVerified: true },
+      })
+      .catch((error) => {
+        if (error instanceof PrismaClientKnownRequestError) {
+          if (error.code === 'P2025' || error.code === 'P2002') {
+            this.logger.debug(`user not found with uuid: ${uuid}`);
+            throw new ForbiddenException('user not found');
+          }
+          this.logger.debug(`prisma error occurred: ${error.code}`);
+          throw new InternalServerErrorException();
+        }
+        this.logger.error(`update phone number error: ${error}`);
         throw new InternalServerErrorException();
       });
   }

@@ -1,6 +1,7 @@
 import { LoggerModule } from '@lib/logger';
 import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { ThrottlerModule } from '@nestjs/throttler';
 
 import { AppController } from './app.controller';
 import { AuthModule } from './auth/auth.module';
@@ -26,6 +27,16 @@ import { WellKnownModule } from './well-known/well-known.module';
     OauthModule,
     WellKnownModule,
     VerifyModule,
+    ThrottlerModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => [
+        {
+          ttl: configService.getOrThrow<number>('THROTTLER_TTL'),
+          limit: configService.getOrThrow<number>('THROTTLER_LIMIT'),
+        },
+      ],
+    }),
   ],
   controllers: [AppController],
 })

@@ -1,11 +1,13 @@
 import { Loggable } from '@lib/logger';
 import { MailService } from '@lib/mail';
 import { ObjectService } from '@lib/object';
-import { RedisService } from '@lib/redis';
+import { CacheNotFoundException, RedisService } from '@lib/redis';
 import { TemplatesService } from '@lib/templates';
 import {
+  BadRequestException,
   ForbiddenException,
   Injectable,
+  InternalServerErrorException,
   Logger,
   UnauthorizedException,
 } from '@nestjs/common';
@@ -30,6 +32,7 @@ import {
   DeleteUserReqDto,
   IssueUserSecretDto,
   RegisterDto,
+  VerifyPhoneNumberDto,
 } from './dto/req.dto';
 import { BasicPasskeyDto, UpdateUserPictureResDto } from './dto/res.dto';
 import { UserConsentType } from './types/userConsent.type';
@@ -48,7 +51,8 @@ export class UserService {
   private readonly verifyStudentIdUrl = this.configService.getOrThrow<string>(
     'VERIFY_STUDENT_ID_URL',
   );
-  private readonly studentIdVerificationPrefix = 'studentId';
+  private readonly phoneNumberVerificationCodePrefix =
+    'PhoneNumberVerificationCode';
 
   constructor(
     private readonly userRepository: UserRepository,
@@ -100,6 +104,7 @@ export class UserService {
     phoneNumber,
     emailVerificationJwtToken,
     studentIdVerificationJwtToken,
+    phoneNumberVerificationJwtToken,
   }: RegisterDto): Promise<void> {
     const emailPayload: VerificationJwtPayloadType =
       await this.verifyService.validateJwtToken(emailVerificationJwtToken);
@@ -134,6 +139,21 @@ export class UserService {
       }
     }
 
+    const phoneNumberPayload: VerificationJwtPayloadType =
+      await this.verifyService.validateJwtToken(
+        phoneNumberVerificationJwtToken,
+      );
+
+    if (phoneNumberPayload.hint !== 'phoneNumber') {
+      this.logger.debug('verification hint is not phoneNumber');
+      throw new ForbiddenException('verification hint is not phoneNumber');
+    }
+
+    if (phoneNumberPayload.sub !== phoneNumber) {
+      this.logger.debug('verification jwt token not valid');
+      throw new ForbiddenException('verification jwt token not valid');
+    }
+
     const hashedPassword: string = bcrypt.hashSync(
       password,
       bcrypt.genSaltSync(10),
@@ -150,6 +170,40 @@ export class UserService {
   async verifyStudentId(uuid: string, dto: VerifyStudentIdDto): Promise<void> {
     const studentId = await this.verifyService.getStudentId(dto);
     await this.userRepository.updateStudentId(uuid, dto.name, studentId);
+  }
+
+  async verifyPhoneNumber(
+    uuid: string,
+    { phoneNumber, code }: VerifyPhoneNumberDto,
+  ): Promise<void> {
+    const cachedCode = await this.redisService
+      .getOrThrow<string>(phoneNumber, {
+        prefix: this.phoneNumberVerificationCodePrefix,
+      })
+      .catch((error) => {
+        if (error instanceof CacheNotFoundException) {
+          this.logger.debug(
+            `Redis cache not found with subject: ${phoneNumber}`,
+          );
+          throw new BadRequestException('invalid phone number or code');
+        }
+        this.logger.error(`Redis get error: ${error}`);
+        throw new InternalServerErrorException();
+      });
+
+    if (
+      Buffer.from(code).length !== Buffer.from(cachedCode).length ||
+      !crypto.timingSafeEqual(Buffer.from(code), Buffer.from(cachedCode))
+    ) {
+      this.logger.debug(`code not matched: ${code}`);
+      throw new BadRequestException('invalid phone number or code');
+    }
+
+    await this.userRepository.updatePhoneNumber(uuid, phoneNumber);
+
+    await this.redisService.del(phoneNumber, {
+      prefix: this.phoneNumberVerificationCodePrefix,
+    });
   }
 
   /**
