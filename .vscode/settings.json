@@ -40,5 +40,6 @@
     "MD041": false
   },
   "npm.packageManager": "bun",
-  "npm.scriptRunner": "bun"
+  "npm.scriptRunner": "bun",
+  "prisma.pinToPrisma6": true
 }
