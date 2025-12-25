@@ -23,6 +23,7 @@ import {
 } from '@simplewebauthn/types';
 import * as bcrypt from 'bcryptjs';
 import * as crypto from 'crypto';
+import { parsePhoneNumberWithError, ParseError } from 'libphonenumber-js';
 import { VerifyStudentIdDto } from 'src/verify/dto/req.dto';
 import { VerificationJwtPayloadType } from 'src/verify/types/verificationJwtPayload.type';
 import { VerifyService } from 'src/verify/verify.service';
@@ -119,7 +120,9 @@ export class UserService {
       throw new ForbiddenException('verification jwt token not valid');
     }
 
-    if (email.endsWith('@gm.gist.ac.kr')) {
+    const isStudentEmail = email.endsWith('@gm.gist.ac.kr');
+
+    if (isStudentEmail) {
       if (!studentIdVerificationJwtToken)
         throw new ForbiddenException('student id verification jwt is required');
 
@@ -139,19 +142,45 @@ export class UserService {
       }
     }
 
-    const phoneNumberPayload: VerificationJwtPayloadType =
-      await this.verifyService.validateJwtToken(
-        phoneNumberVerificationJwtToken,
-      );
-
-    if (phoneNumberPayload.hint !== 'phoneNumber') {
-      this.logger.debug('verification hint is not phoneNumber');
-      throw new ForbiddenException('verification hint is not phoneNumber');
+    let isKoreanPhoneNumber = false;
+    try {
+      const parsedPhoneNumber = parsePhoneNumberWithError(phoneNumber, {
+        defaultCountry: 'KR',
+      });
+      isKoreanPhoneNumber = parsedPhoneNumber.country === 'KR';
+    } catch (error) {
+      if (error instanceof ParseError) {
+        this.logger.debug('Failed to parse phone number', error);
+        throw new BadRequestException('Failed to parse phone number');
+      } else {
+        this.logger.error('Unexpected error while parsing phone number', error);
+        throw new InternalServerErrorException(
+          'Unexpected error while parsing phone number',
+        );
+      }
     }
 
-    if (phoneNumberPayload.sub !== phoneNumber) {
-      this.logger.debug('verification jwt token not valid');
-      throw new ForbiddenException('verification jwt token not valid');
+    if (isKoreanPhoneNumber) {
+      if (!phoneNumberVerificationJwtToken) {
+        throw new ForbiddenException(
+          'phone number verification jwt is required for Korean phone numbers',
+        );
+      }
+
+      const phoneNumberPayload: VerificationJwtPayloadType =
+        await this.verifyService.validateJwtToken(
+          phoneNumberVerificationJwtToken,
+        );
+
+      if (phoneNumberPayload.hint !== 'phoneNumber') {
+        this.logger.debug('verification hint is not phoneNumber');
+        throw new ForbiddenException('verification hint is not phoneNumber');
+      }
+
+      if (phoneNumberPayload.sub !== phoneNumber) {
+        this.logger.debug('verification jwt token not valid');
+        throw new ForbiddenException('verification jwt token not valid');
+      }
     }
 
     const hashedPassword: string = bcrypt.hashSync(
