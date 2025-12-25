@@ -150,15 +150,10 @@ export class UserService {
       isKoreanPhoneNumber = parsedPhoneNumber.country === 'KR';
     } catch (error) {
       if (error instanceof ParseError) {
-        this.logger.debug(
-          `Failed to parse phone number: ${phoneNumber}, error: ${error.message}`,
-        );
+        this.logger.debug('Failed to parse phone number', error);
         throw new BadRequestException('Failed to parse phone number');
       } else {
-        this.logger.error(
-          `Unexpected error while parsing phone number: ${phoneNumber}`,
-          error,
-        );
+        this.logger.error('Unexpected error while parsing phone number', error);
         throw new InternalServerErrorException(
           'Unexpected error while parsing phone number',
         );
