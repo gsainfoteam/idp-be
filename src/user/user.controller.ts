@@ -108,9 +108,11 @@ export class UserController {
 
   @ApiOperation({
     summary: 'sign up',
-    description: 'api for the sign up',
+    description:
+      'API for user sign up. Email verification JWT is always required. Phone number verification JWT is required only for Korean (KR) phone numbers. Student ID verification JWT is required for student emails (@gm.gist.ac.kr).',
   })
   @ApiCreatedResponse({ description: 'success' })
+  @ApiBadRequestResponse({ description: 'invalid phone number format' })
   @ApiConflictResponse({ description: 'user already exists' })
   @ApiForbiddenResponse({ description: 'certification token is not valid' })
   @ApiInternalServerErrorResponse({ description: 'server error' })
