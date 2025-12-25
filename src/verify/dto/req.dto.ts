@@ -4,7 +4,10 @@ import { ApiProperty } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
 import { IsEmail, IsString } from 'class-validator';
 
-import { VerificationList, VerificationType } from '../types/verification.type';
+import {
+  VerificationCodeList,
+  VerificationCodeType,
+} from '../types/verification.type';
 
 export class SendEmailCodeDto {
   @ApiProperty({
@@ -44,10 +47,10 @@ export class VerifyCodeDto {
     example: 'email or phoneNumber',
     description: '인증 타입 (email 또는 phoneNumber)',
     required: true,
-    enum: VerificationList,
+    enum: VerificationCodeList,
   })
   @IsString()
-  hint: VerificationType;
+  hint: VerificationCodeType;
 }
 
 export class VerifyStudentIdDto {
