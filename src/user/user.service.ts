@@ -153,16 +153,14 @@ export class UserService {
         this.logger.debug(
           `Failed to parse phone number: ${phoneNumber}, error: ${error.message}`,
         );
-        throw new BadRequestException(
-          `Failed to parse phone number: ${phoneNumber}, error: ${error.message}`,
-        );
+        throw new BadRequestException('Failed to parse phone number');
       } else {
         this.logger.error(
           `Unexpected error while parsing phone number: ${phoneNumber}`,
           error,
         );
-        throw new BadRequestException(
-          `Unexpected error while parsing phone number: ${phoneNumber}`,
+        throw new InternalServerErrorException(
+          'Unexpected error while parsing phone number',
         );
       }
     }
