@@ -23,7 +23,7 @@ import {
 } from '@simplewebauthn/types';
 import * as bcrypt from 'bcryptjs';
 import * as crypto from 'crypto';
-import { parsePhoneNumberWithError, ParseError } from 'libphonenumber-js';
+import { ParseError, parsePhoneNumberWithError } from 'libphonenumber-js';
 import { VerifyStudentIdDto } from 'src/verify/dto/req.dto';
 import { VerificationJwtPayloadType } from 'src/verify/types/verificationJwtPayload.type';
 import { VerifyService } from 'src/verify/verify.service';

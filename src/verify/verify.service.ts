@@ -13,6 +13,7 @@ import {
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import * as crypto from 'crypto';
+import { parsePhoneNumberWithError } from 'libphonenumber-js';
 
 import {
   SendEmailCodeDto,
@@ -193,6 +194,11 @@ export class VerifyService {
   }
 
   async sendPhoneCode({ phoneNumber }: SendPhoneCodeDto): Promise<void> {
+    const tel = parsePhoneNumberWithError(phoneNumber, 'KR');
+
+    if (tel.country !== 'KR')
+      throw new BadRequestException('Not a South Korean phone number.');
+
     const phoneNumberVerificationCode: string = crypto
       .randomInt(1000000)
       .toString()
@@ -200,7 +206,7 @@ export class VerifyService {
 
     const msg = `인포팀 계정 인증코드: [${phoneNumberVerificationCode}] 공유하지 마십시오.`;
 
-    await this.aligoService.sendMessage(phoneNumber, msg);
+    await this.aligoService.sendMessage(tel.formatNational(), msg);
 
     await this.redisService.set<string>(
       phoneNumber,
