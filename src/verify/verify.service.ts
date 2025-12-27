@@ -197,9 +197,6 @@ export class VerifyService {
     let tel;
     try {
       tel = parsePhoneNumberWithError(phoneNumber, 'KR');
-
-      if (tel.country !== 'KR')
-        throw new BadRequestException('Not a South Korean phone number.');
     } catch (error) {
       if (error instanceof ParseError) {
         this.logger.debug('Failed to parse phone number', error);
@@ -211,6 +208,8 @@ export class VerifyService {
         );
       }
     }
+    if (tel.country !== 'KR')
+      throw new BadRequestException('Not a South Korean phone number.');
 
     const phoneNumberVerificationCode: string = crypto
       .randomInt(1000000)

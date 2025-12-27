@@ -88,7 +88,7 @@ export class RegisterDto {
   studentId: string;
 
   @ApiProperty({
-    example: '+821012345678',
+    example: '+82 10 1234 5678',
     description: '전화번호',
   })
   @IsString()
