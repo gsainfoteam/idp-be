@@ -111,6 +111,7 @@ export class UserRepository {
     name,
     studentId,
     phoneNumber,
+    isPhoneNumberVerified,
   }: Omit<
     User,
     | 'accessLevel'
@@ -120,7 +121,6 @@ export class UserRepository {
     | 'picture'
     | 'profile'
     | 'isIdVerified'
-    | 'isPhoneNumberVerified'
   >): Promise<void> {
     await this.prismaService.user
       .create({
@@ -131,7 +131,7 @@ export class UserRepository {
           studentId,
           phoneNumber,
           isIdVerified: true,
-          isPhoneNumberVerified: true,
+          isPhoneNumberVerified, // TODO: 해외 전화번호 인증 추가 이후 수정 필요
         },
       })
       .catch((error) => {
