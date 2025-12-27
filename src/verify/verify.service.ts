@@ -13,7 +13,7 @@ import {
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import * as crypto from 'crypto';
-import { parsePhoneNumberWithError } from 'libphonenumber-js';
+import { ParseError, parsePhoneNumberWithError } from 'libphonenumber-js';
 
 import {
   SendEmailCodeDto,
@@ -194,10 +194,23 @@ export class VerifyService {
   }
 
   async sendPhoneCode({ phoneNumber }: SendPhoneCodeDto): Promise<void> {
-    const tel = parsePhoneNumberWithError(phoneNumber, 'KR');
+    let tel;
+    try {
+      tel = parsePhoneNumberWithError(phoneNumber, 'KR');
 
-    if (tel.country !== 'KR')
-      throw new BadRequestException('Not a South Korean phone number.');
+      if (tel.country !== 'KR')
+        throw new BadRequestException('Not a South Korean phone number.');
+    } catch (error) {
+      if (error instanceof ParseError) {
+        this.logger.debug('Failed to parse phone number', error);
+        throw new BadRequestException('Failed to parse phone number');
+      } else {
+        this.logger.error('Unexpected error while parsing phone number', error);
+        throw new InternalServerErrorException(
+          'Unexpected error while parsing phone number',
+        );
+      }
+    }
 
     const phoneNumberVerificationCode: string = crypto
       .randomInt(1000000)
