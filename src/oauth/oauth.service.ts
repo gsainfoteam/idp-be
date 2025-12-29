@@ -497,8 +497,14 @@ export class OauthService {
       studentId: tokenData.scope.includes('student_id')
         ? user.studentId
         : undefined,
+      isStudentIdVerified: tokenData.scope.includes('student_id')
+        ? user.isIdVerified
+        : undefined,
       phoneNumber: tokenData.scope.includes('phone_number')
         ? user.phoneNumber
+        : undefined,
+      isPhoneNumberVerified: tokenData.scope.includes('phone_number')
+        ? user.isPhoneNumberVerified
         : undefined,
     };
   }
