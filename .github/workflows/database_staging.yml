@@ -33,7 +33,7 @@ jobs:
           TUNNEL_SERVICE_TOKEN_ID: ${{ secrets.CF_ACCESS_CLIENT_ID }}
           TUNNEL_SERVICE_TOKEN_SECRET: ${{ secrets.CF_ACCESS_CLIENT_SECRET }}
         run: |
-          cloudflared access tcp --service-token-id ${{ secrets.CF_ACCESS_CLIENT_ID }} --service-token-secret ${{ secrets.CF_ACCESS_CLIENT_SECRET }} --hostname icarus-db.gistory.me --url tcp://localhost:32345 &
+          cloudflared access tcp --service-token-id ${{ secrets.CF_ACCESS_CLIENT_ID }} --service-token-secret ${{ secrets.CF_ACCESS_CLIENT_SECRET }} --hostname icarus-db.gistory.me --url localhost:32345 &
           sleep 5
           nc -zv localhost 32345
             
