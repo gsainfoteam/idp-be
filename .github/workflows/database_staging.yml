@@ -34,6 +34,7 @@ jobs:
             --service-token-id ${{ secrets.CF_ACCESS_CLIENT_ID }} \
             --service-token-secret ${{ secrets.CF_ACCESS_CLIENT_SECRET }} &
           sleep 5
+          nc -zv localhost 32345
             
       - name: Migrate Database
         run: npx prisma migrate deploy
