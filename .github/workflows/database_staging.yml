@@ -38,4 +38,4 @@ jobs:
       - name: Migrate Database
         run: npx prisma migrate deploy
         env:
-          DATABASE_URL: ${{ secrets.STG_DATABASE_URL }}
+          DATABASE_URL: ${{ secrets.STG_DATABASE_URL }}?connect_timeout=30&pool_timeout=30
