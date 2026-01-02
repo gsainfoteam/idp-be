@@ -33,6 +33,7 @@ jobs:
           cloudflared access tcp --hostname your-app.example.com --url localhost:8080 \
             --service-token-id ${{ secrets.CF_CLIENT_ID }} \
             --service-token-secret ${{ secrets.CF_CLIENT_SECRET }} &
+          sleep 5
             
       - name: Migrate Database
         run: npx prisma migrate deploy
