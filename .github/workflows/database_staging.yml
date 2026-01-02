@@ -36,12 +36,6 @@ jobs:
           cloudflared access tcp --service-token-id ${{ secrets.CF_ACCESS_CLIENT_ID }} --service-token-secret ${{ secrets.CF_ACCESS_CLIENT_SECRET }} --hostname icarus-db.gistory.me --url localhost:32345 &
           sleep 5
           nc -zv localhost 32345
-
-      - name: Debug Token with Curl
-        run: |
-          curl -v https://icarus-db.gistory.me/ \
-            -H "CF-Access-Client-Id: ${{ secrets.CF_CLIENT_ID }}" \
-            -H "CF-Access-Client-Secret: ${{ secrets.CF_CLIENT_SECRET }}"
             
       - name: Migrate Database
         run: npx prisma migrate deploy
