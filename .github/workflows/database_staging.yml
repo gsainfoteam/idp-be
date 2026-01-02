@@ -29,6 +29,9 @@ jobs:
           version: 'latest'
 
       - name: use Cloudflare
+        env:
+          CF_ACCESS_CLIENT_ID: ${{ secrets.CF_ACCESS_CLIENT_ID }}
+          CF_ACCESS_CLIENT_SECRET: ${{ secrets.CF_ACCESS_CLIENT_SECRET }}
         run: cloudflared access tcp --hostname icarus-db.gistory.me --url tcp://localhost:32345 &
 
       - name: Migrate Database
