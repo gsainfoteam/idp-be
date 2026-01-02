@@ -30,7 +30,7 @@ jobs:
 
       - name: use Cloudflare
         run: |
-          cloudflared access tcp --hostname your-app.example.com --url localhost:8080 \
+          cloudflared access tcp --hostname icarus-db.gistory.me --url tcp://localhost:32345 \
             --service-token-id ${{ secrets.CF_ACCESS_CLIENT_ID }} \
             --service-token-secret ${{ secrets.CF_ACCESS_CLIENT_SECRET }} &
           sleep 5
