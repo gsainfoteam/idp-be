@@ -23,6 +23,14 @@ jobs:
       - name: Install Prisma
         run: bun install
 
+      - name: setup cloudflared
+        uses: AnimMouse/setup-cloudflared@v2
+        with:
+          version: 'latest'
+
+      - name: use Cloudflare
+        run: cloudflared access tcp --hostname icarus-db.gistory.me --url tcp://localhost:32345
+
       - name: Migrate Database
         run: npx prisma migrate deploy
         env:
