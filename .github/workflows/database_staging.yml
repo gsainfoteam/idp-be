@@ -30,9 +30,7 @@ jobs:
 
       - name: use Cloudflare
         run: |
-          cloudflared access tcp --hostname icarus-db.gistory.me --url tcp://localhost:32345 \
-            --id: ${{ secrets.CF_ACCESS_CLIENT_ID }} \
-            --secret: ${{ secrets.CF_ACCESS_CLIENT_SECRET }} &
+          cloudflared access tcp --hostname icarus-db.gistory.me --url tcp://localhost:32345 --id: ${{ secrets.CF_ACCESS_CLIENT_ID }} --secret: ${{ secrets.CF_ACCESS_CLIENT_SECRET }} &
           sleep 5
           nc -zv localhost 32345
             
