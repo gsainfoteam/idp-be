@@ -29,11 +29,11 @@ jobs:
           version: 'latest'
 
       - name: use Cloudflare
-        run: cloudflared access tcp --hostname icarus-db.gistory.me --url tcp://localhost:32345 &
-
-      - name: Auth Cloudflare Access
-        run: curl -H "${{ secrets.CF_ACCESS_CLIENT_ID }}" -H "${{ secrets.CF_ACCESS_CLIENT_SECRET }}" http://localhost:32345
-
+        run: |
+          cloudflared access tcp --hostname your-app.example.com --url localhost:8080 \
+            --service-token-id ${{ secrets.CF_CLIENT_ID }} \
+            --service-token-secret ${{ secrets.CF_CLIENT_SECRET }} &
+            
       - name: Migrate Database
         run: npx prisma migrate deploy
         env:
