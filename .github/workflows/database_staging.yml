@@ -30,11 +30,10 @@ jobs:
 
       - name: use Cloudflare
         run: |
-          cloudflared access tcp --hostname icarus-db.gistory.me --url tcp://localhost:32345
+          cloudflared access tcp --hostname icarus-db.gistory.me --url tcp://localhost:32345 \
+            --id: ${{ secrets.CF_ACCESS_CLIENT_ID }} \
+            --secret: ${{ secrets.CF_ACCESS_CLIENT_SECRET }} &
           sleep 5
-          curl -v http://localhost:32345 \
-            -H "CF-Access-Client-Id: ${{ secrets.CF_ACCESS_CLIENT_ID }}" \
-            -H "CF-Access-Client-Secret: ${{ secrets.CF_ACCESS_CLIENT_SECRET }}"
           nc -zv localhost 32345
             
       - name: Migrate Database
