@@ -215,6 +215,12 @@ class RoleDto {
 
 export class ClientMembersResDto {
   @ApiProperty({
+    description: 'Member UUID',
+    example: 'd290f1ee-6c54-4b01-90e6-d701748f0851',
+  })
+  uuid: string;
+
+  @ApiProperty({
     description: 'Member name',
     example: 'John Doe',
   })

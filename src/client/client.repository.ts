@@ -208,6 +208,7 @@ export class ClientRepository {
           },
         },
         select: {
+          uuid: true,
           name: true,
           email: true,
           picture: true,
