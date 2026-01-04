@@ -139,18 +139,21 @@ export class ClientService {
    * @param uuid client's uuid
    * @param userUuid id of the user to who we want to give Admin
    */
-  async setRole(uuid: string, userUuid: string, role: RoleType): Promise<void> {
-    const curRole = await this.clientRepository.getUserClientRole(
-      uuid,
-      userUuid,
-    );
-    if (curRole === RoleType.OWNER) {
-      throw new ForbiddenException('Owner role cannot be changed');
-    }
-    if (curRole === role) {
-      return;
-    }
-    await this.clientRepository.setRoleToUser(uuid, userUuid, role);
+  async setRole(
+    ownerUuid: string,
+    clientUuid: string,
+    userUuid: string,
+    role: RoleType,
+  ): Promise<void> {
+    if (ownerUuid === userUuid)
+      throw new ForbiddenException('Owner cannot change own role');
+    if (role === RoleType.OWNER)
+      await this.clientRepository.transferOwnership(
+        clientUuid,
+        ownerUuid,
+        userUuid,
+      );
+    else await this.clientRepository.setRoleToUser(clientUuid, userUuid, role);
   }
 
   /**

@@ -202,7 +202,7 @@ export class ClientController {
   @ApiOperation({
     summary: 'Set role to a user',
     description:
-      'Set role to a user to give/take permissions. Permissions: Only OWNER can access (ADMIN and MEMBER cannot)',
+      'Set role to a user to give/take permissions. If transfer ownership, the current owner will be changed to the new owner. Permissions: Only OWNER can access (ADMIN and MEMBER cannot)',
   })
   @ApiBearerAuth('user:jwt')
   @ApiOkResponse({
@@ -215,10 +215,11 @@ export class ClientController {
   @RequireClientRole(RoleType.OWNER)
   @Patch(':clientId/members/:userId/role')
   async setRole(
+    @GetUser() user: User,
     @Param() { clientId, userId }: ClientMemberParamsDto,
     @Body() { role }: ClientRoleDto,
   ): Promise<void> {
-    return this.clientService.setRole(clientId, userId, role);
+    return this.clientService.setRole(user.uuid, clientId, userId, role);
   }
 
   @ApiOperation({
