@@ -4,7 +4,10 @@ import { ApiProperty } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
 import { IsEmail, IsString } from 'class-validator';
 
-import { VerificationList, VerificationType } from '../types/verification.type';
+import {
+  VerificationCodeList,
+  VerificationCodeType,
+} from '../types/verification.type';
 
 export class SendEmailCodeDto {
   @ApiProperty({
@@ -25,10 +28,11 @@ export class SendEmailCodeDto {
 
 export class VerifyCodeDto {
   @ApiProperty({
-    example: 'JohnDoe@gm.gist.ac.kr',
-    description: 'GIST 이메일 혹은 다른 인증 대상의 대푯값',
+    example: 'JohnDoe@gm.gist.ac.kr or +82 10 1234 5678',
+    description: 'GIST 이메일, 전화번호 혹은 다른 인증 대상의 대푯값',
     required: true,
   })
+  @IsString()
   subject: string;
 
   @ApiProperty({
@@ -36,15 +40,17 @@ export class VerifyCodeDto {
     description: '인증 코드',
     required: true,
   })
+  @IsString()
   code: string;
 
   @ApiProperty({
-    example: 'email',
-    description: '인증 타입',
+    example: 'email or phoneNumber',
+    description: '인증 타입 (email 또는 phoneNumber)',
     required: true,
-    enum: VerificationList,
+    enum: VerificationCodeList,
   })
-  hint: VerificationType;
+  @IsString()
+  hint: VerificationCodeType;
 }
 
 export class VerifyStudentIdDto {
@@ -55,4 +61,13 @@ export class VerifyStudentIdDto {
   @ApiProperty({ example: '20000101', description: '생년월일' })
   @IsString()
   birthDate: string;
+}
+
+export class SendPhoneCodeDto {
+  @ApiProperty({
+    example: '+82 10 1234 5678',
+    description: '전화번호',
+  })
+  @IsString()
+  phoneNumber: string;
 }

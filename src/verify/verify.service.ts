@@ -1,3 +1,4 @@
+import { AligoService } from '@lib/aligo';
 import { Loggable } from '@lib/logger';
 import { MailService } from '@lib/mail';
 import { CacheNotFoundException, RedisService } from '@lib/redis';
@@ -12,9 +13,11 @@ import {
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import * as crypto from 'crypto';
+import { ParseError, parsePhoneNumberWithError } from 'libphonenumber-js';
 
 import {
   SendEmailCodeDto,
+  SendPhoneCodeDto,
   VerifyCodeDto,
   VerifyStudentIdDto,
 } from './dto/req.dto';
@@ -32,13 +35,15 @@ export class VerifyService {
   private readonly verifyStudentIdUrl = this.configService.getOrThrow<string>(
     'VERIFY_STUDENT_ID_URL',
   );
-  private readonly studentIdVerificationPrefix = 'studentId';
+  private readonly phoneNumberVerificationCodePrefix =
+    'PhoneNumberVerificationCode';
 
   constructor(
     private readonly configService: ConfigService,
     private readonly jwtService: JwtService,
     private readonly redisService: RedisService,
     private readonly mailService: MailService,
+    private readonly aligoService: AligoService,
     private readonly templatesService: TemplatesService,
   ) {}
 
@@ -77,40 +82,45 @@ export class VerifyService {
     code,
     hint,
   }: VerifyCodeDto): Promise<VerificationJwtResDto> {
-    if (hint !== 'email') {
-      throw new BadRequestException('only email supported');
+    let prefix: string;
+    if (hint === 'email') {
+      prefix = this.emailVerificationCodePrefix;
+      subject = subject.toLowerCase(); // to lower case
+    } else if (hint === 'phoneNumber') {
+      prefix = this.phoneNumberVerificationCodePrefix;
+    } else {
+      throw new BadRequestException('only email and phone number supported');
     }
-    subject = subject.toLowerCase(); // to lower case
 
-    const CachedCode = await this.redisService
+    const cachedCode = await this.redisService
       .getOrThrow<string>(subject, {
-        prefix: this.emailVerificationCodePrefix,
+        prefix,
       })
       .catch((error) => {
         if (error instanceof CacheNotFoundException) {
           this.logger.debug(`Redis cache not found with subject: ${subject}`);
-          throw new BadRequestException('invalid email or code');
+          throw new BadRequestException('invalid subject or code');
         }
         this.logger.error(`Redis get error: ${error}`);
         throw new InternalServerErrorException();
       });
 
     if (
-      Buffer.from(code).length !== Buffer.from(CachedCode).length ||
-      !crypto.timingSafeEqual(Buffer.from(code), Buffer.from(CachedCode))
+      Buffer.from(code).length !== Buffer.from(cachedCode).length ||
+      !crypto.timingSafeEqual(Buffer.from(code), Buffer.from(cachedCode))
     ) {
       this.logger.debug(`code not matched: ${code}`);
-      throw new BadRequestException('invalid email or code');
+      throw new BadRequestException('invalid subject or code');
     }
 
     await this.redisService.del(subject, {
-      prefix: this.emailVerificationCodePrefix,
+      prefix,
     });
 
     const payload: VerificationJwtPayloadType = {
       iss: this.configService.getOrThrow<string>('JWT_ISSUER'),
       sub: subject,
-      hint: 'email',
+      hint,
     };
     return {
       verificationJwtToken: this.jwtService.sign(payload),
@@ -181,5 +191,42 @@ export class VerifyService {
     if (data.result === 'false' || !data.studtNo)
       throw new NotFoundException('Student ID is not found');
     return data.studtNo;
+  }
+
+  async sendPhoneCode({ phoneNumber }: SendPhoneCodeDto): Promise<void> {
+    let tel;
+    try {
+      tel = parsePhoneNumberWithError(phoneNumber, 'KR');
+    } catch (error) {
+      if (error instanceof ParseError) {
+        this.logger.debug('Failed to parse phone number', error);
+        throw new BadRequestException('Failed to parse phone number');
+      } else {
+        this.logger.error('Unexpected error while parsing phone number', error);
+        throw new InternalServerErrorException(
+          'Unexpected error while parsing phone number',
+        );
+      }
+    }
+    if (tel.country !== 'KR')
+      throw new BadRequestException('Not a South Korean phone number.');
+
+    const phoneNumberVerificationCode: string = crypto
+      .randomInt(1000000)
+      .toString()
+      .padStart(6, '0');
+
+    const msg = `인포팀 계정 인증코드: [${phoneNumberVerificationCode}] 공유하지 마십시오.`;
+
+    await this.aligoService.sendMessage(tel.formatNational(), msg);
+
+    await this.redisService.set<string>(
+      phoneNumber,
+      phoneNumberVerificationCode,
+      {
+        ttl: 3 * 60,
+        prefix: this.phoneNumberVerificationCodePrefix,
+      },
+    );
   }
 }

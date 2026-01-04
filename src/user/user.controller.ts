@@ -41,6 +41,7 @@ import {
   IssueUserSecretDto,
   RegisterDto,
   VerifyPasskeyRegistrationDto,
+  VerifyPhoneNumberDto,
 } from './dto/req.dto';
 import {
   BasicPasskeyDto,
@@ -107,9 +108,11 @@ export class UserController {
 
   @ApiOperation({
     summary: 'sign up',
-    description: 'api for the sign up',
+    description:
+      'API for user sign up. Email verification JWT is always required. Phone number verification JWT is required only for Korean (KR) phone numbers. Student ID verification JWT is required for student emails (@gm.gist.ac.kr).',
   })
   @ApiCreatedResponse({ description: 'success' })
+  @ApiBadRequestResponse({ description: 'invalid phone number format' })
   @ApiConflictResponse({ description: 'user already exists' })
   @ApiForbiddenResponse({ description: 'certification token is not valid' })
   @ApiInternalServerErrorResponse({ description: 'server error' })
@@ -122,6 +125,7 @@ export class UserController {
     summary: 'verify student id for original user',
     description:
       'verify student id using birth date and name for original user. If not error, it represents a successful save.',
+    deprecated: true,
   })
   @ApiBearerAuth('user:jwt')
   @ApiOkResponse({ description: 'success' })
@@ -129,11 +133,47 @@ export class UserController {
   @ApiInternalServerErrorResponse({ description: 'server error' })
   @UseGuards(UserGuard)
   @Post('/verify/studentId')
+  async verifyStudentIdLegacy(
+    @GetUser() user: User,
+    @Body() body: VerifyStudentIdDto,
+  ): Promise<void> {
+    return await this.userService.verifyStudentId(user.uuid, body);
+  }
+
+  @ApiOperation({
+    summary: 'verify student id for original user',
+    description:
+      'verify student id using birth date and name for original user. If not error, it represents a successful save.',
+  })
+  @ApiBearerAuth('user:jwt')
+  @ApiOkResponse({ description: 'success' })
+  @ApiNotFoundResponse({ description: 'user is not found' })
+  @ApiInternalServerErrorResponse({ description: 'server error' })
+  @UseGuards(UserGuard)
+  @Post('/verify/student-id')
   async verifyStudentId(
     @GetUser() user: User,
     @Body() body: VerifyStudentIdDto,
   ): Promise<void> {
     return await this.userService.verifyStudentId(user.uuid, body);
+  }
+
+  @ApiOperation({
+    summary: 'verify phone number for original user',
+    description:
+      'verify phone number using phone number and verification code for original user. If not error, it represents a successful save.',
+  })
+  @ApiBearerAuth('user:jwt')
+  @ApiOkResponse({ description: 'success' })
+  @ApiNotFoundResponse({ description: 'user is not found' })
+  @ApiInternalServerErrorResponse({ description: 'server error' })
+  @UseGuards(UserGuard)
+  @Post('/verify/phone-number')
+  async verifyPhoneNumber(
+    @GetUser() user: User,
+    @Body() body: VerifyPhoneNumberDto,
+  ): Promise<void> {
+    return await this.userService.verifyPhoneNumber(user.uuid, body);
   }
 
   @ApiOperation({

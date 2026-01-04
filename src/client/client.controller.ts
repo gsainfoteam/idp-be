@@ -136,7 +136,8 @@ export class ClientController {
 
   @ApiOperation({
     summary: 'Get members',
-    description: 'Get members who can access the client',
+    description:
+      'Get members who can access the client. Permissions: All roles (OWNER, ADMIN, MEMBER) can access',
   })
   @ApiBearerAuth('user:jwt')
   @ApiOkResponse({
@@ -157,7 +158,8 @@ export class ClientController {
 
   @ApiOperation({
     summary: 'Add a member to client',
-    description: 'Add a member to access the client',
+    description:
+      'Add a member to access the client. Permissions: Only OWNER and ADMIN can access (MEMBER cannot)',
   })
   @ApiBearerAuth('user:jwt')
   @ApiOkResponse({
@@ -178,7 +180,8 @@ export class ClientController {
 
   @ApiOperation({
     summary: 'Remove a member from client',
-    description: 'Remove a user from client to restrict the access',
+    description:
+      'Remove a user from client to restrict the access. Permissions: Only OWNER and ADMIN can access (MEMBER cannot)',
   })
   @ApiBearerAuth('user:jwt')
   @ApiOkResponse({
@@ -198,7 +201,8 @@ export class ClientController {
 
   @ApiOperation({
     summary: 'Set role to a user',
-    description: 'Set role to a user to give/take permissions',
+    description:
+      'Set role to a user to give/take permissions. Permissions: Only OWNER can access (ADMIN and MEMBER cannot)',
   })
   @ApiBearerAuth('user:jwt')
   @ApiOkResponse({
@@ -220,7 +224,8 @@ export class ClientController {
 
   @ApiOperation({
     summary: 'Reset client secret',
-    description: '유저가 client의 secret을 재설정한다.',
+    description:
+      'Reset the client secret. Permissions: Only OWNER and ADMIN can access (MEMBER cannot)',
   })
   @ApiBearerAuth('user:jwt')
   @ApiOkResponse({ description: '성공', type: ClientCredentialResDto })
@@ -241,7 +246,8 @@ export class ClientController {
 
   @ApiOperation({
     summary: 'Update client',
-    description: '유저가 client의 정보를 수정한다.',
+    description:
+      'Update client information. Permissions: Only OWNER and ADMIN can access (MEMBER cannot)',
   })
   @ApiBearerAuth('user:jwt')
   @ApiOkResponse({ description: '성공', type: ClientResDto })
@@ -264,7 +270,7 @@ export class ClientController {
   @ApiOperation({
     summary: 'update picture',
     description:
-      'api for updating client image. it will return updated client presigned url. image format must be webp',
+      'api for updating client image. it will return updated client presigned url. image format must be webp. Permissions: Only OWNER and ADMIN can access (MEMBER cannot)',
   })
   @ApiBearerAuth('user:jwt')
   @ApiOkResponse({ description: 'success', type: UpdateClientPictureResDto })
@@ -284,7 +290,8 @@ export class ClientController {
 
   @ApiOperation({
     summary: 'send delete request',
-    description: '유저가 client를 삭제하고 싶다는 요청을 보낸다.',
+    description:
+      'Send a request to delete the client. Permissions: Only OWNER can access (ADMIN and MEMBER cannot)',
   })
   @ApiBearerAuth('user:jwt')
   @ApiOkResponse({ description: '성공' })
@@ -303,7 +310,8 @@ export class ClientController {
 
   @ApiOperation({
     summary: 'delete client picture',
-    description: '유저가 client의 이미지를 삭제한다.',
+    description:
+      'Delete the client image. Permissions: Only OWNER and ADMIN can access (MEMBER cannot)',
   })
   @ApiBearerAuth('user:jwt')
   @ApiOkResponse({ description: '성공' })

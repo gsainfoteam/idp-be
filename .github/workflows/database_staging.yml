@@ -23,7 +23,21 @@ jobs:
       - name: Install Prisma
         run: bun install
 
+      - name: setup cloudflared
+        uses: AnimMouse/setup-cloudflared@v2
+        with:
+          version: 'latest'
+
+      - name: use Cloudflare
+        env:
+          TUNNEL_SERVICE_TOKEN_ID: ${{ secrets.CF_ACCESS_CLIENT_ID }}
+          TUNNEL_SERVICE_TOKEN_SECRET: ${{ secrets.CF_ACCESS_CLIENT_SECRET }}
+        run: |
+          cloudflared access tcp --service-token-id ${{ secrets.CF_ACCESS_CLIENT_ID }} --service-token-secret ${{ secrets.CF_ACCESS_CLIENT_SECRET }} --hostname icarus-db.gistory.me --url localhost:32345 &
+          sleep 5
+          nc -zv localhost 32345
+            
       - name: Migrate Database
         run: npx prisma migrate deploy
         env:
-          DATABASE_URL: ${{ secrets.STG_DATABASE_URL }}
+          DATABASE_URL: ${{ secrets.STG_DATABASE_URL }}?connect_timeout=30&pool_timeout=30

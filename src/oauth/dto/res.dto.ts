@@ -134,6 +134,18 @@ export class UserInfoResDto {
   studentId?: string;
 
   @ApiPropertyOptional({
+    example: true,
+    description: 'is student id verified',
+    required: false,
+    name: 'is_student_id_verified',
+  })
+  @Expose({
+    name: 'is_student_id_verified',
+    toPlainOnly: true,
+  })
+  isStudentIdVerified?: boolean;
+
+  @ApiPropertyOptional({
     example: '01012345678',
     description: 'phone number',
     required: false,
@@ -144,4 +156,16 @@ export class UserInfoResDto {
     toPlainOnly: true,
   })
   phoneNumber?: string;
+
+  @ApiPropertyOptional({
+    example: true,
+    description: 'is phone number verified',
+    required: false,
+    name: 'is_phone_number_verified',
+  })
+  @Expose({
+    name: 'is_phone_number_verified',
+    toPlainOnly: true,
+  })
+  isPhoneNumberVerified?: boolean;
 }

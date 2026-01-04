@@ -88,7 +88,7 @@ export class RegisterDto {
   studentId: string;
 
   @ApiProperty({
-    example: '01012345678',
+    example: '+82 10 1234 5678',
     description: '전화번호',
   })
   @IsString()
@@ -106,11 +106,22 @@ export class RegisterDto {
   @ApiPropertyOptional({
     example:
       'eyJhbGciOiJIUzI1NiIsInR5cCI6Ikp9.eyJlbWFpbCI6ImpvaG5AZ21haWwuY29tIiwiaWF0IjoxNjI2NzQwMjY5LCJleHAiOjE2MjY3NDAyNzZ9.4RZq0Xq2vHf6VQ5o4GtG6tKv4oL9a8kF8y0JW7w5ZlY',
-    description: '학번 인증 jwt 토큰',
+    description:
+      '학번 인증 jwt 토큰 (학생 이메일(@gm.gist.ac.kr)인 경우 필수, 사번 인증 필요 없음)',
   })
   @IsOptional()
   @IsJWT()
   studentIdVerificationJwtToken?: string;
+
+  @ApiPropertyOptional({
+    example:
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6Ikp9.eyJlbWFpbCI6ImpvaG5AZ21haWwuY29tIiwiaWF0IjoxNjI2NzQwMjY5LCJleHAiOjE2MjY3NDAyNzZ9.4RZq0Xq2vHf6VQ5o4GtG6tKv4oL9a8kF8y0JW7w5ZlY',
+    description:
+      '전화번호 인증 jwt 토큰 (한국 번호(KR)인 경우 필수, 외국 번호인 경우 선택)',
+  })
+  @IsOptional()
+  @IsJWT()
+  phoneNumberVerificationJwtToken?: string;
 }
 
 export class DeleteUserReqDto {
@@ -262,4 +273,20 @@ export class ChangePasskeyNameDto {
   })
   @IsString()
   name: string;
+}
+
+export class VerifyPhoneNumberDto {
+  @ApiProperty({
+    example: '01012345678',
+    description: '전화번호',
+  })
+  @IsString()
+  phoneNumber: string;
+
+  @ApiProperty({
+    example: '123456',
+    description: '인증 코드',
+  })
+  @IsString()
+  code: string;
 }

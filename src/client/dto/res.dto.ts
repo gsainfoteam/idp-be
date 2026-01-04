@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { Client } from '@prisma/client';
+import { Client, RoleType } from '@prisma/client';
 import { Exclude, Expose } from 'class-transformer';
 
 export class ClientResDto implements Client {
@@ -205,11 +205,21 @@ export class ClientCredentialResDto implements Client {
 }
 
 class RoleDto {
-  @ApiProperty({ description: 'Role name', example: 'admin' })
-  role: string;
+  @ApiProperty({
+    description: 'Role name',
+    example: 'ADMIN',
+    enum: RoleType,
+  })
+  role: RoleType;
 }
 
 export class ClientMembersResDto {
+  @ApiProperty({
+    description: 'Member UUID',
+    example: 'd290f1ee-6c54-4b01-90e6-d701748f0851',
+  })
+  uuid: string;
+
   @ApiProperty({
     description: 'Member name',
     example: 'John Doe',

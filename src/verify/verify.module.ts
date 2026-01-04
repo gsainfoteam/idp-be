@@ -1,3 +1,4 @@
+import { AligoModule } from '@lib/aligo';
 import { LoggerModule } from '@lib/logger';
 import { MailModule } from '@lib/mail';
 import { RedisModule } from '@lib/redis';
@@ -28,6 +29,7 @@ import { VerifyService } from './verify.service';
         },
       }),
     }),
+    AligoModule,
     TemplatesModule,
   ],
   controllers: [VerifyController],
