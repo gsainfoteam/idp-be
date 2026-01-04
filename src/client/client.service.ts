@@ -148,12 +148,12 @@ export class ClientService {
     if (ownerUuid === userUuid)
       throw new ForbiddenException('Owner cannot change own role');
     if (role === RoleType.OWNER)
-      await this.clientRepository.setRoleToUser(
+      await this.clientRepository.transferOwnership(
         clientUuid,
         ownerUuid,
-        RoleType.ADMIN,
+        userUuid,
       );
-    await this.clientRepository.setRoleToUser(clientUuid, userUuid, role);
+    else await this.clientRepository.setRoleToUser(clientUuid, userUuid, role);
   }
 
   /**

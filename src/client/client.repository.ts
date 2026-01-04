@@ -327,6 +327,44 @@ export class ClientRepository {
       });
   }
 
+  async transferOwnership(
+    clientUuid: string,
+    currentOwnerUuid: string,
+    newOwnerUuid: string,
+  ): Promise<void> {
+    await this.prismaService
+      .$transaction(async (prisma) => {
+        await prisma.userClientRelation.update({
+          where: {
+            userUuid_clientUuid: {
+              userUuid: currentOwnerUuid,
+              clientUuid: clientUuid,
+            },
+          },
+          data: { role: RoleType.ADMIN },
+        });
+        await prisma.userClientRelation.update({
+          where: {
+            userUuid_clientUuid: {
+              userUuid: newOwnerUuid,
+              clientUuid: clientUuid,
+            },
+          },
+          data: { role: RoleType.OWNER },
+        });
+      })
+      .catch((error) => {
+        if (error instanceof PrismaClientKnownRequestError) {
+          this.logger.debug(`transferOwnership error: ${error.stack}`);
+          if (error.code === 'P2025') {
+            throw new NotFoundException();
+          }
+        }
+        this.logger.error(`transferOwnership error: ${error}`);
+        throw new InternalServerErrorException();
+      });
+  }
+
   async deleteRequestClient(uuid: string, userUuid: string): Promise<void> {
     await this.prismaService.client
       .update({
