@@ -2,7 +2,6 @@ import { Loggable } from '@lib/logger/decorator/loggable';
 import { PrismaService } from '@lib/prisma';
 import {
   ConflictException,
-  ForbiddenException,
   Injectable,
   InternalServerErrorException,
   Logger,
@@ -44,7 +43,7 @@ export class ClientRepository {
           error.code == 'P2025'
         ) {
           this.logger.debug(`findClientByUuid error: ${error.stack}`);
-          throw new ForbiddenException();
+          throw new NotFoundException();
         }
         this.logger.error(`findClientByUuid error: ${error}`);
         throw new InternalServerErrorException();
@@ -74,7 +73,7 @@ export class ClientRepository {
           this.logger.debug(
             `findClientByUuidAndUserUuid error: ${error.stack}`,
           );
-          throw new ForbiddenException();
+          throw new NotFoundException();
         }
         this.logger.error(`findClientByUuidAndUserUuid error: ${error}`);
         throw new InternalServerErrorException();
@@ -140,7 +139,7 @@ export class ClientRepository {
           error.code === 'P2025'
         ) {
           this.logger.debug(`updateClientSecret: error=${error.stack}`);
-          throw new ForbiddenException();
+          throw new NotFoundException();
         }
         this.logger.error(`updateClientSecret: error=${error}`);
         throw new InternalServerErrorException();
@@ -188,7 +187,7 @@ export class ClientRepository {
           error.code === 'P2025'
         ) {
           this.logger.debug(`updateClient error: ${error.stack}`);
-          throw new ForbiddenException();
+          throw new NotFoundException();
         }
         this.logger.error(`updateClient error: ${error}`);
         throw new InternalServerErrorException();
@@ -257,7 +256,7 @@ export class ClientRepository {
         if (error instanceof PrismaClientKnownRequestError) {
           this.logger.debug(`addMemberToClient error: ${error.stack}`);
           if (error.code === 'P2025') {
-            throw new ForbiddenException();
+            throw new NotFoundException();
           }
           if (error.code === 'P2002') {
             throw new ConflictException();
@@ -293,7 +292,7 @@ export class ClientRepository {
           error.code === 'P2025'
         ) {
           this.logger.debug(`updateClientPicture error: ${error.stack}`);
-          throw new ForbiddenException();
+          throw new NotFoundException();
         }
         this.logger.error(`updateClientPicture error: ${error}`);
         throw new InternalServerErrorException();
@@ -319,7 +318,7 @@ export class ClientRepository {
         if (error instanceof PrismaClientKnownRequestError) {
           this.logger.debug(`setRoleToUser error: ${error.stack}`);
           if (error.code === 'P2025') {
-            throw new ForbiddenException();
+            throw new NotFoundException();
           }
         }
         this.logger.error(`setRoleToUser error: ${error}`);
@@ -386,7 +385,7 @@ export class ClientRepository {
           error.code === 'P2025'
         ) {
           this.logger.debug(`deleteRequestClient error: ${error.stack}`);
-          throw new ForbiddenException();
+          throw new NotFoundException();
         }
         this.logger.error(`deleteRequestClient error: ${error}`);
         throw new InternalServerErrorException();
@@ -416,7 +415,7 @@ export class ClientRepository {
           error.code === 'P2025'
         ) {
           this.logger.debug(`removeMemberFromClient error: ${error.stack}`);
-          throw new ForbiddenException();
+          throw new NotFoundException();
         }
         this.logger.error(`removeMemberFromClient error: ${error}`);
         throw new InternalServerErrorException();
@@ -444,7 +443,7 @@ export class ClientRepository {
           error.code === 'P2025'
         ) {
           this.logger.debug(`deleteClientPicture error: ${error.stack}`);
-          throw new ForbiddenException();
+          throw new NotFoundException();
         }
         this.logger.error(`deleteClientPicture error: ${error}`);
         throw new InternalServerErrorException();
@@ -474,7 +473,7 @@ export class ClientRepository {
           error.code === 'P2025'
         ) {
           this.logger.debug(`getUserClientRole error: ${error.stack}`);
-          throw new ForbiddenException();
+          throw new NotFoundException();
         }
         this.logger.error(`getUserClientRole error: ${error}`);
         throw new InternalServerErrorException();
