@@ -54,7 +54,7 @@ Account ->>- ClientFe: REDIRECT <client url>?code=code
 ClientFe ->> Account: client_id, code, code_verifier
 note right of Account: POST /oauth/token
 
-alt client doesn't use id token
+alt client using id token
   Account ->> ClientFe: access token, refresh token, id token
   ClientFe ->>+ Client: access token, refresh token, id token
   Client ->> Client: service logic with id token
