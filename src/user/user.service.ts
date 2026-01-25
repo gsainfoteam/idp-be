@@ -334,7 +334,7 @@ export class UserService {
     const user = await this.userRepository.findUserByEmail(email);
 
     const options = await generateRegistrationOptions({
-      rpName: 'idp',
+      rpName: 'account',
       rpID: this.passkeyRpId,
       userID: Buffer.from(user.uuid),
       userName: user.name,

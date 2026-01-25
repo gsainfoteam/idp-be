@@ -1,5 +1,5 @@
 export type IdTokenPayloadType = {
-  iss: string; // issuer of the token (idp)
+  iss: string; // issuer of the token (account)
   sub: string; // subject of the token (user)
   aud: string; // audience of the token (client)
   exp: number; // expiration time of the token

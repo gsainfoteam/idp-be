@@ -1,7 +1,7 @@
 {
-  "name": "infoteam-idp-be",
+  "name": "infoteam-account-be",
   "version": "2.0.0",
-  "description": "Infoteam IDP Backend",
+  "description": "Infoteam Account Backend",
   "author": "infoteam",
   "private": true,
   "license": "AGPL-3.0-only",
