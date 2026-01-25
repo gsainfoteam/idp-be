@@ -233,7 +233,7 @@ export class ClientService {
       throw new ForbiddenException('User or client not valid');
     }
     await this.slackService.postMessage({
-      username: 'IDP_REQUEST',
+      username: 'ACCOUNT_REQUEST',
       icon_emoji: ':warning:',
       blocks: [
         {
