@@ -22,6 +22,9 @@ async function bootstrap() {
     /^https:\/\/.*\.idp-fe-49s\.pages\.dev$/, // for idp fe preview pages
     /^https:\/\/.*\.idp-fe\.pages\.dev$/, // for idp fe preview pages
     /^https:\/\/.*idp\.gistory\.me$/, // for idp fe production pages
+    /^https:\/\/.*\.account-fe-bvs\.pages\.dev$/, // for account fe preview pages
+    /^https:\/\/.*\.account-fe\.pages\.dev$/, // for account fe preview pages
+    /^https:\/\/.*account\.gistory\.me$/, // for account fe production pages
     /^http:\/\/localhost:3000$/, // for local development
     /^http:\/\/localhost:5173$/, // for local development
   ];
@@ -80,8 +83,8 @@ async function bootstrap() {
   await app.register(fastifyCookie);
   // Swagger setup
   const config = new DocumentBuilder()
-    .setTitle('Infoteam-IdP API docs')
-    .setDescription('The Infoteam-IdP API documentation')
+    .setTitle('Infoteam-Account API docs')
+    .setDescription('The Infoteam-Account API documentation')
     .setVersion(configService.getOrThrow<string>('API_VERSION'))
     .addBearerAuth(
       {

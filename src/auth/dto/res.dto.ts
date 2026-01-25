@@ -65,7 +65,7 @@ export class PasskeyAuthOptionResDto {
 
   @ApiPropertyOptional({
     description: 'Relying Party ID',
-    example: 'idp.gistory.me',
+    example: 'account.gistory.me',
   })
   rpId?: string;
 

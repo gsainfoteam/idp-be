@@ -31,8 +31,8 @@ export class UserResDto implements User {
   picture: string | null;
 
   @ApiPropertyOptional({
-    example: 'https://idp.gistory.me/profile/name',
-    description: '사용자 idp profile url',
+    example: 'https://account.gistory.me/profile/name',
+    description: '사용자 account profile url',
     type: 'string',
     nullable: true,
   })

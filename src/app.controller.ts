@@ -24,7 +24,7 @@ export class AppController {
   @ApiOkResponse({
     description: '성공',
     example: {
-      name: 'infoteam-idp',
+      name: 'infoteam-account',
       version: 'v2.0.0',
       publishedAt: new Date().toISOString(),
     },
@@ -35,7 +35,7 @@ export class AppController {
   @Get()
   info() {
     return {
-      name: 'infoteam-idp',
+      name: 'infoteam-account',
       version: this.apiVersion,
       publishedAt: this.publishedAt,
     };

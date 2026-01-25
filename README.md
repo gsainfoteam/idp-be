@@ -2,11 +2,11 @@
   <a href="https://introduce.gistory.me/" target="blank"><img src="assets/Infoteam.png" alt="Infoteam Logo" /></a>
 </p>
 
-# Infoteam IdP
+# Infoteam Account
 
 ## Purpose
 
-GIST 학생들의 계정을 한 곳에서 관리하여 GIST구성원들이 사용할 수 있는 여러 서비스에 쉽게 로그인을 할 수 있도록 하는 Id Provider Server를 만드는 것이 InfoTeam IdP의 목적입니다.
+GIST 학생들의 계정을 한 곳에서 관리하여 GIST구성원들이 사용할 수 있는 여러 서비스에 쉽게 로그인을 할 수 있도록 하는 Id Provider Server를 만드는 것이 InfoTeam Account의 목적입니다.
 
 ## Caution
 
@@ -22,11 +22,11 @@ GIST 학생들의 계정을 한 곳에서 관리하여 GIST구성원들이 사�
 
 ### 명칭 정리
 
-본 서비스를 사용하는 주체는 크게 두 가지가 있습니다. 하나는 user, 다른 하나는 client입니다.  
-  
-user는 infoteam-idp에서 gist mail을 인증하고, 관련된 정보를 제공하여 infoteam-idp를 사용하는 다른 서비스를 사용하려는 사람입니다.  
-  
-client는 infoteam-idp를 사용하여, user의 정보를 받고, 그에 맞추어서 서비스를 제공하는 어플리케이션입니다.
+본 서비스를 사용하는 주체는 크게 두 가지가 있습니다. 하나는 user, 다른 하나는 client입니다.
+
+user는 infoteam-account에서 gist mail을 인증하고, 관련된 정보를 제공하여 infoteam-account를 사용하는 다른 서비스를 사용하려는 사람입니다.
+
+client는 infoteam-account를 사용하여, user의 정보를 받고, 그에 맞추어서 서비스를 제공하는 어플리케이션입니다.
 
 ### 로그인 과정
 
@@ -34,38 +34,38 @@ client는 infoteam-idp를 사용하여, user의 정보를 받고, 그에 맞추�
 
 ```mermaid
 sequenceDiagram
-participant IdPFe as IdP FrontEnd
+participant AccountFe as Account FrontEnd
 participant ClientFe as Client Frontend
 participant Client
-participant IdP
+participant Account
 
 critical Requesting Login
-  ClientFe ->> Client: Request IdP Login
-  Client ->> ClientFe: REDIRECT idp.gistory.me/authorize
-  ClientFe ->> IdPFe: 
+  ClientFe ->> Client: Request Account Login
+  Client ->> ClientFe: REDIRECT account.gistory.me/authorize
+  ClientFe ->> AccountFe:
 end
 
-IdPFe ->> IdPFe: login or sign up
+AccountFe ->> AccountFe: login or sign up
 
-IdPFe ->>+ IdP: client_id, code_challenge, code_challenge_method, redirect_uri, scope, "IdP jwt user token"
-note right of IdP: GET /oauth/authorize
-IdP ->>- ClientFe: REDIRECT <client url>?code=code
+AccountFe ->>+ Account: client_id, code_challenge, code_challenge_method, redirect_uri, scope, "Account jwt user token"
+note right of Account: GET /oauth/authorize
+Account ->>- ClientFe: REDIRECT <client url>?code=code
 
-ClientFe ->> IdP: client_id, code, code_verifier
-note right of IdP: POST /oauth/token
+ClientFe ->> Account: client_id, code, code_verifier
+note right of Account: POST /oauth/token
 
 alt client doesn't use id token
-  IdP ->> ClientFe: access token, refresh token, id token
+  Account ->> ClientFe: access token, refresh token, id token
   ClientFe ->>+ Client: access token, refresh token, id token
   Client ->> Client: service logic with id token
-  Client ->>- ClientFe: 
-else  
-  IdP ->> ClientFe: access token, refresh token
+  Client ->>- ClientFe:
+else
+  Account ->> ClientFe: access token, refresh token
   ClientFe ->>+ Client: access token, refresh token
-  Client ->>+ IdP: access token
-  note right of IdP: POST /oauth/userinfo
-  IdP ->>- Client: user's information
-  Client ->> ClientFe: 
+  Client ->>+ Account: access token
+  note right of Account: POST /oauth/userinfo
+  Account ->>- Client: user's information
+  Client ->> ClientFe:
 end
 
 ```
@@ -75,12 +75,12 @@ end
 ```mermaid
 sequenceDiagram
 participant ClientFe as Client Frontend
-participant IdP
+participant Account
 
-ClientFe ->>+ IdP: client_id, refresh_token
-note right of IdP: POST /oauth/token
+ClientFe ->>+ Account: client_id, refresh_token
+note right of Account: POST /oauth/token
 
-IdP ->>- ClientFe: access token, refresh token, (id token)
+Account ->>- ClientFe: access token, refresh token, (id token)
 ```
 
 - Client Credential flow
@@ -90,17 +90,17 @@ Client를 만들면, 같이 나오는 client의 id와 secret을 이용해서, cl
 ```mermaid
 sequenceDiagram
 participant Client
-participant IdP
+participant Account
 
-Client ->>+ IdP: client_id, client_secret, scope
-note right of IdP: POST /oauth/token
+Client ->>+ Account: client_id, client_secret, scope
+note right of Account: POST /oauth/token
 
-IdP ->>- Client: access token, refresh token
+Account ->>- Client: access token, refresh token
 
 opt if client want to get userinfo
-  Client ->>+ IdP: access token, user id
-  note right of IdP: POST /oauth/userinfo
-  IdP ->>- Client: userinfo
+  Client ->>+ Account: access token, user id
+  note right of Account: POST /oauth/userinfo
+  Account ->>- Client: userinfo
 end
 ```
 
@@ -108,8 +108,8 @@ end
 
 API DOCS는 swagger로 구현되어있으며, 각 문서는 아래의 페이지에서 확인할 수 있습니다.
 
-Production: <https://api.idp.gistory.me/api>  
-Staging: <https://api.stg.idp.gistory.me/api>
+Production: <https://api.account.gistory.me/api>  
+Staging: <https://api.stg.account.gistory.me/api>
 
 ## Database Structure
 

@@ -100,7 +100,7 @@ export class OauthService {
   /**
    * it makes the authorization code and save it to redis since we use oauth2.1, we need to save the code_challenge and code_challenge_method
    * @param authorizeReqDto
-   * @param user since this endpoint is requested by the idp fe, we can get the user from the request.
+   * @param user since this endpoint is requested by the account fe, we can get the user from the request.
    * @returns redirect_uri with query parameters
    */
   async authorize(
